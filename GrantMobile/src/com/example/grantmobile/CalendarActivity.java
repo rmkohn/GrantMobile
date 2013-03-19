@@ -1,11 +1,11 @@
 /*****************************************************************************/
+/** This activity is to allow the user to preview the hours on the calendar **/
+/** and other incomplete details which will be determined as time passes.   **/
 /**                                                                         **/
-/**                                                                         **/
-/**                                                                         **/
-/**                                                                         **/
-/**                                                                         **/
-/**                                                                         **/
-/**                                                                         **/
+/** 03/16/2013 NPK Began programming with main procedures which determine   **/
+/**                calendar square data, and draw it with (currently) made  **/
+/**                up data. Formatting is not yet in place, but is          **/
+/**                somewhat customizable.                                   **/
 /**                                                                         **/
 /**                                                                         **/
 /**                                                                         **/
@@ -34,6 +34,7 @@ import android.graphics.Rect;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 public class CalendarActivity extends Activity {
 
@@ -77,8 +78,10 @@ public class CalendarActivity extends Activity {
 	int headerBackgroundColor = Color.BLACK;
 	// Header foreground color
 	int headerForegroundColor = Color.WHITE;										 
-	// Daily background color
-	int dailyBackgroundColor = Color.WHITE;										
+	// Daily background color odd
+	int dailyBackgroundColorOdd = Color.WHITE;
+	// Daily background color even
+	int dailyBackgroundColorEven = Color.LTGRAY;	
 	// Daily foreground color
 	int dailyForegroundColor = Color.RED;
 	// Footer background color
@@ -89,16 +92,20 @@ public class CalendarActivity extends Activity {
 	int monthTotalGrantHours = 0;
 	// Total non-grant hours for a month
 	int monthTotalNonGrantHours = 0;
+	// Total leave hours for a month
+	int monthTotalLeaveHours = 0;
 	// Total hours for a month
 	int monthTotalHours = 0;
 	// Calendar square titles
 	ArrayList<String> squareTitles = new ArrayList<String>();
-	// Calendar square size
-	int calendarSquareSize;
+	// Calendar square size width
+	int calendarSquareSizeW = 60;
+	// Calendar square size width
+	int calendarSquareSizeH = 68;
 	// Calendar starting position X
-	int calendarStartX;
+	int calendarStartX = 10;
 	// Calendar starting position Y
-	int calendarStartY;
+	int calendarStartY = 10;
 	// Calendar square array list
 	ArrayList<CalendarSquare> calendar = new ArrayList<CalendarSquare>();
 	
@@ -171,9 +178,11 @@ public class CalendarActivity extends Activity {
 			int currentCalendarSquareIndex = 0;
 			// The current display for the current calendar square
 			String thisDisplay = "";
+			// Odd or even flag
+			Boolean oddFlag = true;
 			
 			// Calculate header and footer widths
-			headerAndFooterWidth = calendarSquareSize * (DAYSINAWEEK + 1);
+			headerAndFooterWidth = calendarSquareSizeW * (DAYSINAWEEK + 1);
 			
 			// Draw header
 			paint.setColor(headerBackgroundColor);
@@ -182,7 +191,7 @@ public class CalendarActivity extends Activity {
 				calendarStartX,
 				calendarStartY,
 				calendarStartX + headerAndFooterWidth,
-				calendarStartY + calendarSquareSize
+				calendarStartY + calendarSquareSizeH
 			);
 			canvas.drawRect(curRect, paint);
 			paint.setColor(headerForegroundColor);
@@ -204,13 +213,22 @@ public class CalendarActivity extends Activity {
 						calendar.get(currentCalendarSquareIndex).positionX,
 						calendar.get(currentCalendarSquareIndex).positionY,
 						calendar.get(currentCalendarSquareIndex).positionX +
-							calendarSquareSize,
+							calendar.get(currentCalendarSquareIndex).sizeW,
 						calendar.get(currentCalendarSquareIndex).positionY +
-							calendarSquareSize
+							calendar.get(currentCalendarSquareIndex).sizeH
 					);
 				
+				// Determine color
+				if (oddFlag) {
+					paint.setColor(dailyBackgroundColorOdd);
+				}
+				else
+				{
+					paint.setColor(dailyBackgroundColorEven);
+				}// end if
+				oddFlag = !oddFlag;
+				
 				// Draw rectangle determined
-				paint.setColor(dailyBackgroundColor);
 				canvas.drawRect(curRect, paint);
 				
 				// Determine display
@@ -230,7 +248,7 @@ public class CalendarActivity extends Activity {
 			
 			// Determine footer positions
 			footerY = 
-				calendarStartY + (calendarSquareSize * (WEEKSTODRAW + 1));
+				calendarStartY + (calendarSquareSizeH * (WEEKSTODRAW + 1));
 			
 			// Draw footer
 			paint.setColor(footerBackgroundColor);
@@ -239,7 +257,7 @@ public class CalendarActivity extends Activity {
 				calendarStartX,
 				footerY,
 				calendarStartX + headerAndFooterWidth,
-				footerY + calendarSquareSize
+				footerY + calendarSquareSizeH
 			);
 			canvas.drawRect(curRect, paint);
 			
@@ -263,7 +281,7 @@ public class CalendarActivity extends Activity {
 		
 		// Load month, year, and grant name
 		// (Using sample data)
-		monthNumber = 2;
+		monthNumber = 3;
 		year = 2013;
 		grant = "GRANT-101-101-101";
 		
@@ -298,11 +316,9 @@ public class CalendarActivity extends Activity {
 		// Days done being counted flag
 		Boolean daysEnded = false;
 		
-		// Initialize calendar start position and square size
-		calendarSquareSize = 10;
-		calendarStartX = 10;
-		calendarStartY = 10;
-		
+		// Initialize (override) calendar start position and square size
+		// (not yet present)
+				
 		// Initialize calendar square titles
 		Collections.addAll(squareTitles,
 			"Su","Mo","Tu","We","Th","Fr","Sa","To");
@@ -316,13 +332,13 @@ public class CalendarActivity extends Activity {
 		for (int yy = 0; yy < WEEKSTODRAW; yy++)
 		{
 			// Calculate current Y coordinate
-			currentY = calendarStartY + (calendarSquareSize * (yy + 1)); 
+			currentY = calendarStartY + (calendarSquareSizeH * (yy + 1)); 
 			
 			// Horizontal
 			for (int xx = 0; xx <= 7; xx++)
 			{
 				// Calculate current X coordinate
-				currentX = calendarStartX + (calendarSquareSize * xx);
+				currentX = calendarStartX + (calendarSquareSizeW * xx);
 
 				// For first row, set display to title
 				if (yy == 0)
@@ -392,8 +408,9 @@ public class CalendarActivity extends Activity {
 				// Initialize this calendar square
 				calendar.add(
 					new CalendarSquare(
-							currentX, currentY, thisDailyNumber,
-							0, 0, 0, initialDisplay)
+						currentX, currentY,
+						calendarSquareSizeW, calendarSquareSizeH,
+						thisDailyNumber, initialDisplay)
 				);
 				
 			}// end for
@@ -483,9 +500,9 @@ public class CalendarActivity extends Activity {
 		if (monthName != "")
 		{		
 	
-			cal = Calendar.getInstance();
-			cal.set(year, monthNumber, 1);
-			firstDay = cal.get(Calendar.DAY_OF_WEEK_IN_MONTH);
+			// Still in development
+			
+			Toast.makeText(this, String.valueOf(firstDay), Toast.LENGTH_LONG).show();
 			
 		}// end if
 		
@@ -502,12 +519,16 @@ public class CalendarActivity extends Activity {
 		int dayTotalGrantHours = 0;
 		// Total non-grant hours for a day
 		int dayTotalNonGrantHours = 0;
+		// Total leave hours for a day or week
+		int dayTotalLeaveHours = 0;
 		// Total hours for a day or week
 		int dayTotalHours = 0;
 		// Total grant hours for a week
 		int currentTotalGrantHours = 0;
 		// Total non-grant hours for a week
 		int currentTotalNonGrantHours = 0;
+		// Total leave hours for a week
+		int currentTotalLeaveHours = 0;
 		// Total hours for a day or week
 		int currentTotalHours = 0;
 		
@@ -536,6 +557,7 @@ public class CalendarActivity extends Activity {
 					calendar.get(i).displayString =
 						String.valueOf(currentTotalGrantHours) + "|" +
 						String.valueOf(currentTotalNonGrantHours) + "|" +
+						String.valueOf(currentTotalLeaveHours) + "|" +
 						String.valueOf(currentTotalHours);
 					
 					// Reset weekly totals
@@ -557,16 +579,19 @@ public class CalendarActivity extends Activity {
 					// daily information
 					dayTotalGrantHours = calendar.get(i).grantHours;
 					dayTotalNonGrantHours = calendar.get(i).nonGrantHours;
+					dayTotalLeaveHours = calendar.get(i).leave;
 					dayTotalHours = calendar.get(i).totalHours();
 					
 					// Add daily information to weekly totals
 					currentTotalGrantHours += dayTotalGrantHours;
 					currentTotalNonGrantHours += dayTotalNonGrantHours;
+					currentTotalLeaveHours += dayTotalLeaveHours;
 					currentTotalHours += dayTotalHours;
 					
 					// Increase totals for monthly total
 					monthTotalGrantHours += dayTotalGrantHours;
 					monthTotalNonGrantHours += dayTotalNonGrantHours;
+					monthTotalLeaveHours += dayTotalLeaveHours;
 					monthTotalHours += dayTotalHours;
 					
 					// Set display information as
@@ -586,6 +611,7 @@ public class CalendarActivity extends Activity {
 		footerMessage = "Total Hours This Month: " +
 			String.valueOf(monthTotalGrantHours) + "|" +
 			String.valueOf(monthTotalNonGrantHours) + "|" +
+			String.valueOf(monthTotalLeaveHours) + "|" +
 			String.valueOf(monthTotalHours);
 		
 		// Refresh screen
