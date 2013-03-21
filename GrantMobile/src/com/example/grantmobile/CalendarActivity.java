@@ -638,6 +638,15 @@ public class CalendarActivity extends Activity {
 			case (R.id.mnuLoad)	:
 				loadCalendarData();
 				break;
+			case (R.id.mnuDetail) :
+				//start Detail Activity
+				break;
+			case (R.id.mnuDialog) :
+				//show dialog box
+				SumbitDialog dialog = new SumbitDialog(this);
+				dialog.setUserID(732);
+				dialog.onSubmit();
+				break;
 		}// end switch
 		
 		return true;
