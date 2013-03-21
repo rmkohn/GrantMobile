@@ -6,8 +6,8 @@
 /**                calendar square data, and draw it with (currently) made  **/
 /**                up data. Formatting is not yet in place, but is          **/
 /**                somewhat customizable.                                   **/
-/**                                                                         **/
-/**                                                                         **/
+/** 03/20/2013 NPK Now determines first day of month correctly, and uses    **/
+/**                leave hours of calendar square class.                    **/
 /**                                                                         **/
 /**                                                                         **/
 /**                                                                         **/
@@ -99,9 +99,9 @@ public class CalendarActivity extends Activity {
 	// Calendar square titles
 	ArrayList<String> squareTitles = new ArrayList<String>();
 	// Calendar square size width
-	int calendarSquareSizeW = 60;
-	// Calendar square size width
-	int calendarSquareSizeH = 68;
+	int calendarSquareSizeW = 120;
+	// Calendar square size height
+	int calendarSquareSizeH = 60;
 	// Calendar starting position X
 	int calendarStartX = 10;
 	// Calendar starting position Y
@@ -281,7 +281,7 @@ public class CalendarActivity extends Activity {
 		
 		// Load month, year, and grant name
 		// (Using sample data)
-		monthNumber = 3;
+		monthNumber = 2;
 		year = 2013;
 		grant = "GRANT-101-101-101";
 		
@@ -496,13 +496,12 @@ public class CalendarActivity extends Activity {
 		
 		// Determine what day of the week the first of the month is
 		
-		// Determine if valid month
+		// First check if valid month
 		if (monthName != "")
-		{		
-	
-			// Still in development
-			
-			Toast.makeText(this, String.valueOf(firstDay), Toast.LENGTH_LONG).show();
+		{
+			cal = Calendar.getInstance();
+			cal.set(year, monthNumber - 1, 1);
+			firstDay = cal.get(Calendar.DAY_OF_WEEK) - 1;
 			
 		}// end if
 		
@@ -538,6 +537,7 @@ public class CalendarActivity extends Activity {
 		{
 			calendar.get(i).grantHours = calendar.get(i).dailyNumber;
 			calendar.get(i).nonGrantHours = calendar.get(i).dailyNumber;
+			calendar.get(i).leave = calendar.get(i).dailyNumber;
 			
 		}// end for
 		
@@ -563,6 +563,7 @@ public class CalendarActivity extends Activity {
 					// Reset weekly totals
 					currentTotalGrantHours = 0;
 					currentTotalNonGrantHours = 0;
+					currentTotalLeaveHours = 0;
 					currentTotalHours = 0;
 					
 				}
@@ -599,6 +600,7 @@ public class CalendarActivity extends Activity {
 					calendar.get(i).displayString =
 						String.valueOf(dayTotalGrantHours) + "|" +
 						String.valueOf(dayTotalNonGrantHours) + "|" +
+						String.valueOf(dayTotalLeaveHours) + "|" +
 						String.valueOf(dayTotalHours);
 				
 				}// end if
