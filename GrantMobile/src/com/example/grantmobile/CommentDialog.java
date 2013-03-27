@@ -11,6 +11,11 @@ import android.widget.Toast;
 
 public class CommentDialog extends DialogFragment {
 	private String title;
+	public int userID;
+	
+	public void setUserID(int id){
+		this.userID = id;
+	}
 	
 	public void setTitle(String inTitle){
 		this.title = inTitle;
