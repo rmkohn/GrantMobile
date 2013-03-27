@@ -34,7 +34,6 @@ import android.graphics.Rect;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 public class CalendarActivity extends Activity {
 
@@ -643,9 +642,8 @@ public class CalendarActivity extends Activity {
 				break;
 			case (R.id.mnuDialog) :
 				//show dialog box
-				SumbitDialog dialog = new SumbitDialog(this);
-				dialog.setUserID(732);
-				dialog.onSubmit();
+				SubmitDialog dialog = new SubmitDialog();
+		    	dialog.show(getFragmentManager(), "");
 				break;
 		}// end switch
 		

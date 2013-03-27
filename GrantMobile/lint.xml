@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="NewApi">
+        <ignore path="src\com\example\grantmobile\CalendarActivity.java" />
+        <ignore path="src\com\example\grantmobile\SubmitDialog.java" />
+    </issue>
+    <issue id="ValidFragment">
+        <ignore path="src\com\example\grantmobile\SubmitDialog.java" />
+    </issue>
+</lint>
