@@ -1,8 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">GrantMobile</string>
+    <string name="app_name">DetailView</string>
+    <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="grantNameLabel">Grant</string>
+    <string name="grantIdLabel">Grant Id</string>
+    <string name="employeeNameLabel">Employee</string>
+    <string name="catalogLabel">CFDA#</string>
+    <string name="grantHoursLabel">Grant Hours</string>
+    <string name="nonGrantHoursLabel">Non-grant Hours</string>
+    <string name="leaveHoursLabel">Leave Hours</string>
+    <string name="monthTotalLabel">Month Grant Hours</string>
+    <string name="dateLabel">Date</string>
+    <string name="dayTotalLabel">Day Total Hours</string>
+    <string name="dayOfWeekLabel">Day</string>
     <string name="menu_settings">Settings</string>
 
 </resources>
