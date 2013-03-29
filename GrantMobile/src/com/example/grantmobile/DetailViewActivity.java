@@ -3,6 +3,9 @@ package com.example.grantmobile;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -107,11 +110,27 @@ public class DetailViewActivity extends Activity {
         final Button returnButton = (Button) findViewById(R.id.button3);
         returnButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Toast.makeText(context, "Return to Calendar View", Toast.LENGTH_LONG).show();
+            	returnToCal();
             }
         });
 	}
+	
+	/**
+	 * This procedure initializes the options menu.
+	 */
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		// Inflate the menu
+		getMenuInflater().inflate(R.menu.detail, menu);
+		return true;
+	}
         
+	private void returnToCal() {
+		Intent intent = new Intent(this, CalendarActivity.class);
+    	startActivity(intent);
+	}
+	
     private void updateView() {
     	
 		String DOM_string = String.valueOf(dom_current);
@@ -131,4 +150,35 @@ public class DetailViewActivity extends Activity {
     	}
     	monthTotalHoursView.setText(tgh.toString());
 	}
+    
+	/**
+     * This procedure handles all of the options menu selection events.
+     */
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		
+		// Variables
+		
+		// The id of the menu item chosen
+		int itemId = 0;													
+		
+		// Determine id of item chosen, and respond accordingly
+		itemId = item.getItemId();
+		Intent intent;
+		switch (itemId) {
+			case (R.id.mnuLoad)	:
+				intent = new Intent(this, CalendarActivity.class);
+	    		startActivity(intent);
+	    		break;
+			case (R.id.mnuDialog) :
+				//show dialog box
+				SubmitDialog dialog = new SubmitDialog();
+				dialog.setUserID(732);
+		    	dialog.show(getFragmentManager(), "");
+				break;
+		}// end switch
+		
+		return true;
+		
+	}  
 }

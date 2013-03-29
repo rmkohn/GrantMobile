@@ -29,8 +29,8 @@ public final class R {
         public static final int imageView1=0x7f070007;
         public static final int leaveHoursView=0x7f07000b;
         public static final int menu_settings=0x7f07001a;
-        public static final int mnuDetail=0x7f07001c;
-        public static final int mnuDialog=0x7f07001d;
+        public static final int mnuDetail=0x7f07001d;
+        public static final int mnuDialog=0x7f07001c;
         public static final int mnuLoad=0x7f07001b;
         public static final int monthTotalHoursView=0x7f070012;
         public static final int nonGrantHoursView=0x7f07000c;
@@ -52,7 +52,8 @@ public final class R {
     }
     public static final class menu {
         public static final int activity_main=0x7f060000;
-        public static final int main=0x7f060001;
+        public static final int detail=0x7f060001;
+        public static final int main=0x7f060002;
     }
     public static final class string {
         public static final int action_settings=0x7f040001;
