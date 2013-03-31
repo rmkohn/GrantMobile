@@ -8,7 +8,7 @@
 /**                somewhat customizable.                                   **/
 /** 03/20/2013 NPK Now determines first day of month correctly, and uses    **/
 /**                leave hours of calendar square class.                    **/
-/**                                                                         **/
+/** 03/24/2013 NPK Calendar now sized dynamically based upon screen size.   **/
 /**                                                                         **/
 /**                                                                         **/
 /**                                                                         **/
@@ -17,7 +17,7 @@
 /*****************************************************************************/
 
 
-package com.example.grantmobile;
+package com.example.calendarcodetest;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -26,15 +26,17 @@ import java.util.Collections;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 public class CalendarActivity extends Activity {
 
@@ -121,8 +123,8 @@ public class CalendarActivity extends Activity {
 
 		// Initialize display metrics
 		dm = new DisplayMetrics();
-        	getWindowManager().getDefaultDisplay().getMetrics(dm);
-
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
+		
 		// Initialize rectangle
 		curRect = new Rect();
 		
@@ -254,7 +256,7 @@ public class CalendarActivity extends Activity {
 			
 			// Determine footer positions
 			footerY = 
-				calendarStartY + (calendarSquareSizeH * (WEEKSTODRAW + 1));
+				calendarMarginY + (calendarSquareSizeH * (WEEKSTODRAW + 1));
 			
 			// Draw footer
 			paint.setColor(footerBackgroundColor);
@@ -273,6 +275,41 @@ public class CalendarActivity extends Activity {
 				footerY + 10, paint);
 			
 		}
+		
+		
+	}
+	
+	/**
+	 * This procedure handles touch events. Currently, in the event of a
+	 * square's touching, it displays the daily number of that square.
+	 */
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		
+		// Variables
+		
+		// The touching X coordinate
+		int x = (int)event.getX();
+		// The touching Y coordinate
+	    int y = (int)event.getY();
+		
+	    // Check for any calendar square touches, and toast daily
+	    // number of those touched
+	    for (int i = 0; i < calendar.size(); i = i + 1)
+	    {
+	    	if ((x >= calendar.get(i).positionX) &&
+	    		(y >= calendar.get(i).positionY) &&
+	    		(x <= (calendar.get(i).positionX) + calendar.get(i).sizeW) &&
+	    		(y <= (calendar.get(i).positionY) + calendar.get(i).sizeH)) {
+	    		
+	    		//Toast.makeText(this, "D" + calendar.get(i).dailyNumber,
+	    		//	Toast.LENGTH_LONG).show();
+	    		
+	    	}// end if   	
+	    	
+	    }// end for
+	    
+		return false;
 	}
 
 	/**
@@ -309,6 +346,14 @@ public class CalendarActivity extends Activity {
 	{
 		// Variables
 
+		// Width of the screen
+		int screenWidth;
+		// Height of the screen
+		int screenHeight;
+		// Width of the calendar
+		int calendarWidth;
+		// Height of the calendar
+		int calendarHeight;
 		// Current X position
 		int currentX;
 		// Current Y position
@@ -337,6 +382,7 @@ public class CalendarActivity extends Activity {
 			// plus one from weekly totals 
 		calendarSquareSizeH = calendarHeight / (WEEKSTODRAW + 4);
 			// plus four from header, footer, and two for extra compensation
+		
 				
 		// Initialize calendar square titles
 		Collections.addAll(squareTitles,
@@ -640,37 +686,37 @@ public class CalendarActivity extends Activity {
 	}
 	
 	/**
-     * This procedure handles all of the options menu selection events.
-     */
+	 * This procedure handles all of the options menu selection events.
+	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		
+	
 		// Variables
 		
 		// The id of the menu item chosen
-		int itemId = 0;													
+		int itemId = 0;	
 		
 		// Determine id of item chosen, and respond accordingly
 		itemId = item.getItemId();
 		
 		switch (itemId) {
 			case (R.id.mnuLoad)	:
-				loadCalendarData();
-				break;
-			case (R.id.mnuDetail) :
-				Intent intent = new Intent(this, DetailViewActivity.class);
-		    	startActivity(intent);
-				break;
-			case (R.id.mnuDialog) :
-				//show dialog box
-				SubmitDialog dialog = new SubmitDialog();
-				dialog.setUserID(732);
-		    	dialog.show(getFragmentManager(), "");
-				break;
+			loadCalendarData();
+			break;
+		case (R.id.mnuDetail) :
+			Intent intent = new Intent(this, DetailViewActivity.class);
+			startActivity(intent);
+			break;
+		case (R.id.mnuDialog) :
+			//show dialog box
+			SubmitDialog dialog = new SubmitDialog();
+			dialog.setUserID(732);
+			dialog.show(getFragmentManager(), "");
+			break;
 		}// end switch
 		
 		return true;
 		
-	}  
+		} 
 	
 }
