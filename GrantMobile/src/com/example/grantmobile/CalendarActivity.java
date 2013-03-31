@@ -47,6 +47,8 @@ public class CalendarActivity extends Activity {
 	
 	// Variables
 	
+	// Display metrics analyzer
+	DisplayMetrics dm;
 	// The view where all is drawn on the screen
 	DrawView drawView;			
 	// The paint brush
@@ -99,13 +101,13 @@ public class CalendarActivity extends Activity {
 	// Calendar square titles
 	ArrayList<String> squareTitles = new ArrayList<String>();
 	// Calendar square size width
-	int calendarSquareSizeW = 120;
+	int calendarSquareSizeW;
 	// Calendar square size height
-	int calendarSquareSizeH = 60;
-	// Calendar starting position X
-	int calendarStartX = 10;
-	// Calendar starting position Y
-	int calendarStartY = 10;
+	int calendarSquareSizeH;
+	// Calendar initial horizontal margin
+	int calendarMarginX = 10;
+	// Calendar initial vertical margin
+	int calendarMarginY = 10;
 	// Calendar square array list
 	ArrayList<CalendarSquare> calendar = new ArrayList<CalendarSquare>();
 	
@@ -116,6 +118,10 @@ public class CalendarActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+
+		// Initialize display metrics
+		dm = new DisplayMetrics();
+        	getWindowManager().getDefaultDisplay().getMetrics(dm);
 
 		// Initialize rectangle
 		curRect = new Rect();
@@ -188,15 +194,15 @@ public class CalendarActivity extends Activity {
 			paint.setColor(headerBackgroundColor);
 			paint.setStyle(Style.FILL_AND_STROKE);
 			curRect.set(
-				calendarStartX,
-				calendarStartY,
-				calendarStartX + headerAndFooterWidth,
-				calendarStartY + calendarSquareSizeH
+				calendarMarginX,
+				calendarMarginY,
+				calendarMarginX + headerAndFooterWidth,
+				calendarMarginY + calendarSquareSizeH
 			);
 			canvas.drawRect(curRect, paint);
 			paint.setColor(headerForegroundColor);
-			canvas.drawText(headerMessage, calendarStartX + 10,
-					calendarStartY + 10, paint);
+			canvas.drawText(headerMessage, calendarMarginX + 10,
+					calendarMarginY + 10, paint);
 			
 			// Draw inner calendar squares
 			paint.setStyle(Style.FILL_AND_STROKE);
@@ -254,16 +260,16 @@ public class CalendarActivity extends Activity {
 			paint.setColor(footerBackgroundColor);
 			paint.setStyle(Style.FILL_AND_STROKE);
 			curRect.set(
-				calendarStartX,
+				calendarMarginX,
 				footerY,
-				calendarStartX + headerAndFooterWidth,
+				calendarMarginX + headerAndFooterWidth,
 				footerY + calendarSquareSizeH
 			);
 			canvas.drawRect(curRect, paint);
 			
 			// Draw footer text
 			paint.setColor(footerForegroundColor);
-			canvas.drawText(footerMessage, calendarStartX + 10,
+			canvas.drawText(footerMessage, calendarMarginX + 10,
 				footerY + 10, paint);
 			
 		}
@@ -316,8 +322,21 @@ public class CalendarActivity extends Activity {
 		// Days done being counted flag
 		Boolean daysEnded = false;
 		
-		// Initialize (override) calendar start position and square size
-		// (not yet present)
+		// Initialize calendar square size
+		
+		// Determine screen width and height
+		screenWidth = dm.widthPixels;
+		screenHeight = dm.heightPixels;
+		
+		// Determine calendar height by subtracting margins
+		calendarWidth = screenWidth - (calendarMarginX * 2);
+		calendarHeight = screenHeight - (calendarMarginY * 2);
+		
+		// Determine individual square sizes
+		calendarSquareSizeW = calendarWidth / (DAYSINAWEEK + 1);
+			// plus one from weekly totals 
+		calendarSquareSizeH = calendarHeight / (WEEKSTODRAW + 4);
+			// plus four from header, footer, and two for extra compensation
 				
 		// Initialize calendar square titles
 		Collections.addAll(squareTitles,
@@ -332,13 +351,13 @@ public class CalendarActivity extends Activity {
 		for (int yy = 0; yy < WEEKSTODRAW; yy++)
 		{
 			// Calculate current Y coordinate
-			currentY = calendarStartY + (calendarSquareSizeH * (yy + 1)); 
+			currentY = calendarMarginY + (calendarSquareSizeH * (yy + 1)); 
 			
 			// Horizontal
 			for (int xx = 0; xx <= 7; xx++)
 			{
 				// Calculate current X coordinate
-				currentX = calendarStartX + (calendarSquareSizeW * xx);
+				currentX = calendarMarginX + (calendarSquareSizeW * xx);
 
 				// For first row, set display to title
 				if (yy == 0)
