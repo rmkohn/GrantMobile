@@ -17,7 +17,7 @@
 /*****************************************************************************/
 
 
-package com.example.calendarcodetest;
+package com.example.grantmobile;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -26,6 +26,7 @@ import java.util.Collections;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -36,7 +37,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 
 public class CalendarActivity extends Activity {
 
