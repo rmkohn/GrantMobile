@@ -43,7 +43,7 @@ public class SubmitDialog extends DialogFragment {
 
 	public void show() {
 		// TODO Auto-generated method stub
-		FragmentManager manager = getActivity().getSupportFragmentManager();
+		FragmentManager manager = getFragmentManager();
 		super.show(manager, "");	
 	}
 }

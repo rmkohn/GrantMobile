@@ -49,7 +49,7 @@ public class CommentDialog extends DialogFragment {
     }
 
 	public void show() {
-		FragmentManager manager = getActivity().getSupportFragmentManager();
+		FragmentManager manager = getFragmentManager();
 		super.show(manager, "");
 	}
 }
