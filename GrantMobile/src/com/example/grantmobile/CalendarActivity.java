@@ -107,9 +107,9 @@ public class CalendarActivity extends Activity {
 	// Calendar square size height
 	int calendarSquareSizeH;
 	// Calendar initial horizontal margin
-	int calendarMarginX = 10;
+	static final int calendarMarginX = 10;
 	// Calendar initial vertical margin
-	int calendarMarginY = 10;
+	static final int calendarMarginY = 10;
 	// Calendar square array list
 	ArrayList<CalendarSquare> calendar = new ArrayList<CalendarSquare>();
 	
@@ -120,19 +120,12 @@ public class CalendarActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-
-		// Initialize display metrics
-		dm = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(dm);
 		
 		// Initialize rectangle
 		curRect = new Rect();
 		
 		// Initialize header message
 		initHeaderMessage();
-		
-		// Initialize calendar
-		initCalendar();
 		
 		// Initialize drawing view
 		drawView = new DrawView(this);
@@ -276,6 +269,14 @@ public class CalendarActivity extends Activity {
 			
 		}
 		
+        @Override
+        protected void onLayout(boolean changed, int left, int top, int right,
+                int bottom)
+        {
+        	// this is the earliest possible point at which initCalendar() can be called
+        	// any earlier, and it won't be able to autosize
+            initCalendar();
+        }
 		
 	}
 	
@@ -367,11 +368,20 @@ public class CalendarActivity extends Activity {
 		// Days done being counted flag
 		Boolean daysEnded = false;
 		
+		// make sure calendar is empty before starting
+		calendar.clear();
+		
+		// make sure drawview is ready
+		if (drawView == null || drawView.getWidth() == 0)
+		{
+			return;
+		}
+		
 		// Initialize calendar square size
 		
 		// Determine screen width and height
-		screenWidth = dm.widthPixels;
-		screenHeight = dm.heightPixels;
+		screenWidth = drawView.getWidth();
+		screenHeight = drawView.getHeight();
 		
 		// Determine calendar height by subtracting margins
 		calendarWidth = screenWidth - (calendarMarginX * 2);
@@ -380,8 +390,8 @@ public class CalendarActivity extends Activity {
 		// Determine individual square sizes
 		calendarSquareSizeW = calendarWidth / (DAYSINAWEEK + 1);
 			// plus one from weekly totals 
-		calendarSquareSizeH = calendarHeight / (WEEKSTODRAW + 4);
-			// plus four from header, footer, and two for extra compensation
+		calendarSquareSizeH = calendarHeight / (WEEKSTODRAW + 2);
+			// plus header and footer
 		
 				
 		// Initialize calendar square titles
@@ -700,7 +710,7 @@ public class CalendarActivity extends Activity {
 		itemId = item.getItemId();
 		
 		switch (itemId) {
-			case (R.id.mnuLoad)	:
+		case (R.id.mnuLoad)	:
 			loadCalendarData();
 			break;
 		case (R.id.mnuDetail) :
