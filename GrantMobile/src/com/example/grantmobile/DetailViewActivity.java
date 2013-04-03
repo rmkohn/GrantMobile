@@ -174,7 +174,7 @@ public class DetailViewActivity extends Activity {
 				//show dialog box
 				SubmitDialog dialog = new SubmitDialog();
 				dialog.setUserID(732);
-		    	dialog.show(getFragmentManager(), "");
+		    	dialog.show();
 				break;
 		}// end switch
 		

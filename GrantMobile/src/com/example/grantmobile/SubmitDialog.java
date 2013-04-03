@@ -2,7 +2,9 @@ package com.example.grantmobile;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
+//import android.app.DialogFragment;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
@@ -24,7 +26,7 @@ public class SubmitDialog extends DialogFragment {
 				    	  CommentDialog comment = new CommentDialog();
 				    	  comment.setTitle("Approve Time");
 				    	  comment.setUserID(userID);
-					      comment.show(getFragmentManager(), "");
+				    	  comment.show();
 				      }
 				  })
 		        .setNeutralButton("Deny", new DialogInterface.OnClickListener() {
@@ -32,10 +34,16 @@ public class SubmitDialog extends DialogFragment {
 				    	  CommentDialog comment = new CommentDialog();
 				    	  comment.setTitle("Deny Time");
 				    	  comment.setUserID(userID);
-					      comment.show(getFragmentManager(), "");
+				    	  comment.show();
 				      }
 				  });
         // Create the AlertDialog object and return it
         return builder.create();
     }
+
+	public void show() {
+		// TODO Auto-generated method stub
+		FragmentManager manager = getFragmentManager();
+		super.show(manager, "");	
+	}
 }

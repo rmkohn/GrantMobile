@@ -2,9 +2,10 @@ package com.example.grantmobile;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
+import android.support.v4.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -46,4 +47,9 @@ public class CommentDialog extends DialogFragment {
         // Create the AlertDialog object and return it
         return builder.create();
     }
+
+	public void show() {
+		FragmentManager manager = getFragmentManager();
+		super.show(manager, "");
+	}
 }
