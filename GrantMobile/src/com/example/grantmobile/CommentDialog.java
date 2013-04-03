@@ -47,9 +47,4 @@ public class CommentDialog extends DialogFragment {
         // Create the AlertDialog object and return it
         return builder.create();
     }
-
-	public void show() {
-		FragmentManager manager = getFragmentManager();
-		super.show(manager, "");
-	}
 }

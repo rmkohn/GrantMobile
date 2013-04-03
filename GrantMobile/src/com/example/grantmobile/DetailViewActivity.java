@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -11,7 +13,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class DetailViewActivity extends Activity {
+public class DetailViewActivity extends FragmentActivity {
 
 	static final String[] DOW = 
 			new String[] { "Monday", "Tuesday", "Wednesday", "Thursday",
@@ -174,7 +176,8 @@ public class DetailViewActivity extends Activity {
 				//show dialog box
 				SubmitDialog dialog = new SubmitDialog();
 				dialog.setUserID(732);
-		    	dialog.show();
+				FragmentManager manager = getSupportFragmentManager();
+				dialog.show(manager, "");
 				break;
 		}// end switch
 		

@@ -24,7 +24,6 @@ import java.util.Calendar;
 import java.util.Collections;
 
 import android.os.Bundle;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
@@ -32,13 +31,15 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 
-public class CalendarActivity extends Activity {
+public class CalendarActivity extends FragmentActivity {
 
 	// Constants
 	
@@ -119,8 +120,6 @@ public class CalendarActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
-		super.onCreate(savedInstanceState);
-		
 		// Initialize rectangle
 		curRect = new Rect();
 		
@@ -134,7 +133,6 @@ public class CalendarActivity extends Activity {
 		// Create
 		super.onCreate(savedInstanceState);
         setContentView(drawView);
-		
 	}
 
 	/**
@@ -720,8 +718,10 @@ public class CalendarActivity extends Activity {
 		case (R.id.mnuDialog) :
 			//show dialog box
 			SubmitDialog dialog = new SubmitDialog();
+			FragmentManager manager = getSupportFragmentManager();
 			dialog.setUserID(732);
-			dialog.show();
+			dialog.setManager(manager);
+			dialog.show(manager, "");
 			break;
 		}// end switch
 		
