@@ -3,8 +3,10 @@ package com.example.grantmobile;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.Intent;
 import android.view.Menu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
@@ -16,6 +18,8 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		
 		Uri data 				= getIntent().getData();
+		
+		//Shayne will take these commented sections out when he knows for sure we don't need them.
 	/*	@SuppressWarnings("unused")
 		String scheme	 		= data.getScheme(); // "grantapp"
 		String host 			= data.getHost(); // "mid-state"
@@ -27,7 +31,7 @@ public class MainActivity extends Activity {
 		tvTest.setText("Uri data: " + data);
 		//Toast.makeText(this, "Uri data: " + data, Toast.LENGTH_LONG).show();
 		
-		int workMonthId = getWorkMonthId(data);
+		int workMonthId 		= getWorkMonthId(data);
 		
 		/*Map<String, String> paramsMap = getParameters(data); 
 		
@@ -40,6 +44,24 @@ public class MainActivity extends Activity {
 		}*/
 		
 		tvTest.setText("ID = " + workMonthId);
+		
+		/*if (workMonthId != null)
+		{*/
+			Intent intent = new Intent(this, CalendarActivity.class);
+			startActivity(intent);
+		/*}
+		else
+		{
+			Toast.makeText(this, "You have to access this app through the email link", Toast.LENGTH_LONG).show();
+		}*/
+		
+		
+		
+		/*intent.putExtra("Message",((TextView)v).getText().toString());
+		intent.putExtra("Repeat", 10);*/
+		
+		
+
 	}
 	private int getWorkMonthId(Uri data) {
 		
