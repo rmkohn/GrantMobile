@@ -31,7 +31,8 @@ public class MainActivity extends Activity {
 		tvTest.setText("Uri data: " + data);
 		//Toast.makeText(this, "Uri data: " + data, Toast.LENGTH_LONG).show();
 		
-		int workMonthId 		= getWorkMonthId(data);
+		int workMonthId 		= -1;	
+		workMonthId				= getWorkMonthId(data);
 		
 		/*Map<String, String> paramsMap = getParameters(data); 
 		
@@ -45,15 +46,16 @@ public class MainActivity extends Activity {
 		
 		tvTest.setText("ID = " + workMonthId);
 		
-		/*if (workMonthId != null)
-		{*/
+		if (workMonthId != -1)
+		{
 			Intent intent = new Intent(this, CalendarActivity.class);
+			intent.putExtra("workMonthId", workMonthId);
 			startActivity(intent);
-		/*}
+		}
 		else
 		{
 			Toast.makeText(this, "You have to access this app through the email link", Toast.LENGTH_LONG).show();
-		}*/
+		}
 		
 		
 		
