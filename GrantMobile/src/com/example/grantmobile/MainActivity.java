@@ -32,7 +32,11 @@ public class MainActivity extends Activity {
 		//Toast.makeText(this, "Uri data: " + data, Toast.LENGTH_LONG).show();
 		
 		int workMonthId 		= -1;	
-		workMonthId				= getWorkMonthId(data);
+		
+		if (data != null)
+		{
+			workMonthId				= getWorkMonthId(data);
+		}
 		
 		/*Map<String, String> paramsMap = getParameters(data); 
 		
@@ -69,7 +73,12 @@ public class MainActivity extends Activity {
 		
 		//return IntParse(data.getQueryParameter("ID"));
 		//tvTest.setText(data.getQueryParameter("ID"));
-		return Integer.parseInt(data.getQueryParameter("ID"));
+		String id = data.getQueryParameter("ID");
+		if (id == null)
+		{
+			return -1;
+		}
+		return Integer.parseInt(id);
 		
 		
 		/*String [] params;

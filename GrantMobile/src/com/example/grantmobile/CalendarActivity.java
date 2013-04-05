@@ -47,13 +47,10 @@ public class CalendarActivity extends FragmentActivity {
 	{
 		super.onCreate(savedInstanceState);
 		
+		int id = getIntent().getIntExtra("workMonthId", -1);
 		
-		Uri data = getIntent().getData();
-		if (data != null && data.getQuery() != null)
-		{
-			String destUri = UriHelper.serverAddress + "?q=email&" + data.getQuery();
-			new CalendarLoader(destUri.toString(), this).execute();
-		}
+		String destUri = UriHelper.serverAddress + "?q=email&ID="+id;
+		new CalendarLoader(destUri.toString(), this).execute();
 		
 		setContentView(R.layout.activity_calendar_view);
 		calendarView = (CalendarView) findViewById(R.id.calendarView1);
