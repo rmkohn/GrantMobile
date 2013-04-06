@@ -12,6 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -123,12 +124,15 @@ public final class UriHelper {
 	 * @param <T> Type of returned value in "message" on success
 	 * <code>onSuccess()</code> or <code>onFailure()</code> will be called in the display thread, based on the
 	 * boolean value <code>success</code> in the returned object.<br/>
-	 * <code>onError()</code> is called instead, if anything goes wrong. * <br/>
+	 * <code>onError()</code> is called instead, if anything goes wrong.<br/>
 	 * Their respective default behaviors are to do nothing, log the error to the
 	 * console, and print a stack trace.
+	 * <br/><br/>
+	 * When <code>execute()</code> is called, the request will be started on a background thread, with pairs of parameters
+	 * treaded as key-value pairs for a POST form submission.  With no parameters, the task will be executed as a GET.
 	 */
 	abstract static class JsonLoader<T> extends WebLoader<JSONObject> {
-	    public JsonLoader(String uri, Activity a) { super(uri, a, readJson, postJson); }
+	    public JsonLoader(String uri) { super(uri, null, readJson, postJson); }
 	    protected void onPostExecute(JSONObject result) {
 	    	super.onPostExecute(result);
 			try {
@@ -158,15 +162,21 @@ public final class UriHelper {
 	 */
     abstract static class WebLoader<T> extends AsyncTask<String, Void, T> {
     	String uri;
-    	Activity a;
+    	ContentResolver cr;
 //    	ProgressDialog pDialog;
     	
     	protected ReadFromUri<T> reader;
     	protected PostToUri<T> poster;
     	
+    	/**
+    	 * @param uri The URI to load from.
+    	 * @param a An activity, used to provide a content resolver.  Can be null if the request uses HTTP.
+    	 * @param reader A ReadFromUri able to read an InputStream and return a &ltT&gt.
+    	 * @param poster A PostToUri able to read an InputStream and return a &ltT&gt.
+    	 */
     	public WebLoader(String uri, Activity a, ReadFromUri<T> reader, PostToUri<T> poster) {
     		this.uri = uri;
-			this.a = a; 
+			this.cr = a == null ? null : a.getContentResolver(); 
 			this.reader = reader;
 			this.poster = poster;
 			
@@ -179,15 +189,11 @@ public final class UriHelper {
 		
     	}
 //    	protected String waitMessage() { return "Loading..."; }
-    	/**
-    	 * Start the request on a background thread.  Pairs of parameters are treated as key-value pairs
-    	 * for POST form submissions.  With no parameters, the task will be executed as a GET.
-    	 */
 		protected T doInBackground(String... params) {
 			T result = null;
 			try {
 				if (params.length == 0) { // GET
-					result = reader.read(Uri.parse(uri), a.getContentResolver());
+					result = reader.read(Uri.parse(uri), cr);
 				} else { // POST
 					result = poster.post(uri, params);
 				}

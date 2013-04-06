@@ -50,7 +50,7 @@ public class CalendarActivity extends FragmentActivity {
 		int id = getIntent().getIntExtra("workMonthId", -1);
 		
 		String destUri = UriHelper.serverAddress + "?q=email&ID="+id;
-		new CalendarLoader(destUri.toString(), this).execute();
+		new CalendarLoader(destUri.toString()).execute();
 		
 		setContentView(R.layout.activity_calendar_view);
 		calendarView = (CalendarView) findViewById(R.id.calendarView1);
@@ -78,14 +78,14 @@ public class CalendarActivity extends FragmentActivity {
 
 	
 	private void fillCalendarData(final int id) {
-	    new CalendarLoader(UriHelper.serverAddress + "?q=email&id="+id, this).execute();
+	    new CalendarLoader(UriHelper.serverAddress + "?q=email&id="+id).execute();
 	}	
 	
 	
     class CalendarLoader extends UriHelper.JsonLoader<JSONObject>
     {
-    	public CalendarLoader(String uri, Activity a) {
-			super(uri, a);
+    	public CalendarLoader(String uri) {
+			super(uri);
 		}
 
 		private String getEmployeeName(JSONObject employeeObj) throws JSONException

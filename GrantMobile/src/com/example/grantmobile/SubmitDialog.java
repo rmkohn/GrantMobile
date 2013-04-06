@@ -10,7 +10,6 @@ import android.os.Bundle;
 
 public class SubmitDialog extends DialogFragment {
 	public int userID;
-	private FragmentManager frgMgr;
 	
 	public void setUserID(int id){
 		this.userID = id;
@@ -27,7 +26,8 @@ public class SubmitDialog extends DialogFragment {
 				    	  CommentDialog comment = new CommentDialog();
 				    	  comment.setTitle("Approve Time");
 				    	  comment.setUserID(userID);
-				    	  comment.show(frgMgr, "");
+				    	  comment.setApproval(true);
+				    	  comment.show(getFragmentManager(), "");
 				      }
 				  })
 		        .setNeutralButton("Deny", new DialogInterface.OnClickListener() {
@@ -35,14 +35,12 @@ public class SubmitDialog extends DialogFragment {
 				    	  CommentDialog comment = new CommentDialog();
 				    	  comment.setTitle("Deny Time");
 				    	  comment.setUserID(userID);
-				    	  comment.show(frgMgr, "");
+				    	  comment.setApproval(false);
+				    	  comment.show(getFragmentManager(), "");
 				      }
 				  });
         // Create the AlertDialog object and return it
         return builder.create();
     }
 
-	public void setManager(FragmentManager manager) {
-		this.frgMgr = manager;
-	}
 }
