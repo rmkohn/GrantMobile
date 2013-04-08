@@ -1,4 +1,4 @@
-package com.example.detailview;
+package com.example.grantmobile;
 
 import java.util.ArrayList;
 import java.util.Calendar;

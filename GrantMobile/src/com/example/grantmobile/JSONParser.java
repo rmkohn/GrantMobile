@@ -1,4 +1,4 @@
-package com.example.detailview;
+package com.example.grantmobile;
 
 import java.io.BufferedReader;
 import java.io.IOException;

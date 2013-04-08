@@ -204,8 +204,8 @@ public class CalendarActivity extends FragmentActivity {
 		
 		Intent i = new Intent(this, DetailViewActivity.class);
 		
-		i.putExtra(TAG_REQUEST_ID,   workMonthId);
-		i.putExtra(TAG_DAY_OF_MONTH, detailSquare.dailyNumber);
+		i.putExtra(TAG_REQUEST_ID, String.valueOf(workMonthId));
+		i.putExtra(TAG_DAY_OF_MONTH, String.valueOf(detailSquare.dailyNumber));
 		
 		startActivity(i);
 	}
