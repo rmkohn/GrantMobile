@@ -21,6 +21,9 @@ import android.widget.Toast;
 
 public class CalendarActivity extends FragmentActivity {
 	
+	private static final String TAG_REQUEST_ID = "RequestId"; // required, no default!!!!
+	private static final String TAG_DAY_OF_MONTH = "DayOfMonth"; // optional, default = first day of month	
+	
 	// Name of grant
 	String grantName;
 	// 000-000 formatted number for grant
@@ -127,7 +130,7 @@ public class CalendarActivity extends FragmentActivity {
 				JSONObject hours = result.getJSONObject("hours");
 				JSONArray leavehours    = hours.getJSONArray("leave");
 				JSONArray nongranthours = hours.getJSONArray("non-grant");
-				JSONArray granthours    = hours.getJSONArray(Integer.toString(grantId));
+				JSONArray granthours    = hours.getJSONArray("grant");
 				
 				calendarView.loadTimes(granthours, nongranthours, leavehours);
 				
@@ -199,34 +202,10 @@ public class CalendarActivity extends FragmentActivity {
 		if (detailSquare.dailyNumber < 1)
 			return;
 		
-		
 		Intent i = new Intent(this, DetailViewActivity.class);
 		
-		int daysInMonth = calendarView.daysInMonth;
-		float[] granthrs = new float[daysInMonth];
-		float[] leavehrs = new float[daysInMonth];
-		float[] nongranthrs = new float[daysInMonth];
-		
-		for (CalendarSquare square : calendarView.calendar)
-		{
-			if (square.dailyNumber > 0)
-			{
-				granthrs   [square.dailyNumber - 1] = square.grantHours;
-				nongranthrs[square.dailyNumber - 1] = square.nonGrantHours;
-				leavehrs   [square.dailyNumber - 1] = square.leave;
-			}
-		}
-		i.putExtra("GHRS",          granthrs);
-		i.putExtra("NGHRS",         nongranthrs);
-		i.putExtra("LHRS",          leavehrs);
-		i.putExtra("YR",            calendarView.year);
-		i.putExtra("MNTH",          calendarView.monthNumber);
-		i.putExtra("dateOfMonth",   detailSquare.dailyNumber);
-		i.putExtra("grantName",     grantName);
-		i.putExtra("grantNumber",   grantNumber);
-		i.putExtra("employeeName",  employeeName);
-		i.putExtra("catalogNumber", grantCatalogNumber);
-		i.putExtra("workMonth",     workMonthId);
+		i.putExtra(TAG_REQUEST_ID,   workMonthId);
+		i.putExtra(TAG_DAY_OF_MONTH, detailSquare.dailyNumber);
 		
 		startActivity(i);
 	}
