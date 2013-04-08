@@ -1,57 +1,79 @@
-package com.example.grantmobile;
+package com.example.detailview;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class DetailViewActivity extends FragmentActivity {
+public class DetailViewActivity extends Activity {
+	// these two named parameter are for the Intent interface to this activity (both reference Strings)
+	private static final String TAG_REQUEST_ID = "RequestId"; // required, no default!!!!
+	private static final String TAG_DAY_OF_MONTH = "DayOfMonth"; // optional, default is first day of month
 
-	static final String[] DOW = 
-			new String[] { "Monday", "Tuesday", "Wednesday", "Thursday",
-							"Friday", "Saturday", "Sunday" };
+	private static final String TAG = "detailview";
+	private static String requestURL = "http://mid-state.net/mobileclass2/android";
 	
-	static final String[] GHRS = 
-			new String[] { "4", "6" , "6", "0", "0",
-							"3", "4" , "5", "4", "2", "0", "0",	
-							"5", "2", "1", "0" , "0", "0", "0",
-							"7", "6", "5", "4" , "3", "2", "1",
-							"3", "6", "7", "3" , "0"};
-	static final String[] NGHRS = 
-			new String[] { "4", "2" , "2", "0", "0",
-							"7", "4" , "3", "4", "6", "0", "0",
-							"3", "6", "7", "8" , "0", "0", "0",
-							"1", "2", "3", "4" , "5", "6", "7",
-							"5", "2", "1", "5" , "8"};
-	static final String[] LHRS = 
-			new String[] { "0", "0" , "0", "0", "0",
-							"0", "0" , "0", "0", "0", "0", "0",
-							"0", "0" , "0", "0", "8", "0", "0",
-							"0", "0", "0", "0" , "0", "0", "0",
-							"0", "0", "0", "0" , "0"};
+	JSONParser jParser = new JSONParser();
+	ArrayList<String> grantHours; // grant hour array 
+	ArrayList<String> nonGrantHours; // non-grant hour array
+	ArrayList<String> leaveHours;  // leave hour array
+	HashMap<String,String> map;
 	
-	// these arguments will be passed in via intent from calendar view
-	static final String YR = "2013";
-	static final String MNTH = "5";
-	static final String dateOfMonth = "14";
-	static final String grantName = "U.S. Grant";
-	static final String grantId = "111-111";
-	static final String employeeName = "Davy Jones";
-	static final String catalogNumber = "11.111";
+	private static final String TAG_SUCCESS = "success";  // "true" is good
+	private static final String TAG_MESSAGE = "message";
+
+	private static final String TAG_HOURS = "hours"; 
+	private static final String TAG_GRANT = "grant";
+	private static final String TAG_NON_GRANT = "non-grant";
+	private static final String TAG_LEAVE = "leave";
 	
-	// GHRS[], NGHRS[] and LHRS[] will be gotten from grant database
-	// DOM.length, DOW[] (Mon=0; Sun=6) must be determined from date
-	Integer dow_start = 1; // month starts on Wednesday for test, use WED - 1 
-	Integer dom_current = Integer.valueOf(dateOfMonth);
+	private static final String TAG_MONTH = "month";
+	private static final String TAG_YEAR = "year";
 	
+	private static final String TAG_EMPLOYEE = "employee";
+	private static final String TAG_FIRST_NAME = "firstname";
+	private static final String TAG_LAST_NAME = "lastname";
+	private static final String TAG_EMPLOYEE_ID = "id";
+	
+	private static final String TAG_GRANT_ID = "ID";
+	private static final String TAG_STATE_CATALOG_NUM = "stateCatalogNum";
+	private static final String TAG_GRANT_NUMBER = "grantNumber";
+	private static final String TAG_GRANT_TITLE = "grantTitle";
+
+	JSONObject json = null; // entire json object
+
+	// day of week string array
+	static final String[] DOW = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
+							"Friday", "Saturday" };
+		
+	Integer dowStart; // month starts on Wednesday for test, use WED - 1 
+	Integer domCurrent; // current day of month
+	public static String requestId;
+	
+	TextView grantNameView;
+	TextView grantIdView;
+	TextView employeeNameView;
+	TextView catalogView;
+		
 	TextView dateView;
 	TextView dayView;
 	TextView grantHoursView;
@@ -66,21 +88,38 @@ public class DetailViewActivity extends FragmentActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_detail_view);
 		context = this;
+		setContentView(R.layout.activity_detail_view);
 		
-		// write out preamble
-		TextView grantNameView = (TextView)findViewById(R.id.grantNameView);
-		TextView grantIdView = (TextView)findViewById(R.id.grantIdView);
-		TextView employeeNameView = (TextView)findViewById(R.id.employeeNameView);
-		TextView catalogView = (TextView)findViewById(R.id.catalogView);
+		// instantiate parser and storage objects
+		jParser = new JSONParser();
+		grantHours = new ArrayList<String>(); // grant hour array 
+		nonGrantHours = new ArrayList<String>(); // non-grant hour array
+		leaveHours = new ArrayList<String>();  // leave hour array
+		map = new HashMap<String,String>();
 		
-		grantNameView.setText(grantName);
-		grantIdView.setText(grantId);
-		employeeNameView.setText(employeeName);
-		catalogView.setText(catalogNumber);
-		
-		// setup view for displaying specific data for a given date
+		// intent interface
+		Intent intent = getIntent();
+		String str = intent.getStringExtra(TAG_DAY_OF_MONTH);
+		if (str==null) {
+			domCurrent = 1;
+		} else {
+			domCurrent = Integer.valueOf(str);
+		}
+		str = intent.getStringExtra(TAG_REQUEST_ID);
+		if (str==null) {
+			requestId = "23"; // for test
+		} else {
+			requestId = str;
+		}
+
+		// setup view for displaying grant info
+		grantNameView = (TextView)findViewById(R.id.grantNameView);
+		grantIdView = (TextView)findViewById(R.id.grantIdView);
+		employeeNameView = (TextView)findViewById(R.id.employeeNameView);
+		catalogView = (TextView)findViewById(R.id.catalogView);
+
+		// setup view for displaying specific info for a given date
 		dateView = (TextView)findViewById(R.id.dateView);
 		dayView = (TextView)findViewById(R.id.dayOfWeekView);
 		grantHoursView = (TextView)findViewById(R.id.grantHoursView);
@@ -89,99 +128,124 @@ public class DetailViewActivity extends FragmentActivity {
 
 		dayTotalHoursView = (TextView)findViewById(R.id.dayTotalHoursView);
 		monthTotalHoursView = (TextView)findViewById(R.id.monthTotalHoursView);
-	
-		// write out date specific data
-		updateView();
 		
-        final Button backwardButton = (Button) findViewById(R.id.button1);
+        final Button backwardButton = (Button) findViewById(R.id.backBtn);
         backwardButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Perform action on click
-            	if (--dom_current == 0) dom_current = GHRS.length;  // underflow wrap
+            	if (--domCurrent == 0) domCurrent = grantHours.size();  // underflow wrap
             	updateView();
             }
         });
-        final Button forwardButton = (Button) findViewById(R.id.button2);
+        final Button forwardButton = (Button) findViewById(R.id.nextBtn);
         forwardButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-            	if (++dom_current >  GHRS.length) dom_current = 1; // overflow wrap
+            	if (++domCurrent >  grantHours.size()) domCurrent = 1; // overflow wrap
             	updateView();
             }
         });
         
-        final Button returnButton = (Button) findViewById(R.id.button3);
+        final Button returnButton = (Button) findViewById(R.id.returnBtn);
         returnButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-            	returnToCal();
+                Toast.makeText(context, "Return to Calendar View", Toast.LENGTH_LONG).show();
+                finish();
             }
         });
-	}
-	
-	/**
-	 * This procedure initializes the options menu.
-	 */
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu)
-	{
-		// Inflate the menu
-		getMenuInflater().inflate(R.menu.detail, menu);
-		return true;
+        
+		// start access of grant data, updateView() below will access the data when ready
+		new GetGrantData().execute();
 	}
         
-	private void returnToCal() {
-		Intent intent = new Intent(this, CalendarActivity.class);
-    	startActivity(intent);
-	}
-	
     private void updateView() {
+		String domString = String.valueOf(domCurrent);
     	
-		String DOM_string = String.valueOf(dom_current);
-		String date = MNTH + "/" + DOM_string + "/" + YR;
-		
-    	dateView.setText(date);
-    	dayView.setText(DOW[(dom_current+dow_start)%7]);
-    	grantHoursView.setText(GHRS[dom_current-1]);
-    	nonGrantHoursView.setText(NGHRS[dom_current-1]);
-    	leaveHoursView.setText(LHRS[dom_current-1]);
+		// figure out what first day-of-week is for this month (dowStart)
+    	Calendar cal = Calendar.getInstance();
+    	cal.set(Calendar.DATE,1);
+    	cal.set(Calendar.MONTH, Integer.valueOf(map.get(TAG_MONTH))-1);
+    	cal.set(Calendar.YEAR, Integer.valueOf(map.get(TAG_YEAR)));
+    	cal.set(Calendar.DAY_OF_MONTH, 1); 	
+        dowStart = (cal.get(Calendar.DAY_OF_WEEK)-Calendar.SUNDAY)%7;
+        
+		grantNameView.setText(map.get(TAG_GRANT_TITLE));
+		grantIdView.setText(map.get(TAG_GRANT_ID));
+		employeeNameView.setText(map.get(TAG_FIRST_NAME)+ " " + map.get(TAG_LAST_NAME));
+		catalogView.setText(map.get(TAG_STATE_CATALOG_NUM));
+    	
+    	dateView.setText(map.get(TAG_MONTH)+"/"+domString+"/"+map.get(TAG_YEAR));
+    	dayView.setText(DOW[(domCurrent+dowStart-1)%7]);
+    	grantHoursView.setText(grantHours.get(domCurrent-1));
+    	nonGrantHoursView.setText(nonGrantHours.get(domCurrent-1));
+    	leaveHoursView.setText(leaveHours.get(domCurrent-1));
     		
-    	Integer dayTotal = Integer.valueOf(GHRS[dom_current-1])+Integer.valueOf(NGHRS[dom_current-1])+Integer.valueOf(LHRS[dom_current-1]);
+    	Integer dayTotal = Integer.valueOf(grantHours.get(domCurrent-1))+Integer.valueOf(nonGrantHours.get(domCurrent-1))+Integer.valueOf(leaveHours.get(domCurrent-1));
     	dayTotalHoursView.setText(dayTotal.toString());
     	Integer tgh = 0;
-    	for (int i = 0; i < GHRS.length; i++) {
-    		tgh = tgh + Integer.valueOf(GHRS[i]);
-    	}
+    	for (int i = 0; i < grantHours.size(); i++)
+    		tgh = tgh + Integer.valueOf(grantHours.get(i));
     	monthTotalHoursView.setText(tgh.toString());
 	}
-    
-	/**
-     * This procedure handles all of the options menu selection events.
-     */
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+
+	class GetGrantData extends AsyncTask<String,String,String> {
+
+		@Override
+		protected String doInBackground(String... args) {
+			List<NameValuePair> params = new ArrayList<NameValuePair>();
+			params.add(new BasicNameValuePair("q","email"));
+			params.add(new BasicNameValuePair("id",requestId)); // this will come from intent
+			Log.d(TAG+"_GET_REQ", requestURL);
+			json = jParser.makeHttpRequest(requestURL, "GET", params);
+			Log.d(TAG+"_GET_RET", json.toString());
+			return "OK";
+		}
 		
-		// Variables
-		
-		// The id of the menu item chosen
-		int itemId = 0;													
-		
-		// Determine id of item chosen, and respond accordingly
-		itemId = item.getItemId();
-		Intent intent;
-		switch (itemId) {
-			case (R.id.mnuLoad)	:
-				intent = new Intent(this, CalendarActivity.class);
-	    		startActivity(intent);
-	    		break;
-			case (R.id.mnuDialog) :
-				//show dialog box
-				SubmitDialog dialog = new SubmitDialog();
-				dialog.setUserID(732);
-				FragmentManager manager = getSupportFragmentManager();
-				dialog.show(manager, "");
-				break;
-		}// end switch
-		
-		return true;
-		
-	}  
+		protected void onPostExecute(String file_url) {
+
+			runOnUiThread(new Runnable() {
+				public void run() {
+					JSONArray jsa = null; // json array
+					JSONObject jso = null; // json object
+					JSONObject jsom = null; // message jsom
+					JSONObject jsoh = null; // hours jsom
+					try {
+						String s = json.getString(TAG_SUCCESS);
+						if (s.equals("true")) {
+							jsom = json.getJSONObject(TAG_MESSAGE);
+							jsoh = jsom.getJSONObject(TAG_HOURS);
+							jsa = jsoh.getJSONArray(TAG_GRANT);
+					 	    for (int i = 0; i < jsa.length(); i++) {
+					 	    	grantHours.add((Integer.valueOf(jsa.getInt(i))).toString());  // these are the grant hours for each day of month
+					 	    }
+							jsa = jsoh.getJSONArray(TAG_NON_GRANT);
+					 	    for (int i = 0; i < jsa.length(); i++){
+					 	    	nonGrantHours.add((Integer.valueOf(jsa.getInt(i))).toString());  // these are the non-grant hours for each day of month
+					 	    }
+							jsa = jsoh.getJSONArray(TAG_LEAVE);
+					 	    for (int i = 0; i < jsa.length(); i++){
+					 	    	leaveHours.add((Integer.valueOf(jsa.getInt(i))).toString());  // these are the leave hours for each day of month
+					 	    }
+					 		map.put(TAG_MONTH,(Integer.valueOf(jsom.getInt(TAG_MONTH))).toString());
+					 		map.put(TAG_YEAR,(Integer.valueOf(jsom.getInt(TAG_YEAR))).toString());
+					 		jso = jsom.getJSONObject(TAG_EMPLOYEE);
+					 		map.put(TAG_FIRST_NAME, jso.getString(TAG_FIRST_NAME));
+					 		map.put(TAG_LAST_NAME, jso.getString(TAG_LAST_NAME));
+							Log.d(TAG+"_GET_REQ", "last name = " + jso.getString(TAG_LAST_NAME));
+					 		map.put(TAG_EMPLOYEE_ID, jso.getString(TAG_EMPLOYEE_ID));
+					 		jso = jsom.getJSONObject(TAG_GRANT);	
+					 		map.put(TAG_GRANT_ID, jso.getString(TAG_GRANT_ID));
+					 		map.put(TAG_GRANT_NUMBER, jso.getString(TAG_GRANT_NUMBER));
+					 		map.put(TAG_GRANT_TITLE, jso.getString(TAG_GRANT_TITLE));
+					 		map.put(TAG_STATE_CATALOG_NUM, jso.getString(TAG_STATE_CATALOG_NUM));	
+					 		updateView();
+					    }
+					} catch (JSONException e) {
+					    e.printStackTrace();
+					}
+				}
+			});
+		}
+	}
+
+
 }
