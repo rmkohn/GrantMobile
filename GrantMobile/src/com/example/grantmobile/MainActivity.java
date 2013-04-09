@@ -31,12 +31,12 @@ public class MainActivity extends Activity {
 		tvTest.setText("Uri data: " + data);
 		//Toast.makeText(this, "Uri data: " + data, Toast.LENGTH_LONG).show();
 		
-		int workMonthId 		= -1;	
+		//int workMonthId 		= -1;	
 		
-		if (data != null)
+		/*if (workMonthId == -1)
 		{
 			workMonthId				= getWorkMonthId(data);
-		}
+		}*/
 		
 		/*Map<String, String> paramsMap = getParameters(data); 
 		
@@ -48,17 +48,19 @@ public class MainActivity extends Activity {
 					
 		}*/
 		
+		int workMonthId				= getWorkMonthId(data);
+		
 		tvTest.setText("ID = " + workMonthId);
 		
-		if (workMonthId != -1)
+		if (workMonthId == -1)
+		{
+			Toast.makeText(this, "You have to access this app through the email link", Toast.LENGTH_LONG).show();
+		}
+		else
 		{
 			Intent intent = new Intent(this, CalendarActivity.class);
 			intent.putExtra("workMonthId", workMonthId);
 			startActivity(intent);
-		}
-		else
-		{
-			Toast.makeText(this, "You have to access this app through the email link", Toast.LENGTH_LONG).show();
 		}
 		
 		
@@ -73,13 +75,20 @@ public class MainActivity extends Activity {
 		
 		//return IntParse(data.getQueryParameter("ID"));
 		//tvTest.setText(data.getQueryParameter("ID"));
-		String id = data.getQueryParameter("ID");
-		if (id == null)
+		
+		if (data == null)
 		{
 			return -1;
 		}
+		String id = data.getQueryParameter("ID");
+		
 		return Integer.parseInt(id);
 		
+		
+		/*if (id == null)
+		{
+			return -1;
+		}*/
 		
 		/*String [] params;
 		String afterQuery = data.getQuery();
