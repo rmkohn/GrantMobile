@@ -42,8 +42,6 @@ import android.view.View;
 
 public class CalendarView extends View {
 	
-	
-
 	// Constants
 
     // Days in a week
@@ -513,13 +511,13 @@ public class CalendarView extends View {
 		// Total hours for a day or week
 		int dayTotalHours = 0;
 		// Total grant hours for a week
-		int currentTotalGrantHours = 0;
+		int weekTotalGrantHours = 0;
 		// Total non-grant hours for a week
-		int currentTotalNonGrantHours = 0;
+		int weekTotalNonGrantHours = 0;
 		// Total leave hours for a week
-		int currentTotalLeaveHours = 0;
+		int weekTotalLeaveHours = 0;
 		// Total hours for a day or week
-		int currentTotalHours = 0;
+		int weekTotalHours = 0;
 		
 		// Determine weekly and monthly totals and note information
 		for (int i = 0; i < calendar.size(); i++)
@@ -532,19 +530,23 @@ public class CalendarView extends View {
 				// If end of week, determine weekly totals, and set it
 				if ((i % (DAYSINAWEEK + 1)) == DAYSINAWEEK) {
 				
-					// Set display information as
-					// total hours concatenated string
-					calendar.get(i).displayString =
-						String.valueOf(currentTotalGrantHours) + "|" +
-						String.valueOf(currentTotalNonGrantHours) + "|" +
-						String.valueOf(currentTotalLeaveHours) + "|" +
-						String.valueOf(currentTotalHours);
+					// Set weekly totals for this square
+					calendar.get(i).grantHours = weekTotalGrantHours;
+					calendar.get(i).nonGrantHours = weekTotalNonGrantHours;
+					calendar.get(i).leave = weekTotalLeaveHours;
+					
+					// Set display information as total hours 
+					calendar.get(i).displayString = "T: " +
+						String.valueOf(weekTotalHours);
+
+					// Set weekly totals property on
+					calendar.get(i).weeklyTotal = true;
 					
 					// Reset weekly totals
-					currentTotalGrantHours = 0;
-					currentTotalNonGrantHours = 0;
-					currentTotalLeaveHours = 0;
-					currentTotalHours = 0;
+					weekTotalGrantHours = 0;
+					weekTotalNonGrantHours = 0;
+					weekTotalLeaveHours = 0;
+					weekTotalHours = 0;					
 					
 				}
 				else if ((calendar.get(i).dailyNumber > daysInMonth)
@@ -553,21 +555,23 @@ public class CalendarView extends View {
 					// Daily number out of range test. If so, set display string to dash
 					calendar.get(i).displayString = "-";
 					
+					// Set weekly totals off
+					calendar.get(i).weeklyTotal = false;
+					
 				}
 				else
 				{
-					// If not end of week and within range, determine
-					// daily information
+					// If not end of week and within range, determine daily information
 					dayTotalGrantHours = calendar.get(i).grantHours;
 					dayTotalNonGrantHours = calendar.get(i).nonGrantHours;
 					dayTotalLeaveHours = calendar.get(i).leave;
 					dayTotalHours = calendar.get(i).totalHours();
 					
-					// Add daily information to weekly totals
-					currentTotalGrantHours += dayTotalGrantHours;
-					currentTotalNonGrantHours += dayTotalNonGrantHours;
-					currentTotalLeaveHours += dayTotalLeaveHours;
-					currentTotalHours += dayTotalHours;
+					// Update weekly hours
+					weekTotalGrantHours += dayTotalGrantHours;
+					weekTotalNonGrantHours += dayTotalNonGrantHours;
+					weekTotalLeaveHours += dayTotalLeaveHours;
+					weekTotalHours += dayTotalHours; 
 					
 					// Increase totals for monthly total
 					monthTotalGrantHours += dayTotalGrantHours;
@@ -575,13 +579,11 @@ public class CalendarView extends View {
 					monthTotalLeaveHours += dayTotalLeaveHours;
 					monthTotalHours += dayTotalHours;
 					
-					// Set display information as
-					// total hours concatenated string
-					calendar.get(i).displayString =
-						String.valueOf(dayTotalGrantHours) + "|" +
-						String.valueOf(dayTotalNonGrantHours) + "|" +
-						String.valueOf(dayTotalLeaveHours) + "|" +
-						String.valueOf(dayTotalHours);
+					// Set display information as daily number only
+					calendar.get(i).displayString = String.valueOf(calendar.get(i).dailyNumber);
+					
+					// Set weekly totals off
+					calendar.get(i).weeklyTotal = false;
 				
 				}// end if
 				
@@ -591,9 +593,6 @@ public class CalendarView extends View {
 		
 		// Determine footer message from monthly totals
 		footerMessage = "Total Hours This Month: " +
-			String.valueOf(monthTotalGrantHours) + "|" +
-			String.valueOf(monthTotalNonGrantHours) + "|" +
-			String.valueOf(monthTotalLeaveHours) + "|" +
 			String.valueOf(monthTotalHours);
 		
 		// Refresh screen

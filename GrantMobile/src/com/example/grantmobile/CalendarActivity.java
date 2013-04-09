@@ -1,6 +1,5 @@
 package com.example.grantmobile;
 
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,7 +16,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Toast;
-
 
 public class CalendarActivity extends FragmentActivity {
 	

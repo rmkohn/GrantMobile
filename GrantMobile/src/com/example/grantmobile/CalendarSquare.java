@@ -26,6 +26,7 @@ public class CalendarSquare {
 	public int grantHours = 0;
 	public int nonGrantHours = 0;
 	public int leave = 0;
+	public boolean weeklyTotal = false;
 	public String displayString = "";
 	
 	/**
@@ -38,9 +39,10 @@ public class CalendarSquare {
 	 * @param g Grant hours
 	 * @param n Non-grant hours
 	 * @param l Leave hours
+	 * @param wt Weekly totals
 	 * @param ds Display string for messages, titles, or totals
 	 */
-	public CalendarSquare(int x, int y, int w, int h, int d, int g, int n, int l, String ds)
+	public CalendarSquare(int x, int y, int w, int h, int d, int g, int n, int l, boolean wt, String ds)
 	{
 		positionX = x;
 		positionY = y;
@@ -50,6 +52,7 @@ public class CalendarSquare {
 		grantHours = g;
 		nonGrantHours = n;
 		leave = l;
+		weeklyTotal = wt;
 		displayString = ds;
 	}
 	

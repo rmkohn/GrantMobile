@@ -60,6 +60,7 @@ public class MainActivity extends Activity {
 		{
 			Intent intent = new Intent(this, CalendarActivity.class);
 			intent.putExtra("workMonthId", workMonthId);
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			startActivity(intent);
 		}
 		
