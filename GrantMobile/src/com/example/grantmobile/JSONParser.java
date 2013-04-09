@@ -5,46 +5,56 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.AsyncTask;
 import android.util.Log;
 
 public class JSONParser {
 
-	static InputStream is = null;
-	static JSONObject jObj = null;
-	static String json = "";
 
 	// constructor
 	public JSONParser() {
 
 	}
-
+	static CookieStore cookies;
+	
 	// function get json from url
 	// by making HTTP POST or GET mehtod
-	public JSONObject makeHttpRequest(String url, String method,
+	public static JSONObject makeHttpRequest(String url, String method,
 			List<NameValuePair> params) {
+		InputStream is = null;
+		JSONObject jObj = null;
+		String json = "";
+		
+		if (cookies == null)
+			cookies = new BasicCookieStore();
 
 		// Making HTTP request
 		try {
+			DefaultHttpClient httpClient = new DefaultHttpClient();
+			httpClient.setCookieStore(cookies);
 			
 			// check for request method
 			if(method == "POST"){
 				// request method is POST
 				// defaultHttpClient
-				DefaultHttpClient httpClient = new DefaultHttpClient();
 				HttpPost httpPost = new HttpPost(url);
 				httpPost.setEntity(new UrlEncodedFormEntity(params));
 
@@ -54,7 +64,6 @@ public class JSONParser {
 				
 			}else if(method == "GET"){
 				// request method is GET
-				DefaultHttpClient httpClient = new DefaultHttpClient();
 				String paramString = URLEncodedUtils.format(params, "utf-8");
 				url += "?" + paramString;
 				HttpGet httpGet = new HttpGet(url);
@@ -98,5 +107,73 @@ public class JSONParser {
 		return jObj;
 
 	}
+	
+	public static class RequestBuilder {
+		String url = null;
+		String method = "GET";
+		List<NameValuePair> params = new ArrayList<NameValuePair>();
+		
+		public RequestBuilder() { }
+		public RequestBuilder(String url) {
+			this.url = url;
+		}
+		
+		public String getUrl() {
+			return url;
+		}
+		public String getMethod() {
+			return method;
+		}
+		public void clearParams() {
+			params.clear();
+		}
+		public List<NameValuePair> getParams() {
+			return params;
+		}
+		public RequestBuilder addParam(String name, String value) {
+			params.add(new BasicNameValuePair(name, value));
+			return this;
+		}
+		public RequestBuilder setUrl(String url) {
+			this.url = url;
+			return this;
+		}
+		public RequestBuilder setMethod(String method) {
+			this.method = method;
+			return this;
+		}
+		public void makeRequest(final ResultHandler handler) {
+			new AsyncTask<Void, Void, JSONObject>() {
+				protected JSONObject doInBackground(Void... params) {
+					return makeHttpRequest(url, method, RequestBuilder.this.params);
+				}
+				protected void onPostExecute(JSONObject result) {
+					try {
+				    	if (result.getBoolean("success"))
+				    		handler.onSuccess(result.get("message"));
+						else
+							handler.onFailure(result.getString("message"));
+					} catch (JSONException e) {
+						handler.onError(e);
+					} catch (IOException e) {
+						handler.onError(e);
+					} catch (NullPointerException e) {
+						handler.onError(e);
+					} catch (ClassCastException e) {
+						handler.onError(e);
+					}
+				}
+			}.execute();
+		}
+		
+	}
+	
+	public static class ResultHandler {
+        protected void onSuccess(Object result) throws JSONException, IOException { }
+        protected void onFailure(String errorMessage) { Log.w("GrantMobile", errorMessage); }
+        protected void onError(Exception e) { e.printStackTrace(); }
+	}
+	
+	
 }
 

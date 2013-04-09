@@ -24,6 +24,8 @@ public class CalendarActivity extends FragmentActivity {
 	private static final String TAG_REQUEST_ID = "RequestId"; // required, no default!!!!
 	private static final String TAG_DAY_OF_MONTH = "DayOfMonth"; // optional, default = first day of month	
 	
+	public static final String requestURL = "http://mid-state.net/mobileclass2/android";
+	
 	// Name of grant
 	String grantName;
 	// 000-000 formatted number for grant
@@ -52,8 +54,7 @@ public class CalendarActivity extends FragmentActivity {
 		
 		int id = getIntent().getIntExtra("workMonthId", -1);
 		
-		String destUri = UriHelper.serverAddress + "?q=email&ID="+id;
-		new CalendarLoader(destUri.toString()).execute();
+		fillCalendarData(id);
 		
 		setContentView(R.layout.activity_calendar_view);
 		calendarView = (CalendarView) findViewById(R.id.calendarView1);
@@ -81,15 +82,15 @@ public class CalendarActivity extends FragmentActivity {
 
 	
 	private void fillCalendarData(final int id) {
-	    new CalendarLoader(UriHelper.serverAddress + "?q=email&id="+id).execute();
+		new JSONParser.RequestBuilder(requestURL)
+		.setUrl(requestURL)
+		.addParam("q", "email")
+		.addParam("id", String.valueOf(id))
+		.makeRequest(new CalendarResultHandler());
 	}	
 	
-	
-    class CalendarLoader extends UriHelper.JsonLoader<JSONObject>
+    class CalendarResultHandler extends JSONParser.ResultHandler
     {
-    	public CalendarLoader(String uri) {
-			super(uri);
-		}
 
 		private String getEmployeeName(JSONObject employeeObj) throws JSONException
     	{
@@ -99,10 +100,11 @@ public class CalendarActivity extends FragmentActivity {
     	}
 
 		@Override
-		protected void onSuccess(JSONObject result)
+		protected void onSuccess(Object oResult)
 		{
 			try
 			{
+				JSONObject result = (JSONObject) oResult;
 				// get the date
 				int month = result.getInt("month") + 1; // server months are 0-indexed
 				int year  = result.getInt("year");

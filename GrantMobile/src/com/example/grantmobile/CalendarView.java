@@ -74,6 +74,10 @@ public class CalendarView extends View {
 	// Calendar initial vertical margin
 	private static final int calendarMarginY = 10;
 	
+	public static final String[] monthNames = {
+		"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
+	};
+	
 	// Variables
 	
 	// The paint brush
@@ -218,14 +222,14 @@ public class CalendarView extends View {
 	        oddFlag = !oddFlag;
 
 	        // Draw rectangle determined
-	        canvas.drawRect(curRect, paint);
+	    		canvas.drawRect(curRect, paint);
 
 	        // Determine display
 	        thisDisplay =
 	                calendar.get(currentCalendarSquareIndex).displayString;
 
 	        // Show display
-	        paint.setColor(dailyForegroundColor);
+		        paint.setColor(dailyForegroundColor);
 	        canvas.drawText(thisDisplay,
 	                calendar.get(currentCalendarSquareIndex).positionX
 	                + 10,
@@ -278,11 +282,11 @@ public class CalendarView extends View {
 		Log.i("drawview", "got touch evt "+Math.round(event.getX())+","+Math.round(event.getY()));
 		// standard gesture handler, route events to GestureDetector
 		if (tapDetector.onTouchEvent(event))
-			return true;
+		        return true;
 		return super.onTouchEvent(event);
-	}
-
-
+		    }
+			
+			
 
 	/**
 	 * This procedure initializes the header message with sample data
@@ -362,7 +366,7 @@ public class CalendarView extends View {
 			// plus one from weekly totals 
 		calendarSquareSizeH = calendarHeight / (WEEKSTODRAW + 2);
 			// plus header and footer
-		
+
 				
 		// Initialize calendar square titles
 		Collections.addAll(squareTitles,
@@ -476,7 +480,7 @@ public class CalendarView extends View {
 		
 		// Determine month name and number of days in the month
 		cal = new GregorianCalendar(year, monthNumber - 1, 1);
-		monthName = cal.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault());
+		monthName = monthNames[monthNumber - 1];
 		daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
 		
 		// Determine what day of the week the first of the month is
@@ -593,14 +597,14 @@ public class CalendarView extends View {
 			String.valueOf(monthTotalHours);
 		
 		// Refresh screen
-		invalidate();
+        invalidate();
 	}
 	
 	private GestureDetector getGestureListener()
 	{
 	    SimpleOnGestureListener gl = new GestureDetector.SimpleOnGestureListener()
 	    {
-	        @Override
+			@Override
 	        public boolean onDown(MotionEvent event)
 	        {
 	            // The touching X coordinate

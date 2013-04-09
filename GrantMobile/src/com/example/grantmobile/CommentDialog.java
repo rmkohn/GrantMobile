@@ -1,8 +1,13 @@
 package com.example.grantmobile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -17,6 +22,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 public class CommentDialog extends DialogFragment {
+	public static final String requestURL = "http://mid-state.net/mobileclass2/android";
 	private String title;
 	public int userID;
 	public boolean approval;
@@ -51,15 +57,15 @@ public class CommentDialog extends DialogFragment {
         		.setMessage("Enter a comment below and click OK to submit")
         		.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 				      public void onClick(DialogInterface dialog, int id) {
-				    	  Uri approveUri = Uri.parse(UriHelper.serverAddress).buildUpon()
-		    			  .appendQueryParameter("q", "approve")
-		    			  .appendQueryParameter("approval", Boolean.toString(approval))
-		    			  .build();
-				    	  new UriHelper.JsonLoader<String>(approveUri.toString()) {
-							protected void onSuccess(String result) {
-								Toast.makeText(currentActivity, result, Toast.LENGTH_LONG).show();
-							}
-						}.execute();
+				    	  new JSONParser.RequestBuilder(requestURL)
+				    	  .addParam("q", "approve")
+		    			  .addParam("approval", Boolean.toString(approval))
+				    	  .addParam("comment", input.getText().toString())
+				    	  .makeRequest(new JSONParser.ResultHandler() {
+				    		  protected void onSuccess(Object result) {
+				    			  Toast.makeText(currentActivity, (String)result, Toast.LENGTH_LONG).show();
+				    		  }
+				    	  });
 				      }
 				  })
 		        .setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
