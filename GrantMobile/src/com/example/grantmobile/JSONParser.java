@@ -167,11 +167,16 @@ public class JSONParser {
 		}
 		
 	}
+	public static interface ResultHandler {
+        public void onSuccess(Object result) throws JSONException, IOException;
+        public void onFailure(String errorMessage);
+        public void onError(Exception e);
+	}
 	
-	public static class ResultHandler {
-        protected void onSuccess(Object result) throws JSONException, IOException { }
-        protected void onFailure(String errorMessage) { Log.w("GrantMobile", errorMessage); }
-        protected void onError(Exception e) { e.printStackTrace(); }
+	public static class SimpleResultHandler implements ResultHandler {
+        public void onSuccess(Object result) throws JSONException, IOException { }
+        public void onFailure(String errorMessage) { Log.w("GrantMobile", errorMessage); }
+        public void onError(Exception e) { e.printStackTrace(); }
 	}
 	
 	

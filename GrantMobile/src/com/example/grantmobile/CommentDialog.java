@@ -61,8 +61,8 @@ public class CommentDialog extends DialogFragment {
 				    	  .addParam("q", "approve")
 		    			  .addParam("approval", Boolean.toString(approval))
 				    	  .addParam("comment", input.getText().toString())
-				    	  .makeRequest(new JSONParser.ResultHandler() {
-				    		  protected void onSuccess(Object result) {
+				    	  .makeRequest(new JSONParser.SimpleResultHandler() {
+				    		  public void onSuccess(Object result) {
 				    			  Toast.makeText(currentActivity, (String)result, Toast.LENGTH_LONG).show();
 				    		  }
 				    	  });

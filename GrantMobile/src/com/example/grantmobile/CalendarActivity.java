@@ -87,7 +87,7 @@ public class CalendarActivity extends FragmentActivity {
 		.makeRequest(new CalendarResultHandler());
 	}	
 	
-    class CalendarResultHandler extends JSONParser.ResultHandler
+    class CalendarResultHandler extends JSONParser.SimpleResultHandler
     {
 
 		private String getEmployeeName(JSONObject employeeObj) throws JSONException
@@ -98,7 +98,7 @@ public class CalendarActivity extends FragmentActivity {
     	}
 
 		@Override
-		protected void onSuccess(Object oResult)
+		public void onSuccess(Object oResult)
 		{
 			try
 			{
@@ -144,8 +144,7 @@ public class CalendarActivity extends FragmentActivity {
 		}
 
 		@Override
-		protected void onFailure(String errorMessage) {
-			super.onFailure(errorMessage);
+		public void onFailure(String errorMessage) {
 			Toast.makeText(CalendarActivity.this, errorMessage, Toast.LENGTH_LONG).show();
 		}
 	}
