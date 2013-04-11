@@ -165,10 +165,10 @@ public class LoginActivity extends Activity {
 			mEmailView.setError(getString(R.string.error_field_required));
 			focusView = mEmailView;
 			cancel = true;
-		} else if (!mEmail.contains("@")) {
-			mEmailView.setError(getString(R.string.error_invalid_email));
-			focusView = mEmailView;
-			cancel = true;
+//		} else if (!mEmail.contains("@")) {
+//			mEmailView.setError(getString(R.string.error_invalid_email));
+//			focusView = mEmailView;
+//			cancel = true;
 		}
 
 		if (cancel) {
@@ -180,8 +180,25 @@ public class LoginActivity extends Activity {
 			// perform the user login attempt.
 			mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
 			showProgress(true);
-			mAuthTask = new UserLoginTask();
-			mAuthTask.execute((Void) null);
+		    new JSONParser.RequestBuilder("http://mid-state.net/mobileclass2/android")
+		    .addParam("q", "login")
+		    .addParam("id", mEmail)
+		    .addParam("pass", mPassword)
+		    .makeRequest(new JSONParser.SimpleResultHandler() {
+		        public void onPostExecute() {
+        			mAuthTask = null;
+        			showProgress(false);
+		        }
+
+		        public void onSuccess(Object result) {
+		            Toast.makeText(LoginActivity.this, (String) result, Toast.LENGTH_LONG).show();
+		        }
+		        public void onFailure(String message) {
+        				mPasswordView
+    						.setError(getString(R.string.error_incorrect_password));
+        				mPasswordView.requestFocus();
+		        }
+		    });
 		}
 	}
 
@@ -257,8 +274,6 @@ public class LoginActivity extends Activity {
 		@Override
 		protected void onPostExecute(final Boolean success) 
 		{
-			mAuthTask = null;
-			showProgress(false);
 
 			if (success)
 			{
@@ -270,9 +285,6 @@ public class LoginActivity extends Activity {
 				Toast.makeText(LoginActivity.this, "Successfully logged in", Toast.LENGTH_LONG).show();
 				//finish();
 			} else {
-				mPasswordView
-						.setError(getString(R.string.error_incorrect_password));
-				mPasswordView.requestFocus();
 			}
 		}
 
