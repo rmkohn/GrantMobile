@@ -1,29 +1,9 @@
-/*****************************************************************************/
-/** This activity is to allow the user to preview the hours on the calendar **/
-/** and other incomplete details which will be determined as time passes.   **/
-/**                                                                         **/
-/** 03/16/2013 NPK Began programming with main procedures which determine   **/
-/**                calendar square data, and draw it with (currently) made  **/
-/**                up data. Formatting is not yet in place, but is          **/
-/**                somewhat customizable.                                   **/
-/** 03/20/2013 NPK Now determines first day of month correctly, and uses    **/
-/**                leave hours of calendar square class.                    **/
-/** 03/24/2013 NPK Calendar now sized dynamically based upon screen size.   **/
-/**                                                                         **/
-/**                                                                         **/
-/**                                                                         **/
-/**                                                                         **/
-/**                                                                         **/
-/*****************************************************************************/
-
-
 package com.example.grantmobile;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
-import java.util.Locale;
 
 import org.json.JSONArray;
 
@@ -51,8 +31,6 @@ public class CalendarView extends View {
 	
 	// Calendar drawing constants
 	
-	// Screen background color
-	private static final int screenBackgroundColor = Color.BLUE;
 	// Header background color
 	private static final int headerBackgroundColor = Color.BLACK;
 	// Header foreground color
@@ -67,6 +45,10 @@ public class CalendarView extends View {
 	private static final int footerBackgroundColor = Color.BLACK;
 	// Footer foreground color 
 	private static final int footerForegroundColor = Color.WHITE;
+	// Enlarged square background color
+	private static final int enlargedBackgroundColor = Color.BLUE;
+	// Enlarged square foreground color 
+	private static final int enlargedForegroundColor = Color.YELLOW;
 	// Calendar initial horizontal margin
 	private static final int calendarMarginX = 10;
 	// Calendar initial vertical margin
@@ -121,12 +103,26 @@ public class CalendarView extends View {
 	int calendarSquareSizeH;
 	// Calendar square array list
 	ArrayList<CalendarSquare> calendar = new ArrayList<CalendarSquare>();
+	// The enlarged day view
+	int enlargedDay = 0;
+	// Is the enlarged a weekly total?
+	boolean enlargedWeeklyTotal = false;
+	// The enlarged day's calendar square index
+	int enlargedDayIndex = -1;
+	// The enlarged day's starting X coordinate
+	int enlargedX = 0;
+	// The enlarged day's starting Y coordinate
+	int enlargedY = 0;
+	// The enlarged day's width
+	int enlargedW = 0;
+	// The enlarged day's height
+	int enlargedH = 0;
+	
 	
 	public static interface OnCalSquareTapListener
 	{
 		public void onTap(CalendarSquare square);
 	}
-	
 		
 	public CalendarView(Context context) {
         super(context);
@@ -292,13 +288,13 @@ public class CalendarView extends View {
 	private void initHeaderMessage()
 	{	
 		// load sample data
-		initHeaderMessage(2, 2013, "", "GRANT-101-101-101");
+		initHeaderMessage(1, 2000, "Loading", "Loading");
 	}
 	
 	/**
 	 * This procedure initializes the header message.
 	 */
-	public void initHeaderMessage(int month, int year, String grantName, String grantCatalogNum)
+	public void initHeaderMessage(int month, int headerYear, String grantName, String grantCatalogNum)
 	{
 		// Variables
 		
@@ -308,7 +304,7 @@ public class CalendarView extends View {
 		// Load month, year, and grant name
 		// (Using provided data)
 		monthNumber = month;
-		this.year = year;
+		year = headerYear;
 		grant = grantName + " " + grantCatalogNum;
 		
 		// Get the month's details
@@ -606,29 +602,81 @@ public class CalendarView extends View {
 			@Override
 	        public boolean onDown(MotionEvent event)
 	        {
+				// Flag for tapping
+				boolean tapped = false;
+				// Flag for loading details
+				boolean loadDetails = false;
+				// Index of calendar square
+				int calendarSquareIndex = 0;
 	            // The touching X coordinate
 	            int x = (int)event.getX();
 	            // The touching Y coordinate
 	            int y = (int)event.getY();
+	            
+	            // Check for tapping of arrows around enlarged box if a box is present
+	            if ((enlargedDay >= 1) && (enlargedDay <= daysInMonth)) {
+	            	
+	            }// end if
+	            
+	            // If nothing tapped
+	            if (!tapped) {
 
-	            // Check for any calendar square touches, and toast daily
-	            // number of those touched
-	            for (CalendarSquare square : calendar)
-	            {
-	                if ((x >= square.positionX) &&
-	                        (y >= square.positionY) &&
-	                        (x <= (square.positionX) + square.sizeW) &&
-	                        (y <= (square.positionY) + square.sizeH))
-	                {
-	                    Log.i("drawview", "found matching square for day " + square.dailyNumber);
-	                    if (calendarSquareListener != null)
-	                    {
-	                    	calendarSquareListener.onTap(square);
-	                    }
-	                    return true;
-	                }// end if   	
-	            }// end for
-	            return false;
+		            // Check for any calendar square touches and react to them
+		            for (CalendarSquare square : calendar)
+		            {
+		                if (((x >= square.positionX) &&
+		                        (y >= square.positionY) &&
+		                        (x <= (square.positionX + square.sizeW)) &&
+		                        (y <= (square.positionY + square.sizeH))
+		                        && (!tapped)))
+		                {
+		                	// Note tap in log
+		                    Log.i("drawview", "found matching square for day " + square.dailyNumber);
+		                    
+		                    // If second tap here, load details view
+		                    if (enlargedDayIndex == calendarSquareIndex) {
+		                    	
+		                    	// Prepare to load details view
+		                    	loadDetails = true;		                    	
+		                    	
+		                    }// end if
+		                    
+		                    // Save square details to class variables
+		                    enlargedDay = square.dailyNumber;
+		                    enlargedWeeklyTotal = square.weeklyTotal;
+		                    enlargedDayIndex = calendarSquareIndex;
+		                    
+		                    // Note tapped
+		                    if (calendarSquareListener != null)
+		                    {
+		                    	calendarSquareListener.onTap(square);
+		                    }// end if
+		                    tapped = true;
+		                   
+		                }// end if
+		                
+		                // Increase index
+		                calendarSquareIndex += 1;
+		                
+		            }// end for
+		            
+	            }// end if
+	            
+	            // If something tapped now, update class variables for enlarged box
+	            if (tapped) {
+	            	
+	            	// Update position and size
+	            	
+	            }// end if
+	            
+	            // If should load details, load now
+	            if (loadDetails) {
+	            	
+	            	// Load details here
+	            	
+	            }// end if
+	            
+	            return tapped;
 	        }
 
 	    };
