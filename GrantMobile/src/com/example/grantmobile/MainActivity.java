@@ -8,136 +8,85 @@ import android.view.Menu;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends Activity {
-
+public class MainActivity extends Activity 
+{
 	TextView tvTest; 
-	String testArray[] ; 
+	
+	
+	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) 
+	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		Uri data 				= getIntent().getData();
+		Uri data 					= getIntent().getData();
 		
-		//Shayne will take these commented sections out when he knows for sure we don't need them.
-	/*	@SuppressWarnings("unused")
-		String scheme	 		= data.getScheme(); // "grantapp"
-		String host 			= data.getHost(); // "mid-state"
-		List<String> params 	= data.getPathSegments();
-		String first 			= params.get(0); // "999"
-		//String second 			= params.get(1); // "instructor"
-		*/
-		tvTest 					= (TextView) findViewById(R.id.tvTest); 
-		tvTest.setText("Uri data: " + data);
-		//Toast.makeText(this, "Uri data: " + data, Toast.LENGTH_LONG).show();
+		tvTest 						= (TextView) findViewById(R.id.tvTest); 
 		
-		//int workMonthId 		= -1;	
-		
-		/*if (workMonthId == -1)
-		{
-			workMonthId				= getWorkMonthId(data);
-		}*/
-		
-		/*Map<String, String> paramsMap = getParameters(data); 
-		
-		String results ="";
-		
-		for(Map.Entry<String, String> entry:paramsMap.entrySet())
-		{
-			results += entry.getKey() + " is " + entry.getValue() + "\n";
-					
-		}*/
-		
+		tvTest.setText("Uri data: " + data);//FOR TESTING PURPOSES ONLY.  D E L E T E BEFORE GOING INTO PRODUCTION
+				
 		int workMonthId				= getWorkMonthId(data);
 		
-		tvTest.setText("ID = " + workMonthId);
+		tvTest.setText("ID = " 		+ workMonthId);//FOR TESTING PURPOSES ONLY.  D E L E T E BEFORE GOING INTO PRODUCTION
 		
+		/******************************************************************************************************
+		 * CHECKS TO SEE IF THE APP WAS OPENED BY CLICKING THE APP ICON OR BY THE EMAIL LINK.                 *
+		 *                                                                                                    *
+		 ******************************************************************************************************/
 		if (workMonthId == -1)
 		{
 			Toast.makeText(this, "You have to access this app through the email link", Toast.LENGTH_LONG).show();
-		}
+		}//ENDIF
+		
 		else
 		{
 			Intent intent = new Intent(this, CalendarActivity.class);
 			intent.putExtra("workMonthId", workMonthId);
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			startActivity(intent);
-		}
+		}//ENDELSE
 		
-		
-		
-		/*intent.putExtra("Message",((TextView)v).getText().toString());
-		intent.putExtra("Repeat", 10);*/
-		
-		
-
-	}
-	private int getWorkMonthId(Uri data) {
-		
-		//return IntParse(data.getQueryParameter("ID"));
-		//tvTest.setText(data.getQueryParameter("ID"));
-		
+	}//END ONCREATE
+	
+	/**********************************************************************************************************
+	 * CHECKS TO SEE IF THE APP WAS OPENED BY CLICKING THE APP ICON OR BY THE EMAIL LINK.  IF DATA IS NULL, IT*
+	 * RETURNS A -1 THAT SIGNIFIES THAT THE APP HAS BEEN OPENED BY CLICKING ON THE APP. IF DATA IS NOT NULL,  *
+	 * IT RETURNS THE WORKMONTHID NUMBER THAT WILL BE NEEDED IN CALENDAR ACTIVITY.                            *
+	 *                                                                                                        *
+	 * @param data                                                                                            *
+	 * @return                                                                                                *
+	 *                                                                                                        *
+	 **********************************************************************************************************/
+	
+	private int getWorkMonthId(Uri data) 
+	{			
 		if (data == null)
 		{
 			return -1;
-		}
+		}//ENDIF
+		
 		String id = data.getQueryParameter("ID");
 		
 		return Integer.parseInt(id);
-		
-		
-		/*if (id == null)
-		{
-			return -1;
-		}*/
-		
-		/*String [] params;
-		String afterQuery = data.getQuery();
-		params = afterQuery.split("&");
-		
-		//tvTest.setText("ID = " + params[0]);
-		tvTest.setText(Integer.parseInt(params[0].substring(params[0].indexOf('=')+1)));
-		return Integer.parseInt(params[0].substring(params[0].indexOf('=')+1));*/
-	}
-	
+	}//END GETWORKMONTHID
 
 	
-	/*private Map<String, String> getParameters(Uri data) 
+	
+	/*@SuppressWarnings("unused")
+	private int IntParse(String queryParameter) 
 	{
-		Map<String, String> paramsMap = new HashMap<String, String>();
-		
-		
-		String [] params;
-		String afterQuery = data.getQuery();
-		tvTest.setText("After the query: " + afterQuery);
-		params = afterQuery.split("&");
-		
-		paramsMap.put("supervisorId", params[1].substring(params[1].indexOf('=')+1));
-		paramsMap.put("employeeId", params[2].substring(params[2].indexOf('=')+1));
-		paramsMap.put("month", params[3].substring(params[3].indexOf('=')+1));
-		paramsMap.put("year", params[4].substring(params[4].indexOf('=')+1));
-		paramsMap.put("grantId", params[5].substring(params[5].indexOf('=')+1));
-		
-		
-		return paramsMap;
-		
-		
-		
-		
-	}*/
-	
-
-
-
-	private int IntParse(String queryParameter) {
 		// TODO Auto-generated method stub
 		return 0;
-	}
+	}//END INTPARSE
+*/	
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+	public boolean onCreateOptionsMenu(Menu menu) 
+	{
 		// Inflate the menu; this adds items to the action bar if it is present.
+		
 		getMenuInflater().inflate(R.menu.activity_main, menu);
 		return true;
-	} 
+	}//END ONCREATEOPTIONSMENU 
 
-}
+}//END MAIN ACTIVITY
