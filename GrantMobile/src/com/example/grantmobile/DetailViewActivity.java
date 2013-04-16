@@ -2,7 +2,6 @@ package com.example.grantmobile;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,7 +17,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -195,7 +193,7 @@ public class DetailViewActivity extends Activity {
 			params.add(new BasicNameValuePair("q","email"));
 			params.add(new BasicNameValuePair("id",requestId)); // this will come from intent
 			Log.d(TAG+"_GET_REQ", requestURL);
-			json = jParser.makeHttpRequest(requestURL, "GET", params);
+			json = JSONParser.makeHttpRequest(requestURL, "GET", params);
 			Log.d(TAG+"_GET_RET", json.toString());
 			return "OK";
 		}
@@ -206,8 +204,8 @@ public class DetailViewActivity extends Activity {
 				public void run() {
 					JSONArray jsa = null; // json array
 					JSONObject jso = null; // json object
-					JSONObject jsom = null; // message jsom
-					JSONObject jsoh = null; // hours jsom
+					JSONObject jsom = null; // message json
+					JSONObject jsoh = null; // hours json
 					try {
 						String s = json.getString(TAG_SUCCESS);
 						if (s.equals("true")) {
