@@ -36,7 +36,9 @@ public class MainActivity extends Activity
 		 ******************************************************************************************************/
 		if (workMonthId == -1)
 		{
-			Toast.makeText(this, "You have to access this app through the email link", Toast.LENGTH_LONG).show();
+		    Intent intent = new Intent(this, LoginActivity.class);
+		    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		    startActivity(intent);
 		}//ENDIF
 		
 		else
@@ -60,7 +62,7 @@ public class MainActivity extends Activity
 	 **********************************************************************************************************/
 	
 	private int getWorkMonthId(Uri data) 
-	{			
+	{
 		if (data == null)
 		{
 			return -1;

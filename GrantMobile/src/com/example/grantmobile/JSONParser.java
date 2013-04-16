@@ -142,12 +142,19 @@ public class JSONParser {
 			this.method = method;
 			return this;
 		}
-		public void makeRequest(final ResultHandler handler) {
-			new AsyncTask<Void, Void, JSONObject>() {
+		public AsyncTask<Void, Void, JSONObject> makeRequest(final ResultHandler handler) {
+			return new AsyncTask<Void, Void, JSONObject>() {
 				protected JSONObject doInBackground(Void... params) {
 					return makeHttpRequest(url, method, RequestBuilder.this.params);
 				}
 				protected void onPostExecute(JSONObject result) {
+				    try {
+                        Log.i("JSONParser", result.toString(2));
+                    } catch (JSONException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
+				    handler.onPostExecute();
 					try {
 				    	if (result.getBoolean("success"))
 				    		handler.onSuccess(result.get("message"));
@@ -168,12 +175,14 @@ public class JSONParser {
 		
 	}
 	public static interface ResultHandler {
+	    public void onPostExecute();
         public void onSuccess(Object result) throws JSONException, IOException;
         public void onFailure(String errorMessage);
         public void onError(Exception e);
 	}
 	
 	public static class SimpleResultHandler implements ResultHandler {
+	    public void onPostExecute() { }
         public void onSuccess(Object result) throws JSONException, IOException { }
         public void onFailure(String errorMessage) { Log.w("GrantMobile", errorMessage); }
         public void onError(Exception e) { e.printStackTrace(); }
