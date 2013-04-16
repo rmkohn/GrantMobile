@@ -28,7 +28,7 @@ public class LoginActivity extends Activity {
 	private AsyncTask mAuthTask = null;
 
 	// Values for email and password at the time of the login attempt.
-	private String mEmail;
+	private String mEmployeeId;
 	private String mPassword;
 
 	// UI references.
@@ -52,9 +52,9 @@ public class LoginActivity extends Activity {
 		setContentView(R.layout.activity_login);
 
 		// Set up the login form.
-		mEmail 					= getIntent().getStringExtra("");
-		mEmailView 				= (EditText) findViewById(R.id.email);
-		mEmailView.setText(mEmail);
+		mEmployeeId 					= getIntent().getStringExtra("");
+		mEmailView 				= (EditText) findViewById(R.id.user_id);
+		mEmailView.setText(mEmployeeId);
 		
 
 		mPasswordView = (EditText) findViewById(R.id.password);
@@ -110,7 +110,7 @@ public class LoginActivity extends Activity {
 		mPasswordView.setError(null);
 
 		// Store values at the time of the login attempt.
-		mEmail = mEmailView.getText().toString();
+		mEmployeeId = mEmailView.getText().toString();
 		mPassword = mPasswordView.getText().toString();
 
 		boolean cancel = false;
@@ -120,28 +120,28 @@ public class LoginActivity extends Activity {
 		 *                                                                                    *
 		 **************************************************************************************/
 		// Check for a valid password.
-		if (TextUtils.isEmpty(mPassword)) {
-			mPasswordView.setError(getString(R.string.error_field_required));
-			focusView = mPasswordView;
-			cancel = true;
-		} else if (mPassword.length() < 4) {
-			mPasswordView.setError(getString(R.string.error_invalid_password));
-			focusView = mPasswordView;
-			cancel = true;
-		}
+//		if (TextUtils.isEmpty(mPassword)) {
+//			mPasswordView.setError(getString(R.string.error_field_required));
+//			focusView = mPasswordView;
+//			cancel = true;
+//		} else if (mPassword.length() < 4) {
+//			mPasswordView.setError(getString(R.string.error_invalid_password));
+//			focusView = mPasswordView;
+//			cancel = true;
+//		}
 		/**************************************************************************************
 		 * This section needs to be modified according to the grant app user id.              *
 		 *                                                                                    *
 		 **************************************************************************************/
 		// Check for a valid email address.
-		if (TextUtils.isEmpty(mEmail)) {
+		if (TextUtils.isEmpty(mEmployeeId)) {
 			mEmailView.setError(getString(R.string.error_field_required));
 			focusView = mEmailView;
 			cancel = true;
-//		} else if (!mEmail.contains("@")) {
-//			mEmailView.setError(getString(R.string.error_invalid_email));
-//			focusView = mEmailView;
-//			cancel = true;
+		} else if (!mEmployeeId.matches("\\d+")) {
+			mEmailView.setError(getString(R.string.error_invalid_user_id));
+			focusView = mEmailView;
+			cancel = true;
 		}
 
 		if (cancel) {
@@ -155,7 +155,7 @@ public class LoginActivity extends Activity {
 			showProgress(true);
 		    new JSONParser.RequestBuilder("http://mid-state.net/mobileclass2/android")
 		    .addParam("q", "login")
-		    .addParam("id", mEmail)
+		    .addParam("id", mEmployeeId)
 		    .addParam("pass", mPassword)
 		    .makeRequest(new JSONParser.SimpleResultHandler() {
 		        public void onPostExecute() {
