@@ -4,8 +4,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 import org.json.JSONArray;
+
+import com.example.grantmobile.CalendarSquare.DaySquare;
+import com.example.grantmobile.CalendarSquare.ICalendarSquare;
+import com.example.grantmobile.CalendarSquare.PlaceholderSquare;
+import com.example.grantmobile.CalendarSquare.TotalSquare;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -58,6 +64,9 @@ public class CalendarView extends View {
 	public static final String[] monthNames = {
 		"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
 	};
+	private static final String[] squareTitles = {
+		"Su","Mo","Tu","We","Th","Fr","Sa","To"
+	};
 	
 	// Variables
 	
@@ -97,22 +106,23 @@ public class CalendarView extends View {
 	// Total hours for a month
 	int monthTotalHours = 0;
 	// Calendar square titles
-	ArrayList<String> squareTitles = new ArrayList<String>();
 	// Calendar square size width
 	int calendarSquareSizeW;
 	// Calendar square size height
 	int calendarSquareSizeH;
 	// Calendar square array list
-	ArrayList<CalendarSquare> calendar = new ArrayList<CalendarSquare>();
+	List<ICalendarSquare> calendar = new ArrayList<ICalendarSquare>();
+	// squares which correspond to actual days in a month
+	List<DaySquare> realDays = new ArrayList<DaySquare>();
 	// The enlarged day square
-	CalendarSquare enlargedSquare = new CalendarSquare();
-	// The enlarged day square's reference to main squares index
-	int enlargedSquareIndex;
+	ICalendarSquare enlargedSquare;
+	// how much larger the enlarged square is than a regular square
+	private static final float ENLARGED_SQUARE_MULTIPLIER = 3.0f;
 	
 	
 	public static interface OnCalSquareTapListener
 	{
-		public void onTap(CalendarSquare square);
+		public void onTap(ICalendarSquare square);
 	}
 		
 	public CalendarView(Context context) {
@@ -138,8 +148,46 @@ public class CalendarView extends View {
         // Initialize gesture listener
         tapDetector = getGestureListener();
     }
-
-
+    
+    /*
+     * conveninece methods to convert between calendar square positions
+     * and pixels
+     * These should be the only methods to know about details like the
+     * header and margins
+     */
+    // get left pixel X from calendar square X
+    private int getPixelX(int squareX) {
+    	return calendarMarginX + squareX * calendarSquareSizeW;
+    }
+    
+    // get top pixel Y from calendar square Y
+    private int getPixelY(int squareY) {
+    	return calendarMarginY + (squareY+1) * calendarSquareSizeH;
+    }
+    
+    // get calendar square X from pixel X, or -1 if there is no such square
+    private int getContainingSquareX(int x) {
+    	int squareX = (x - calendarMarginX) / calendarSquareSizeW;
+    	if (squareX < 0 || squareX >= DAYSINAWEEK + 1)
+    		return -1;
+    	return squareX;
+    }
+    
+    // get cqlendar square Y from pixel Y, or -1 if there is no such square
+    private int getContainingSquareY(int y) {
+    	int squareY = (y - calendarMarginY) / calendarSquareSizeH - 1;
+    	if (squareY < 0 || squareY >= WEEKSTODRAW)
+    		return -1;
+    	return squareY;
+    }
+    
+    // convenience method to set curRect
+    private void setRect(Rect rect, int x, int y) {
+    	int posX = getPixelX(x);
+    	int posY = getPixelY(y);
+        rect.set(posX, posY, posX + calendarSquareSizeW, posY + calendarSquareSizeH);
+    }
+    
 	/**
 	 * This procedure draws the screen with the current details.
 	 */
@@ -152,10 +200,6 @@ public class CalendarView extends View {
 	    int headerAndFooterWidth;
 	    // Footer Y position
 	    int footerY;
-	    // Current calendar square index
-	    int currentCalendarSquareIndex = 0;
-	    // The current display for the current calendar square
-	    String thisDisplay = "";
 	    // Odd or even flag
 	    Boolean oddFlag = true;
 
@@ -180,47 +224,22 @@ public class CalendarView extends View {
 	    paint.setStyle(Style.FILL_AND_STROKE);
 
 	    // Loop of using calendar square index
-	    for (
-	            currentCalendarSquareIndex = 0;
-	            currentCalendarSquareIndex < calendar.size();
-	            currentCalendarSquareIndex = currentCalendarSquareIndex + 1
-	            ) {
-
-	        // Determine rectangle to draw
-	        curRect.set(
-	                calendar.get(currentCalendarSquareIndex).positionX,
-	                calendar.get(currentCalendarSquareIndex).positionY,
-	                calendar.get(currentCalendarSquareIndex).positionX +
-	                calendar.get(currentCalendarSquareIndex).sizeW,
-	                calendar.get(currentCalendarSquareIndex).positionY +
-	                calendar.get(currentCalendarSquareIndex).sizeH
-	                );
+	    for ( ICalendarSquare curSquare: calendar) {
+	    	setRect(curRect, curSquare.getX(), curSquare.getY());
 
 	        // Determine color
-	        if (oddFlag) {
-	            paint.setColor(dailyBackgroundColorOdd);
-	        }
-	        else
-	        {
-	            paint.setColor(dailyBackgroundColorEven);
-	        }// end if
+	        paint.setColor(oddFlag ? dailyBackgroundColorOdd : dailyBackgroundColorEven);
 	        oddFlag = !oddFlag;
 
 	        // Draw rectangle determined
-	    		canvas.drawRect(curRect, paint);
+    		canvas.drawRect(curRect, paint);
 
 	        // Determine display
-	        thisDisplay =
-	                calendar.get(currentCalendarSquareIndex).displayString;
+	        String thisDisplay = curSquare.getMessage();
 
 	        // Show display
-		        paint.setColor(dailyForegroundColor);
-	        canvas.drawText(thisDisplay,
-	                calendar.get(currentCalendarSquareIndex).positionX
-	                + 10,
-	                calendar.get(currentCalendarSquareIndex).positionY
-	                + 10,
-	                paint);
+	        paint.setColor(dailyForegroundColor);
+	        canvas.drawText(thisDisplay, curRect.left + 10, curRect.top + 10, paint);
 
 	    }// end for
 
@@ -244,36 +263,36 @@ public class CalendarView extends View {
 	    canvas.drawText(footerMessage, calendarMarginX + 10,
 	            footerY + 10, paint);
 	    
-	    // Draw enlarged square and details if applicable
-	    if (enlargedSquare.positionX != 0) {
-	    	
+	    // draw enlarged square
+	    if (enlargedSquare != null) {
 	    	paint.setColor(enlargedBackgroundColor);
-	    	curRect.set(
-    			enlargedSquare.positionX,
-    			enlargedSquare.positionY,
-    			enlargedSquare.positionX + enlargedSquare.sizeW,
-    			enlargedSquare.positionY + enlargedSquare.sizeH
-    			);
+	    	setRect(curRect, enlargedSquare.getX(), enlargedSquare.getY());
+	    	// embiggen rect
+	    	float offset = (ENLARGED_SQUARE_MULTIPLIER - 1) / 2;
+	    	curRect.left   -= calendarSquareSizeW * offset;
+	    	curRect.right  += calendarSquareSizeW * offset;
+	    	curRect.top    -= calendarSquareSizeH * offset;
+	    	curRect.bottom += calendarSquareSizeH * offset;
+	    	int minX = getPixelX(0), minY = getPixelY(0);
+	    	// maxX: left side of rect when its right side is at the rightmost point
+	    	// of the rightmost square
+	    	// maxY: same, but subtract 1 for footer
+	    	int maxX = getPixelX(DAYSINAWEEK + 1) - curRect.width();
+	    	int maxY = getPixelY(WEEKSTODRAW) - curRect.height();
+	    	// check left/right bounds
+	    	if      (curRect.left < minX) curRect.offsetTo(minX, curRect.top);
+	    	else if (curRect.left > maxX) curRect.offsetTo(maxX, curRect.top);
+	    	// check top/bottom bounds
+	    	if      (curRect.top  < minY) curRect.offsetTo(curRect.left, minY);
+	    	else if (curRect.top  > maxY) curRect.offsetTo(curRect.left, maxY);
 	    	canvas.drawRect(curRect, paint);
 	    	
 	    	paint.setColor(enlargedForegroundColor);
-	    	canvas.drawText(enlargedSquare.displayString,
-	    		enlargedSquare.positionX + 10,
-	    		enlargedSquare.positionY + 10,
-	    		paint
-	    		);
+	    	canvas.drawText(enlargedSquare.getMessage(),
+	    		curRect.left + 10, curRect.top + 10, paint);
 	    	
 	    }// end if
 
-	}
-
-	@Override
-	protected void onLayout(boolean changed, int left, int top, int right,
-	        int bottom)
-	{
-	    // this is the earliest possible point at which initCalendar() can be called
-	    // any earlier, and it won't be able to autosize
-	    initCalendar();
 	}
 	
 	/**
@@ -336,23 +355,13 @@ public class CalendarView extends View {
 		int calendarWidth;
 		// Height of the calendar
 		int calendarHeight;
-		// Current X position
-		int currentX;
-		// Current Y position
-		int currentY;
 		// Daily number for days initialization
-		int thisDailyNumber = -1;
-		// Daily number for square setting
-		int setDailyNumber = -1;
-		// Initial display for a calendar square
-		String initialDisplay = "";
-		// Days started to being counted flag
-		Boolean daysStarted = false;
-		// Days done being counted flag
-		Boolean daysEnded = false;
+		int thisDailyNumber;
 		
-		// make sure calendar is empty before starting
-		calendar.clear();
+		// make arraylists to replace the originals when we're done
+		ArrayList<ICalendarSquare> tmpCalendar =
+				new ArrayList<ICalendarSquare>(WEEKSTODRAW * (DAYSINAWEEK + 1));
+		ArrayList<DaySquare> tmpRealDays = new ArrayList<DaySquare>(daysInMonth);
 		
 		// Initialize calendar square size
 		
@@ -366,111 +375,53 @@ public class CalendarView extends View {
 		calendarSquareSizeH = calendarHeight / (WEEKSTODRAW + 2);
 			// plus header and footer
 
-				
-		// Initialize calendar square titles
-		Collections.addAll(squareTitles,
-			"Su","Mo","Tu","We","Th","Fr","Sa","To");
+		for (int x = 0; x < squareTitles.length; x++) {
+			tmpCalendar.add(new PlaceholderSquare(squareTitles[x], x, 0));
+		}
 		
-		// Initialize daily number
-		thisDailyNumber = 0;
+//		PlaceholderSquare emptyDay = new PlaceholderSquare("-");
 		
-		// Loops of initializing calendar squares:
+		// effective "day" of Sunday spot on first week
+		Log.i("loadcalendar", ""+firstDay);
+		thisDailyNumber = 1 - firstDay;
 		
 		// Vertical
-		for (int yy = 0; yy < WEEKSTODRAW; yy++)
+		for (int yy = 1; yy < WEEKSTODRAW; yy++)
 		{
-			// Calculate current Y coordinate
-			currentY = calendarMarginY + (calendarSquareSizeH * (yy + 1)); 
-			
+			// used for weekly totals
+			ArrayList<DaySquare> realDaysInWeek = new ArrayList<DaySquare>();
 			// Horizontal
-			for (int xx = 0; xx <= 7; xx++)
+			for (int xx = 0; xx <= 6; xx++)
 			{
-				// Calculate current X coordinate
-				currentX = calendarMarginX + (calendarSquareSizeW * xx);
-
-				// For first row, set display to title
-				if (yy == 0)
-				{
-					
-					initialDisplay = squareTitles.get(xx);
-					
+				ICalendarSquare curSquare;
+				
+				if (thisDailyNumber > 0 && thisDailyNumber <= daysInMonth) {
+					// create real day and add to weekSquares and realDays
+					DaySquare daySquare = new DaySquare(thisDailyNumber, 0, 0, 0, xx, yy);
+					curSquare = daySquare;
+					realDaysInWeek.add(daySquare);
+					tmpRealDays.add(daySquare);
+				} else {
+					// create placeholder day
+					curSquare = new PlaceholderSquare("-", xx, yy);
 				}
-				else
-				{
-				// For additional rows, determine daily number
-					
-					// Initialize display to set to dash
-					initialDisplay = "-";
-					
-					// If day counting hasn't started, check if first day
-					if (!daysStarted)
-					{
-						if (xx == firstDay)
-						{
-							daysStarted = true;
-							thisDailyNumber = 0;
-							setDailyNumber = thisDailyNumber;
-						}
-						
-					}// end if
-					
-					// After days have started, but not yet ended
-					if ((daysStarted) && (!daysEnded))
-					{
-						
-						// If not the location for the weekly totals
-						if ((xx != DAYSINAWEEK) && (!daysEnded))
-						{							
-							
-							// Increase daily number							
-							thisDailyNumber = thisDailyNumber + 1;
-							setDailyNumber = thisDailyNumber;
-							
-							// Set initial display to daily number
-							initialDisplay = String.valueOf(thisDailyNumber);
-							
-						} else
-						{
-							// If location for daily totals, start with N/A
-							initialDisplay = "N/A";
-							setDailyNumber = 0;
-							
-						}// end if
-						
-						// If past the end of the month, use zero as daily
-						// number, and set display to dash
-						if ((thisDailyNumber > daysInMonth) && (!daysEnded)) {
-							daysEnded = true;
-							thisDailyNumber = 0;
-							setDailyNumber = thisDailyNumber;
-							initialDisplay = "-";
-						}// end if
-
-					}// end if
-					
-				}// end if
 				
-				// If days have ended, check for daily total square
-				if ((daysEnded) && (xx == DAYSINAWEEK))
-				{
-					initialDisplay = "N/A";
-					setDailyNumber = 0;
-				
-				}// end if
-				
-				// Initialize this calendar square
-				calendar.add(
-					new CalendarSquare(
-						currentX, currentY,
-						calendarSquareSizeW, calendarSquareSizeH,
-						setDailyNumber, initialDisplay)
-				);
-				
-			}// end for
-			
-		}// end for
-		
+				// add whatever square we made to calendar and advance a day
+				tmpCalendar.add(curSquare);
+				thisDailyNumber++;
+			} // end for xx
+			// add total square for week
+			if (realDaysInWeek.size() > 0) {
+				tmpCalendar.add(new TotalSquare(realDaysInWeek, 7, yy));
+			} else {
+				tmpCalendar.add(new PlaceholderSquare("-", 7, yy));
+			}
+		} // end for yy
+		// we are gonna be in a bad way if these get out of sync, so make it tougher for that to happen
+		this.calendar = Collections.unmodifiableList(tmpCalendar);
+		this.realDays = Collections.unmodifiableList(tmpRealDays);
 	}
+
 	
 	/**
 	 * This procedure returns the month name of the current month number.
@@ -498,115 +449,17 @@ public class CalendarView extends View {
 		
 	}
 	
-	
-		
-	
 	/**
 	 * This procedure loads the calendar with the data for hours, and totals.
 	 */
 	public void loadCalendarData() {
-	
-		// Variables
-		
-		// Total grant hours for a day
-		int dayTotalGrantHours = 0;
-		// Total non-grant hours for a day
-		int dayTotalNonGrantHours = 0;
-		// Total leave hours for a day or week
-		int dayTotalLeaveHours = 0;
-		// Total hours for a day or week
-		int dayTotalHours = 0;
-		// Total grant hours for a week
-		int weekTotalGrantHours = 0;
-		// Total non-grant hours for a week
-		int weekTotalNonGrantHours = 0;
-		// Total leave hours for a week
-		int weekTotalLeaveHours = 0;
-		// Total hours for a day or week
-		int weekTotalHours = 0;
-		// Is the next square a first day of week?
-		boolean nextDayFirstDay = true;
-		
-		// Determine weekly and monthly totals and note information
-		for (int i = 0; i < calendar.size(); i++)
+		for (DaySquare square: realDays)
 		{
-			
-			// If not the first week test
-			if (i >= (DAYSINAWEEK + 1)) {
-			
-				// End of week test
-				// If end of week, determine weekly totals, and set it
-				if ((i % (DAYSINAWEEK + 1)) == DAYSINAWEEK) {
-				
-					// Set weekly totals for this square
-					calendar.get(i).grantHours = weekTotalGrantHours;
-					calendar.get(i).nonGrantHours = weekTotalNonGrantHours;
-					calendar.get(i).leave = weekTotalLeaveHours;
-					
-					// Set display information as total hours 
-					calendar.get(i).displayString = "T: " +
-						String.valueOf(weekTotalHours);
-
-					// Set weekly totals property on
-					calendar.get(i).weeklyTotal = true;
-					
-					// Note next day as first day
-					nextDayFirstDay = true;
-					
-					// Reset weekly totals
-					weekTotalGrantHours = 0;
-					weekTotalNonGrantHours = 0;
-					weekTotalLeaveHours = 0;
-					weekTotalHours = 0;					
-					
-				}
-				else if ((calendar.get(i).dailyNumber > daysInMonth)
-						|| (calendar.get(i).dailyNumber < 1))
-				{
-					// Daily number out of range test. If so, set display string to dash
-					calendar.get(i).displayString = "-";
-					
-					// Set weekly totals off
-					calendar.get(i).weeklyTotal = false;
-					
-				}
-				else
-				{
-					// If not end of week and within range, determine daily information
-					dayTotalGrantHours = calendar.get(i).grantHours;
-					dayTotalNonGrantHours = calendar.get(i).nonGrantHours;
-					dayTotalLeaveHours = calendar.get(i).leave;
-					dayTotalHours = calendar.get(i).totalHours();
-					
-					// Update weekly hours
-					weekTotalGrantHours += dayTotalGrantHours;
-					weekTotalNonGrantHours += dayTotalNonGrantHours;
-					weekTotalLeaveHours += dayTotalLeaveHours;
-					weekTotalHours += dayTotalHours; 
-					
-					// Increase totals for monthly total
-					monthTotalGrantHours += dayTotalGrantHours;
-					monthTotalNonGrantHours += dayTotalNonGrantHours;
-					monthTotalLeaveHours += dayTotalLeaveHours;
-					monthTotalHours += dayTotalHours;
-					
-					// Set display information as daily number only
-					calendar.get(i).displayString = String.valueOf(calendar.get(i).dailyNumber);
-					
-					// Set weekly totals off
-					calendar.get(i).weeklyTotal = false;
-					
-					// If first day, note it, and toggle flag
-					if (nextDayFirstDay) {
-						calendar.get(i).firstDayOfWeek = true;
-						nextDayFirstDay = false;						
-					}// end if
-									
-				}// end if
-				
-			}// end if
-			
-		}// end for
+			monthTotalGrantHours += square.grantHours;
+			monthTotalNonGrantHours += square.nonGrantHours;
+			monthTotalLeaveHours += square.leave;
+			monthTotalHours += square.totalHours();
+		}
 		
 		// Determine footer message from monthly totals
 		footerMessage = "Total Hours This Month: " +
@@ -625,105 +478,46 @@ public class CalendarView extends View {
 	        {
 				// Flag for tapping
 				boolean tapped = false;
-				// Flag for loading details
-				boolean loadDetails = false;
-				// Index of calendar square
-				int calendarSquareIndex = 0;
 	            // The touching X coordinate
 	            int x = (int)event.getX();
 	            // The touching Y coordinate
 	            int y = (int)event.getY();
 	            
 	            // Check for tapping of arrows around enlarged box if a box is present
-	            if (enlargedSquare.dailyNumber >= 1) {
+	            if (enlargedSquare != null && enlargedSquare instanceof DaySquare) {
 	            	
 	            	//tapped = true;
 	            	
-	            }// end if
-	            
+	            }
 	            // If nothing tapped
 	            if (!tapped) {
-
-		            // Check for any calendar square touches and react to them
-		            for (CalendarSquare square : calendar)
-		            {
-		                if (((x >= square.positionX) &&
-		                        (y >= square.positionY) &&
-		                        (x <= (square.positionX + square.sizeW)) &&
-		                        (y <= (square.positionY + square.sizeH))
-		                        && (!tapped)))
-		                {
-		                	// Note tap in log
-		                    Log.i("drawview", "found matching square for day " + square.dailyNumber);
-		                    
-		                    // If second tap here, load details view
-		                    if (enlargedSquareIndex == calendarSquareIndex) {
-		                    	
-		                    	// Prepare to load details view
-		                    	loadDetails = true;		                    	
-		                    	
-		                    }// end if
-		                    
-		                    // Save square if daily number appropriate
-		                    enlargedSquareIndex = calendarSquareIndex;
-		                    enlargedSquare = new CalendarSquare(square);
-		                    
-		                    // Note tapped
-		                    tapped = true;
-		                   
-		                }// end if
-		                
-		                // Increase index
-		                calendarSquareIndex += 1;
-		                
-		            }// end for
-		            
-	            }// end if
-	            
-	            // If something tapped now, update class variables for enlarged box
-	            if (tapped) {
+	            	// the square that was tapped before
+	            	ICalendarSquare oldEnlargedSquare = enlargedSquare;
 	            	
-	            	// Update enlarged information
-	            	enlargedSquare.sizeW = calendarSquareSizeW * 3;
-	            	enlargedSquare.sizeH = calendarSquareSizeH * 3;
+	            	enlargedSquare = null;
 	            	
-            		enlargedSquare.positionX -= calendarSquareSizeW;
-            		enlargedSquare.positionY -= calendarSquareSizeH;
+	            	// get touch position in terms of calendar squares
+	            	int calX = getContainingSquareX(x);
+	            	int calY = getContainingSquareY(y);
 	            	
-	            	if (enlargedSquare.firstDayOfWeek) {
-	            		enlargedSquare.positionX += calendarSquareSizeW;
-	            		enlargedSquare.positionY += calendarSquareSizeH;
-	            		enlargedSquare.displayString += "D";
-	            	}// end if
-	            	
-	            	if (enlargedSquare.weeklyTotal) {
-	            		enlargedSquare.positionX -= calendarSquareSizeW;
-	            		enlargedSquare.positionY -= calendarSquareSizeH;
-	            		enlargedSquare.displayString += "W";
-	            	}// end if
-	            	
-	            }// end if
-	            
-	            // If should load details, load now
-	            if (loadDetails) {
-	            	
-                    if (calendarSquareListener != null)
-                    {
-                    	calendarSquareListener.onTap(enlargedSquare);
-                    }// end if
-	            	
-	            }// end if
-	            
-	            // If a tap happened, update screen
-	            if (tapped) {
-	            	
-	            	invalidate();
-	            	
-	            }// end if
-	            
+	            	// is tap pos in bounds? should prolly check margins vs getHeight()/Width() instead
+	            	if (calX != -1 && calY != -1) {
+	            		enlargedSquare = calendar.get(calY * 8 + calX);
+	            		tapped = true;
+	            		
+	            		// repeated tap?
+		            	if (oldEnlargedSquare == enlargedSquare
+		            		&& calendarSquareListener != null)
+		            	{
+	            			calendarSquareListener.onTap(enlargedSquare);
+		            	}
+	            	} // end if in bounds
+	            	if (oldEnlargedSquare != enlargedSquare) {
+	            		invalidate();
+	            	}
+	            } // end if !tapped
 	            return tapped;
 	        }
-
 	    };
 	    return new GestureDetector(this.getContext(), gl);
 	}
@@ -731,15 +525,11 @@ public class CalendarView extends View {
 	public void loadTimes(JSONArray granthours, JSONArray nongranthours, JSONArray leavehours)
 	{
 		// load hours into calendar squares
-		for (CalendarSquare cal : calendar)
+		for (DaySquare cal : realDays)
 		{
-			// don't mess with squares that don't contain actual days
-			if (cal.dailyNumber != 0)
-			{
-				cal.leave         = (int)leavehours   .optDouble(cal.dailyNumber-1, 0);
-				cal.nonGrantHours = (int)nongranthours.optDouble(cal.dailyNumber-1, 0);
-				cal.grantHours    = (int)granthours   .optDouble(cal.dailyNumber-1, 0);
-			}
+			cal.leave         = (int)leavehours   .optDouble(cal.dailyNumber-1, 0);
+			cal.nonGrantHours = (int)nongranthours.optDouble(cal.dailyNumber-1, 0);
+			cal.grantHours    = (int)granthours   .optDouble(cal.dailyNumber-1, 0);
 		}
 	}
 	

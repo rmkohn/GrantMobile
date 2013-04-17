@@ -4,6 +4,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.example.grantmobile.CalendarSquare.DaySquare;
+import com.example.grantmobile.CalendarSquare.ICalendarSquare;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -57,7 +60,7 @@ public class CalendarActivity extends FragmentActivity {
 		
 		calendarView.setOnCalSquareTapListener(new CalendarView.OnCalSquareTapListener()
 		{
-			public void onTap(CalendarSquare square)
+			public void onTap(ICalendarSquare square)
 			{
 				openDetailView(square);
 			}
@@ -194,15 +197,16 @@ public class CalendarActivity extends FragmentActivity {
 	}
 	
 	
-	private void openDetailView(CalendarSquare detailSquare)
+	private void openDetailView(ICalendarSquare detailSquare)
 	{
-		if (detailSquare.dailyNumber < 1)
+		if (!(detailSquare instanceof DaySquare))
 			return;
+		DaySquare square = (DaySquare) detailSquare;
 		
 		Intent i = new Intent(this, DetailViewActivity.class);
 		
 		i.putExtra(TAG_REQUEST_ID, String.valueOf(workMonthId));
-		i.putExtra(TAG_DAY_OF_MONTH, String.valueOf(detailSquare.dailyNumber));
+		i.putExtra(TAG_DAY_OF_MONTH, String.valueOf(square.dailyNumber));
 		
 		startActivity(i);
 	}
