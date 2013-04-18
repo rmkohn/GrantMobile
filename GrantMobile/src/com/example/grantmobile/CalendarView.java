@@ -243,7 +243,7 @@ public class CalendarView extends View {
 	    paint.setColor(footerForegroundColor);
 	    canvas.drawText(footerMessage, calendarMarginX + 10,
 	            footerY + 10, paint);
-	    
+
 	    // Draw enlarged square and details if applicable
 	    if (enlargedSquare.positionX != 0) {
 	    	
@@ -275,7 +275,7 @@ public class CalendarView extends View {
 	    // any earlier, and it won't be able to autosize
 	    initCalendar();
 	}
-	
+		
 	/**
 	 * This procedure handles touch events. Currently, in the event of a
 	 * square's touching, it displays the daily number of that square.
@@ -557,7 +557,7 @@ public class CalendarView extends View {
 					weekTotalGrantHours = 0;
 					weekTotalNonGrantHours = 0;
 					weekTotalLeaveHours = 0;
-					weekTotalHours = 0;					
+					weekTotalHours = 0;
 					
 				}
 				else if ((calendar.get(i).dailyNumber > daysInMonth)
@@ -595,7 +595,7 @@ public class CalendarView extends View {
 					
 					// Set weekly totals off
 					calendar.get(i).weeklyTotal = false;
-					
+				
 					// If first day, note it, and toggle flag
 					if (nextDayFirstDay) {
 						calendar.get(i).firstDayOfWeek = true;
@@ -604,6 +604,11 @@ public class CalendarView extends View {
 									
 				}// end if
 				
+			}// end if
+			
+			// First day of week test
+			if (i % (DAYSINAWEEK + 1) == 0) {
+				calendar.get(i).firstDayOfWeek = true;
 			}// end if
 			
 		}// end for
@@ -654,7 +659,13 @@ public class CalendarView extends View {
 		                        && (!tapped)))
 		                {
 		                	// Note tap in log
-		                    Log.i("drawview", "found matching square for day " + square.dailyNumber);
+		                    Log.i("drawview", "found matching square for day " + square.dailyNumber + ".");
+		                    if (square.firstDayOfWeek) {
+		                    	Log.i("drawview","it is a first day");
+		                    }// end if
+		                    if (square.weeklyTotal) {
+		                    	Log.i("drawview","it is a weekly total");
+		                    }// end if
 		                    
 		                    // If second tap here, load details view
 		                    if (enlargedSquareIndex == calendarSquareIndex) {
@@ -693,14 +704,18 @@ public class CalendarView extends View {
 	            	if (enlargedSquare.firstDayOfWeek) {
 	            		enlargedSquare.positionX += calendarSquareSizeW;
 	            		enlargedSquare.positionY += calendarSquareSizeH;
-	            		enlargedSquare.displayString += "D";
 	            	}// end if
 	            	
 	            	if (enlargedSquare.weeklyTotal) {
 	            		enlargedSquare.positionX -= calendarSquareSizeW;
 	            		enlargedSquare.positionY -= calendarSquareSizeH;
-	            		enlargedSquare.displayString += "W";
 	            	}// end if
+	            	
+	            	enlargedSquare.displayString =
+            			enlargedSquare.grantHours + "|" +
+            			enlargedSquare.nonGrantHours + "|" +
+            			enlargedSquare.leave + "|" +
+            			enlargedSquare.totalHours();
 	            	
 	            }// end if
 	            
@@ -746,7 +761,8 @@ public class CalendarView extends View {
 	public void setOnCalSquareTapListener(OnCalSquareTapListener listener)
 	{
 		this.calendarSquareListener = listener;
-	}
+	}
+
 	
 }
 

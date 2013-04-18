@@ -98,7 +98,7 @@ public class CalendarSquare {
 		leave = square.leave;
 		displayString = square.displayString;
 		weeklyTotal = square.weeklyTotal;
-		firstDayOfWeek = square.weeklyTotal;
+		firstDayOfWeek = square.firstDayOfWeek;
 		
 	}
 	
