@@ -15,7 +15,12 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
+import android.widget.GridView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class CalendarActivity extends FragmentActivity {
@@ -41,7 +46,11 @@ public class CalendarActivity extends FragmentActivity {
 	String supervisorName = "";
 
     
-    CalendarView calendarView;
+	TextView headerView;
+	TextView footerView;
+	GridView calendarGrid;
+	
+	CalendarArray calendar;
     
 	/**
 	 * This procedure initializes the layout.
@@ -56,13 +65,15 @@ public class CalendarActivity extends FragmentActivity {
 		fillCalendarData(id);
 		
 		setContentView(R.layout.activity_calendar_view);
-		calendarView = (CalendarView) findViewById(R.id.calendarView1);
 		
-		calendarView.setOnCalSquareTapListener(new CalendarView.OnCalSquareTapListener()
-		{
-			public void onTap(ICalendarSquare square)
-			{
-				openDetailView(square);
+		calendarGrid = (GridView) findViewById(R.id.calendarGrid);
+		headerView   = (TextView) findViewById(R.id.calendarHeader);
+		footerView   = (TextView) findViewById(R.id.calendarFooter);
+		calendarGrid.setOnItemClickListener(new OnItemClickListener() {
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				openDetailView(calendar.getSquare(position));
+				
 			}
 		});
 	}
@@ -122,10 +133,10 @@ public class CalendarActivity extends FragmentActivity {
 				workMonthId = result.getInt("id");
 				
 				// get that info ready to display, also set year and monthNumber class-level variables
-				calendarView.initHeaderMessage(month, year, grantName, grantNumber);
+				initHeaderMessage(month, year, grantName, grantNumber);
 				
 				// set up calendar, now that we know what month it is
-				calendarView.initCalendar();
+				calendar = new CalendarArray(year, month);
 				
 				// get time arrays
 				JSONObject hours = result.getJSONObject("hours");
@@ -133,10 +144,11 @@ public class CalendarActivity extends FragmentActivity {
 				JSONArray nongranthours = hours.getJSONArray("non-grant");
 				JSONArray granthours    = hours.getJSONArray("grant");
 				
-				calendarView.loadTimes(granthours, nongranthours, leavehours);
+				calendar.loadTimes(granthours, nongranthours, leavehours);
+				initFooterMessage();
 				
 				// finally, display calendar
-				calendarView.loadCalendarData();
+				calendarGrid.setAdapter(new CalendarSquareAdapter(CalendarActivity.this, calendar));
 			}
 			catch (JSONException e)
 			{
@@ -210,6 +222,63 @@ public class CalendarActivity extends FragmentActivity {
 		
 		startActivity(i);
 	}
+		/**
+	 * This procedure initializes the header message with sample data
+	 */
+	private void initHeaderMessage()
+	{	
+		// load sample data
+		initHeaderMessage(1, 2000, "Loading", "Loading");
+	}
+	
+	/**
+	 * This procedure initializes the header message.
+	 */
+	public void initHeaderMessage(int month, int headerYear, String grantName, String grantCatalogNum)
+	{
+		// Variables
+		
+		// Long date message
+		String longDate = "";
+		
+		// Load month, year, and grant name
+		// (Using provided data)
+		String grant = grantName + " " + grantCatalogNum;
+		
+		String monthName = CalendarArray.monthNames[month];
+	
+		// Determine long date
+		longDate = monthName + ", " + String.valueOf(headerYear);
+				
+		// Determine header message
+		headerView.setText(grant.trim() + " : " + longDate);
+	}
+	
+	
+	
+	/**
+	 * This procedure loads the calendar with the data for hours, and totals.
+	 */
+	public void initFooterMessage() {
+		int monthTotalGrantHours = 0;
+		int monthTotalNonGrantHours = 0;
+		int monthTotalLeaveHours = 0;
+		int monthTotalHours = 0;
+		
+		for (int day = 1; day <= calendar.getNumberOfDays(); day++) {
+			DaySquare square = calendar.getDay(day);
+			monthTotalGrantHours += square.grantHours;
+			monthTotalNonGrantHours += square.nonGrantHours;
+			monthTotalLeaveHours += square.leave;
+			monthTotalHours += square.totalHours();
+		}
+		
+		// Determine footer message from monthly totals
+		footerView.setText("Total Hours This Month: " +
+			String.valueOf(monthTotalHours));
+		
+	}
+	
 	
 
 }
