@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
+import java.util.ResourceBundle.Control;
 
 import org.json.JSONArray;
 
@@ -156,6 +157,8 @@ public class CalendarView extends View {
 	    int currentCalendarSquareIndex = 0;
 	    // The current display for the current calendar square
 	    String thisDisplay = "";
+	    // The optimal font size for the current text planned to be displayed
+	    int optimalFontSize;
 	    // Odd or even flag
 	    Boolean oddFlag = true;
 
@@ -173,6 +176,10 @@ public class CalendarView extends View {
 	            );
 	    canvas.drawRect(curRect, paint);
 	    paint.setColor(headerForegroundColor);
+	    
+	    // Draw header texts with optimal font sizes
+	    optimalFontSize = 14;
+	    paint.setTextSize(optimalFontSize);
 	    canvas.drawText(headerMessage, calendarMarginX + 10,
 	            calendarMarginY + 10, paint);
 
@@ -212,6 +219,10 @@ public class CalendarView extends View {
 	        // Determine display
 	        thisDisplay =
 	                calendar.get(currentCalendarSquareIndex).displayString;
+	        
+	        // Determine optimal font size
+	        optimalFontSize = 14;
+		    paint.setTextSize(optimalFontSize);
 
 	        // Show display
 		        paint.setColor(dailyForegroundColor);
@@ -219,7 +230,7 @@ public class CalendarView extends View {
 	                calendar.get(currentCalendarSquareIndex).positionX
 	                + 10,
 	                calendar.get(currentCalendarSquareIndex).positionY
-	                + 10,
+	                + 15,
 	                paint);
 
 	    }// end for
@@ -241,6 +252,10 @@ public class CalendarView extends View {
 
 	    // Draw footer text
 	    paint.setColor(footerForegroundColor);
+
+	    optimalFontSize = 14;
+	    paint.setTextSize(optimalFontSize);
+	    
 	    canvas.drawText(footerMessage, calendarMarginX + 10,
 	            footerY + 10, paint);
 
@@ -303,11 +318,11 @@ public class CalendarView extends View {
 	 * This procedure initializes the header message.
 	 */
 	public void initHeaderMessage(int month, int headerYear, String grantName, String grantCatalogNum)
-	{
+	{	
 		// Variables
 		
-		// Long date message
-		String longDate = "";
+		// Long date message on the top of the calendar
+		String headerLongDate = "";
 		
 		// Load month, year, and grant name
 		// (Using provided data)
@@ -319,10 +334,10 @@ public class CalendarView extends View {
 		getMonthDetails();
 	
 		// Determine long date
-		longDate = monthName + ", " + year;
+		headerLongDate = monthName + ", " + year;
 				
 		// Determine header message
-		headerMessage = grant.trim() + " : " + longDate;
+		headerMessage = grant.trim() + " |:| " + headerLongDate;
 	}
 	
 	/**
@@ -365,7 +380,6 @@ public class CalendarView extends View {
 			// plus one from weekly totals 
 		calendarSquareSizeH = calendarHeight / (WEEKSTODRAW + 2);
 			// plus header and footer
-
 				
 		// Initialize calendar square titles
 		Collections.addAll(squareTitles,
@@ -385,6 +399,7 @@ public class CalendarView extends View {
 			// Horizontal
 			for (int xx = 0; xx <= 7; xx++)
 			{
+				
 				// Calculate current X coordinate
 				currentX = calendarMarginX + (calendarSquareSizeW * xx);
 
@@ -397,7 +412,7 @@ public class CalendarView extends View {
 				}
 				else
 				{
-				// For additional rows, determine daily number
+					// For additional rows, determine daily number
 					
 					// Initialize display to set to dash
 					initialDisplay = "-";
@@ -441,7 +456,7 @@ public class CalendarView extends View {
 						// number, and set display to dash
 						if ((thisDailyNumber > daysInMonth) && (!daysEnded)) {
 							daysEnded = true;
-							thisDailyNumber = 0;
+							thisDailyNumber = -1;
 							setDailyNumber = thisDailyNumber;
 							initialDisplay = "-";
 						}// end if
@@ -450,11 +465,24 @@ public class CalendarView extends View {
 					
 				}// end if
 				
-				// If days have ended, check for daily total square
-				if ((daysEnded) && (xx == DAYSINAWEEK))
-				{
-					initialDisplay = "N/A";
-					setDailyNumber = 0;
+				// If days have ended, check for daily total square to determine enlargement ability
+				if (daysEnded) {
+					
+					// Initialize display to dash 
+					initialDisplay = "-";
+					
+					// If weekly total, allow enlarging
+					if (xx == DAYSINAWEEK)
+					{
+						
+						setDailyNumber = 0;
+					
+					} else {
+					// If not weekly total, don't allow enlarging
+						
+						setDailyNumber = -1;
+						
+					}// end if
 				
 				}// end if
 				
@@ -524,8 +552,6 @@ public class CalendarView extends View {
 		int weekTotalLeaveHours = 0;
 		// Total hours for a day or week
 		int weekTotalHours = 0;
-		// Is the next square a first day of week?
-		boolean nextDayFirstDay = true;
 		
 		// Determine weekly and monthly totals and note information
 		for (int i = 0; i < calendar.size(); i++)
@@ -549,9 +575,6 @@ public class CalendarView extends View {
 
 					// Set weekly totals property on
 					calendar.get(i).weeklyTotal = true;
-					
-					// Note next day as first day
-					nextDayFirstDay = true;
 					
 					// Reset weekly totals
 					weekTotalGrantHours = 0;
@@ -595,12 +618,6 @@ public class CalendarView extends View {
 					
 					// Set weekly totals off
 					calendar.get(i).weeklyTotal = false;
-				
-					// If first day, note it, and toggle flag
-					if (nextDayFirstDay) {
-						calendar.get(i).firstDayOfWeek = true;
-						nextDayFirstDay = false;						
-					}// end if
 									
 				}// end if
 				
@@ -638,13 +655,6 @@ public class CalendarView extends View {
 	            int x = (int)event.getX();
 	            // The touching Y coordinate
 	            int y = (int)event.getY();
-	            
-	            // Check for tapping of arrows around enlarged box if a box is present
-	            if (enlargedSquare.dailyNumber >= 1) {
-	            	
-	            	//tapped = true;
-	            	
-	            }// end if
 	            
 	            // If nothing tapped
 	            if (!tapped) {
@@ -694,28 +704,41 @@ public class CalendarView extends View {
 	            // If something tapped now, update class variables for enlarged box
 	            if (tapped) {
 	            	
-	            	// Update enlarged information
-	            	enlargedSquare.sizeW = calendarSquareSizeW * 3;
-	            	enlargedSquare.sizeH = calendarSquareSizeH * 3;
+	            	// Test daily number. If in range, make enlarged square
+	            	if ((enlargedSquare.dailyNumber != -1)) {
 	            	
-            		enlargedSquare.positionX -= calendarSquareSizeW;
-            		enlargedSquare.positionY -= calendarSquareSizeH;
-	            	
-	            	if (enlargedSquare.firstDayOfWeek) {
-	            		enlargedSquare.positionX += calendarSquareSizeW;
-	            		enlargedSquare.positionY += calendarSquareSizeH;
-	            	}// end if
-	            	
-	            	if (enlargedSquare.weeklyTotal) {
+		            	// Update enlarged information
+		            	enlargedSquare.sizeW = calendarSquareSizeW * 3;
+		            	enlargedSquare.sizeH = calendarSquareSizeH * 3;
+		            	
 	            		enlargedSquare.positionX -= calendarSquareSizeW;
 	            		enlargedSquare.positionY -= calendarSquareSizeH;
+		            	
+		            	if (enlargedSquare.firstDayOfWeek) {
+		            		enlargedSquare.positionX += calendarSquareSizeW;
+		            	}// end if
+		            	
+		            	if (enlargedSquare.weeklyTotal) {
+		            		enlargedSquare.positionX -= calendarSquareSizeW;
+		            	}// end if
+		            	
+		            	enlargedSquare.displayString =
+	            			enlargedSquare.grantHours + "|" +
+	            			enlargedSquare.nonGrantHours + "|" +
+	            			enlargedSquare.leave + "|" +
+	            			enlargedSquare.totalHours();
+		            	
+	            	} else {
+	            		// If out of range, hide square
+		            	enlargedSquare.sizeW = 0;
+		            	enlargedSquare.sizeH = 0;
+		            	
+	            		enlargedSquare.positionX = 0;
+	            		enlargedSquare.positionY = 0;
+	            		
+	            		enlargedSquare.displayString = "";
+		            	
 	            	}// end if
-	            	
-	            	enlargedSquare.displayString =
-            			enlargedSquare.grantHours + "|" +
-            			enlargedSquare.nonGrantHours + "|" +
-            			enlargedSquare.leave + "|" +
-            			enlargedSquare.totalHours();
 	            	
 	            }// end if
 	            
