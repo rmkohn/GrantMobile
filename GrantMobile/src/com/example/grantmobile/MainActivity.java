@@ -11,12 +11,12 @@ import android.widget.Toast;
 public class MainActivity extends Activity 
 {
 	TextView tvTest; 
-	
-	
-	
+		
+		
+		
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
-	{
+		{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
@@ -25,7 +25,7 @@ public class MainActivity extends Activity
 		tvTest 						= (TextView) findViewById(R.id.tvTest); 
 		
 		tvTest.setText("Uri data: " + data);//FOR TESTING PURPOSES ONLY.  D E L E T E BEFORE GOING INTO PRODUCTION
-				
+		
 		int workMonthId				= getWorkMonthId(data);
 		
 		tvTest.setText("ID = " 		+ workMonthId);//FOR TESTING PURPOSES ONLY.  D E L E T E BEFORE GOING INTO PRODUCTION
@@ -50,7 +50,7 @@ public class MainActivity extends Activity
 		}//ENDELSE
 		
 	}//END ONCREATE
-	
+		
 	/**********************************************************************************************************
 	 * CHECKS TO SEE IF THE APP WAS OPENED BY CLICKING THE APP ICON OR BY THE EMAIL LINK.  IF DATA IS NULL, IT*
 	 * RETURNS A -1 THAT SIGNIFIES THAT THE APP HAS BEEN OPENED BY CLICKING ON THE APP. IF DATA IS NOT NULL,  *
@@ -60,7 +60,7 @@ public class MainActivity extends Activity
 	 * @return                                                                                                *
 	 *                                                                                                        *
 	 **********************************************************************************************************/
-	
+		
 	private int getWorkMonthId(Uri data) 
 	{
 		if (data == null)
@@ -72,9 +72,9 @@ public class MainActivity extends Activity
 		
 		return Integer.parseInt(id);
 	}//END GETWORKMONTHID
-
-	
-	
+		
+		
+		
 	/*@SuppressWarnings("unused")
 	private int IntParse(String queryParameter) 
 	{

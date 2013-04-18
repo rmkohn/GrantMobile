@@ -11,9 +11,9 @@
     <string name="grantHoursLabel">Grant Hours</string>
     <string name="nonGrantHoursLabel">Non-grant Hours</string>
     <string name="leaveHoursLabel">Leave Hours</string>
-    <string name="monthTotalLabel">Month Grant Hours</string>
+    <string name="monthTotalLabel">Monthly Hours</string>
     <string name="dateLabel">Date</string>
-    <string name="dayTotalLabel">Day Total Hours</string>
+    <string name="dayTotalLabel">Daily Hours</string>
     <string name="dayOfWeekLabel">Day</string>
     <string name="menu_settings">Settings</string>
 
