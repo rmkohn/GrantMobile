@@ -1,16 +1,29 @@
 package com.example.grantmobile;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.TableLayout;
 import android.support.v4.app.NavUtils;
 import android.annotation.TargetApi;
 import android.os.Build;
 
 public class GrantSelectActivity extends Activity {
 	AutoCompleteTextView[] grantViews;
+	
+	// TEMPORARY until we decide which values to display and which to discard
+	JSONObject[] grants;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +39,40 @@ public class GrantSelectActivity extends Activity {
 		grantViews[3] = (AutoCompleteTextView)findViewById(R.id.grant4Autocomplete);
 		
 		loadGrants();
+	}
+
+	private void loadGrants() {
+		new JSONParser.RequestBuilder("http://mid-state.net/mobileclass2/android")
+		.addParam("q", "listallgrants")
+		.makeRequest(new JSONParser.SimpleResultHandler() {
+			@Override
+			public void onSuccess(Object result) throws JSONException, IOException {
+				JSONArray jsonGrants = (JSONArray) result;
+				grants = new JSONObject[jsonGrants.length()];
+				for (int i = 0; i < jsonGrants.length(); i++) {
+					grants[i] = jsonGrants.getJSONObject(i);
+				}
+				loadAutocompleteViews();
+			}
+		});
+	}
+
+	protected void loadAutocompleteViews() {
+		String[] grantNames = new String[grants.length];
+		try {
+			for (int i = 0; i < grantNames.length; i++) {
+				grantNames[i] = grants[i].getString("grantTitle");
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+			return;
+		}
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+			this, android.R.layout.simple_dropdown_item_1line, grantNames
+		);
+		for (AutoCompleteTextView view: grantViews) {
+			view.setAdapter(adapter);
+		}
 	}
 
 	/**
