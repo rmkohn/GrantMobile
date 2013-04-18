@@ -33,10 +33,14 @@ public class GrantSelectActivity extends Activity {
 		setupActionBar();
 		
 		grantViews = new AutoCompleteTextView[4];
-		grantViews[0] = (AutoCompleteTextView)findViewById(R.id.grant1Autocomplete);
-		grantViews[1] = (AutoCompleteTextView)findViewById(R.id.grant2Autocomplete);
-		grantViews[2] = (AutoCompleteTextView)findViewById(R.id.grant3Autocomplete);
-		grantViews[3] = (AutoCompleteTextView)findViewById(R.id.grant4Autocomplete);
+		TableLayout grantTable = (TableLayout)findViewById(R.id.grantTable);
+		for (int i = 0; i < grantViews.length; i++) {
+			View grantRow = getLayoutInflater().inflate(R.layout.tablerow_grantselect, grantTable, false);
+			grantViews[i] = (AutoCompleteTextView) grantRow.findViewById(R.id.grantrow_autocomplete);
+			grantViews[i].setThreshold(0);
+			grantTable.addView(grantRow);
+		}
+		grantViews[0].requestFocus();
 		
 		loadGrants();
 	}
