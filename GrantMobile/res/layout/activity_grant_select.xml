@@ -1,0 +1,99 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="10dp" >
+
+    <Button
+        android:id="@+id/grant_select_continue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:text="Continue" />
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/grant_select_continue"
+        android:stretchColumns="*"
+        tools:context=".GrantSelectActivity" >
+
+        <TableRow android:gravity="center_vertical|right" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Grant 1"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <AutoCompleteTextView
+                android:id="@+id/grant1Autocomplete"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:text="" >
+
+                <requestFocus />
+            </AutoCompleteTextView>
+        </TableRow>
+
+        <TableRow android:gravity="center_vertical|right" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Grant 2"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <AutoCompleteTextView
+                android:id="@+id/grant2Autocomplete"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:text="" >
+
+                <requestFocus />
+            </AutoCompleteTextView>
+        </TableRow>
+
+        <TableRow android:gravity="center_vertical|right" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Grant 3"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <AutoCompleteTextView
+                android:id="@+id/grant3Autocomplete"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:text="" >
+
+                <requestFocus />
+            </AutoCompleteTextView>
+        </TableRow>
+
+        <TableRow android:gravity="center_vertical|right" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Grant 4"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <AutoCompleteTextView
+                android:id="@+id/grant4Autocomplete"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:text="" >
+
+                <requestFocus />
+            </AutoCompleteTextView>
+        </TableRow>
+    </TableLayout>
+
+</RelativeLayout>

@@ -43,6 +43,18 @@
             android:name="com.example.grantmobile.LoginActivity"
             android:label="@string/app_name" >
         </activity>
+        <activity
+            android:name="com.example.grantmobile.MonthSelectActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="com.example.grantmobile.GrantSelectActivity"
+            android:label="@string/title_activity_grant_select"
+            android:parentActivityName="com.example.grantmobile.MonthSelectActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.grantmobile.MonthSelectActivity" />
+        </activity>
     </application>
 
 </manifest>

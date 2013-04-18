@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -94,7 +95,7 @@ public class LoginActivity extends Activity {
 		getMenuInflater().inflate(R.menu.activity_login, menu);
 		return true;
 	}
-
+	
 	/**
 	 * Attempts to sign in or register the account specified by the login form.
 	 * If there are form errors (invalid email, missing fields, etc.), the
@@ -165,6 +166,8 @@ public class LoginActivity extends Activity {
 
 		        public void onSuccess(Object result) {
 		            Toast.makeText(LoginActivity.this, (String) result, Toast.LENGTH_LONG).show();
+		            // FIXME get the actual user ID, if we even need it?
+		            continueAsUser(-1);
 		        }
 		        public void onFailure(String message) {
     				mPasswordView
@@ -177,6 +180,12 @@ public class LoginActivity extends Activity {
 		        }
 		    });
 		}
+	}
+	
+	public void continueAsUser(int user) {
+		Intent i = new Intent(this, MonthSelectActivity.class);
+		i.putExtra("userid", user);
+		startActivity(i);
 	}
 
 	/**
