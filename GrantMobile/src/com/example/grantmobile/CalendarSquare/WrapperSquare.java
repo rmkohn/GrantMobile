@@ -11,15 +11,4 @@ public class WrapperSquare implements ICalendarSquare {
 	public String getMessage() {
 		return wrapped.getMessage();
 	}
-
-	@Override
-	public int getX() {
-		return wrapped.getX();
-	}
-
-	@Override
-	public int getY() {
-		return wrapped.getY();
-	}
-
 }

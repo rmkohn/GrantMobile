@@ -4,12 +4,9 @@ import java.util.List;
 
 public class TotalSquare implements ICalendarSquare {
 	public List<DaySquare> squares;
-	int x, y;
 
-	public TotalSquare(List<DaySquare> squares, int x, int y) {
+	public TotalSquare(List<DaySquare> squares) {
 		this.squares = squares;
-		this.x = x;
-		this.y = y;
 	}
 	
 	
@@ -25,14 +22,4 @@ public class TotalSquare implements ICalendarSquare {
 		return "T: " + grant;
 //		return String.format("%d - %d - %d", grant, nongrant, leave);
 	}
-	@Override
-	public int getX() {
-		return x;
-	}
-
-	@Override
-	public int getY() {
-		return y;
-	}
-
 }

@@ -96,7 +96,7 @@ public class CalendarArray {
 		
 
 		for (int x = 0; x < squareTitles.length; x++) {
-			tmpCalendar.add(new PlaceholderSquare(squareTitles[x], x, 0));
+			tmpCalendar.add(new PlaceholderSquare(squareTitles[x]));
 		}
 		
 //		PlaceholderSquare emptyDay = new PlaceholderSquare("-");
@@ -117,13 +117,13 @@ public class CalendarArray {
 				
 				if (thisDailyNumber > 0 && thisDailyNumber <= daysInMonth) {
 					// create real day and add to weekSquares and realDays
-					DaySquare daySquare = new DaySquare(thisDailyNumber, 0, 0, 0, xx, yy);
+					DaySquare daySquare = new DaySquare(thisDailyNumber, 0, 0, 0);
 					curSquare = daySquare;
 					realDaysInWeek.add(daySquare);
 					tmpRealDays.add(daySquare);
 				} else {
 					// create placeholder day
-					curSquare = new PlaceholderSquare("-", xx, yy);
+					curSquare = new PlaceholderSquare("-");
 				}
 				
 				// add whatever square we made to calendar and advance a day
@@ -132,9 +132,9 @@ public class CalendarArray {
 			} // end for xx
 			// add total square for week
 			if (realDaysInWeek.size() > 0) {
-				tmpCalendar.add(new TotalSquare(realDaysInWeek, 7, yy));
+				tmpCalendar.add(new TotalSquare(realDaysInWeek));
 			} else {
-				tmpCalendar.add(new PlaceholderSquare("-", 7, yy));
+				tmpCalendar.add(new PlaceholderSquare("-"));
 			}
 		} // end for yy
 		// we are gonna be in a bad way if these get out of sync, so make it tougher for that to happen

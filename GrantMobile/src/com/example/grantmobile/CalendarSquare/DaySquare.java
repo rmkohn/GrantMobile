@@ -23,7 +23,6 @@ public class DaySquare implements ICalendarSquare {
 	public int grantHours = 0;
 	public int nonGrantHours = 0;
 	public int leave = 0;
-	public int x, y;
 	
 	/**
 	 * This constructor is for calendar squares using all parameters.
@@ -39,14 +38,12 @@ public class DaySquare implements ICalendarSquare {
 	 * @param fd First day of the week
 	 * @param ds Display string for messages, titles, or totals
 	 */
-	public DaySquare(int d, int g, int n, int l, int x, int y)
+	public DaySquare(int d, int g, int n, int l)
 	{
 		dailyNumber = d;
 		grantHours = g;
 		nonGrantHours = n;
 		leave = l;
-		this.x = x;
-		this.y = y;
 	}
 	
 	/**
@@ -66,15 +63,4 @@ public class DaySquare implements ICalendarSquare {
 //		return String.format("%d - %d - %d", grantHours, nonGrantHours, leave);
 		return String.valueOf(dailyNumber);
 	}
-
-	@Override
-	public int getX() {
-		return x;
-	}
-
-	@Override
-	public int getY() {
-		return y;
-	}
-	
 }
