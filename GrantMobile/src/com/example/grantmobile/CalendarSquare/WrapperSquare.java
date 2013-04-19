@@ -11,4 +11,9 @@ public class WrapperSquare implements ICalendarSquare {
 	public String getMessage() {
 		return wrapped.getMessage();
 	}
+
+	@Override
+	public int getHighlightColor() {
+		return wrapped.getHighlightColor();
+	}
 }

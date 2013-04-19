@@ -16,9 +16,10 @@
 
 package com.example.grantmobile.CalendarSquare;
 
+import android.graphics.Color;
+
 
 public class DaySquare implements ICalendarSquare {
-
 	public int dailyNumber = 0;
 	public int grantHours = 0;
 	public int nonGrantHours = 0;
@@ -26,17 +27,10 @@ public class DaySquare implements ICalendarSquare {
 	
 	/**
 	 * This constructor is for calendar squares using all parameters.
-	 * @param x X coordinate of calendar square
-	 * @param y Y coordinate of calendar square
-	 * @param w Width of square
-	 * @param h Height of square
 	 * @param d Daily number, as in 5 for the 5th of the month
 	 * @param g Grant hours
 	 * @param n Non-grant hours
 	 * @param l Leave hours
-	 * @param wt Weekly totals
-	 * @param fd First day of the week
-	 * @param ds Display string for messages, titles, or totals
 	 */
 	public DaySquare(int d, int g, int n, int l)
 	{
@@ -63,4 +57,10 @@ public class DaySquare implements ICalendarSquare {
 //		return String.format("%d - %d - %d", grantHours, nonGrantHours, leave);
 		return String.valueOf(dailyNumber);
 	}
+
+	@Override
+	public int getHighlightColor() {
+		return SquareColors.getHighlightColor(grantHours, nonGrantHours, leave);
+	}
+
 }

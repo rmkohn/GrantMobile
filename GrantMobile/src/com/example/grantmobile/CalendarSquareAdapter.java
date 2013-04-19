@@ -1,5 +1,7 @@
 package com.example.grantmobile;
 
+import com.example.grantmobile.CalendarSquare.ICalendarSquare;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,7 +42,9 @@ public class CalendarSquareAdapter extends BaseAdapter {
 			view = (TextView) convertView;
 		}
 		
-		view.setText(calendar.getSquare(position).getMessage());
+		ICalendarSquare square = calendar.getSquare(position);
+		view.setBackgroundColor(square.getHighlightColor());
+		view.setText(square.getMessage());
 
 		return view;
 	}

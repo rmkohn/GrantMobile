@@ -1,5 +1,7 @@
 package com.example.grantmobile.CalendarSquare;
 
+import android.graphics.Color;
+
 public class PlaceholderSquare implements ICalendarSquare {
 	String message;
 
@@ -10,5 +12,10 @@ public class PlaceholderSquare implements ICalendarSquare {
 	@Override
 	public String getMessage() {
 		return message;
+	}
+
+	@Override
+	public int getHighlightColor() {
+		return SquareColors.DEFAULT_COLOR;
 	}
 }
