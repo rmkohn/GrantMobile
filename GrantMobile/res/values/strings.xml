@@ -17,5 +17,6 @@
     <string name="dayOfWeekLabel">Day</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_grant_select">GrantSelectActivity</string>
+    <string name="title_activity_calendar_edit">Edit Grant Hours</string>
 
 </resources>

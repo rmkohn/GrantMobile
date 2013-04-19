@@ -23,12 +23,7 @@ import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class CalendarActivity extends FragmentActivity {
-	
-	private static final String TAG_REQUEST_ID = "RequestId"; // required, no default!!!!
-	private static final String TAG_DAY_OF_MONTH = "DayOfMonth"; // optional, default = first day of month	
-	
-	public static final String requestURL = "http://mid-state.net/mobileclass2/android";
+public class CalendarActivity extends BaseCalendarActivity {
 	
 	// Name of grant
 	String grantName;
@@ -44,14 +39,9 @@ public class CalendarActivity extends FragmentActivity {
 	String employeeName = "";
 	// Name of grant supervisor
 	String supervisorName = "";
-
-    
-	TextView headerView;
-	TextView footerView;
-	GridView calendarGrid;
 	
-	CalendarArray calendar;
-    
+	TextView headerView;
+
 	/**
 	 * This procedure initializes the layout.
 	 */
@@ -59,23 +49,12 @@ public class CalendarActivity extends FragmentActivity {
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		headerView = (TextView) findViewById(R.id.calendarHeader);
+		headerFlipper.setDisplayedChild(headerFlipper.indexOfChild(headerView));
 		
 		int id = getIntent().getIntExtra("workMonthId", -1);
 		
 		fillCalendarData(id);
-		
-		setContentView(R.layout.activity_calendar_view);
-		
-		calendarGrid = (GridView) findViewById(R.id.calendarGrid);
-		headerView   = (TextView) findViewById(R.id.calendarHeader);
-		footerView   = (TextView) findViewById(R.id.calendarFooter);
-		calendarGrid.setOnItemClickListener(new OnItemClickListener() {
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				openDetailView(calendar.getSquare(position));
-				
-			}
-		});
 	}
 
 	/**
@@ -136,7 +115,7 @@ public class CalendarActivity extends FragmentActivity {
 				initHeaderMessage(month, year, grantName, grantNumber);
 				
 				// set up calendar, now that we know what month it is
-				calendar = new CalendarArray(year, month);
+				createCalendarArray(year, month);
 				
 				// get time arrays
 				JSONObject hours = result.getJSONObject("hours");
@@ -144,11 +123,7 @@ public class CalendarActivity extends FragmentActivity {
 				JSONArray nongranthours = hours.getJSONArray("non-grant");
 				JSONArray granthours    = hours.getJSONArray("grant");
 				
-				calendar.loadTimes(granthours, nongranthours, leavehours);
-				initFooterMessage();
-				
-				// finally, display calendar
-				calendarGrid.setAdapter(new CalendarSquareAdapter(CalendarActivity.this, calendar));
+				loadCalendar(granthours, nongranthours, leavehours);
 			}
 			catch (JSONException e)
 			{
@@ -207,9 +182,9 @@ public class CalendarActivity extends FragmentActivity {
 		return true;
 		
 	}
-	
-	
-	private void openDetailView(ICalendarSquare detailSquare)
+
+	@Override
+	protected void openDetailView(ICalendarSquare detailSquare)
 	{
 		if (!(detailSquare instanceof DaySquare))
 			return;
@@ -253,32 +228,5 @@ public class CalendarActivity extends FragmentActivity {
 		// Determine header message
 		headerView.setText(grant.trim() + " : " + longDate);
 	}
-	
-	
-	
-	/**
-	 * This procedure loads the calendar with the data for hours, and totals.
-	 */
-	public void initFooterMessage() {
-		int monthTotalGrantHours = 0;
-		int monthTotalNonGrantHours = 0;
-		int monthTotalLeaveHours = 0;
-		int monthTotalHours = 0;
-		
-		for (int day = 1; day <= calendar.getNumberOfDays(); day++) {
-			DaySquare square = calendar.getDay(day);
-			monthTotalGrantHours += square.grantHours;
-			monthTotalNonGrantHours += square.nonGrantHours;
-			monthTotalLeaveHours += square.leave;
-			monthTotalHours += square.totalHours();
-		}
-		
-		// Determine footer message from monthly totals
-		footerView.setText("Total Hours This Month: " +
-			String.valueOf(monthTotalHours));
-		
-	}
-	
-	
 
 }

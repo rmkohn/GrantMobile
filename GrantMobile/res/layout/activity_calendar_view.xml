@@ -3,13 +3,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <TextView
-        android:id="@+id/calendarHeader"
+    <ViewFlipper
+        android:id="@+id/calendarHeaderFlipper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:text="Header"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:layout_alignParentTop="true" >
+
+        <TextView
+            android:id="@+id/calendarHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Header"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+        <Spinner
+            android:id="@+id/calendarGrantSwitcher"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </ViewFlipper>
 
     <TextView
         android:id="@+id/calendarFooter"
@@ -24,7 +35,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/calendarFooter"
-        android:layout_below="@id/calendarHeader"
+        android:layout_below="@id/calendarHeaderFlipper"
         android:gravity="center"
         android:numColumns="8" >
     </GridView>
