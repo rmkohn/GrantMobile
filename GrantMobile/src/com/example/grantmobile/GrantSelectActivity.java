@@ -2,6 +2,8 @@ package com.example.grantmobile;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -12,11 +14,13 @@ import android.app.Activity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.TableLayout;
 import android.support.v4.app.NavUtils;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.os.Build;
 
 public class GrantSelectActivity extends Activity {
@@ -43,6 +47,17 @@ public class GrantSelectActivity extends Activity {
 		grantViews[0].requestFocus();
 		
 		loadGrants();
+		
+		findViewById(R.id.grant_select_continue).setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                Intent i = new Intent(GrantSelectActivity.this, CalendarActivity.class);
+                i.putExtras(getIntent());
+                ArrayList<Integer> grantids = new ArrayList<Integer>();
+                for (int i = 0; i < 4; i++) {
+                    int pos = Arrays.
+                    if(grantViews[i].
+            }
+        });
 	}
 
 	private void loadGrants() {
@@ -56,6 +71,15 @@ public class GrantSelectActivity extends Activity {
 				for (int i = 0; i < jsonGrants.length(); i++) {
 					grants[i] = jsonGrants.getJSONObject(i);
 				}
+				Arrays.sort(grants, new Comparator<JSONObject>() {
+                    public int compare(JSONObject lhs, JSONObject rhs) {
+                        try {
+                            return lhs.getString("grantTitle").compareTo(rhs.getString("grantTitle"));
+                        } catch (JSONException e) {
+                            return 0;
+                        }
+                    }
+				});
 				loadAutocompleteViews();
 			}
 		});

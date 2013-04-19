@@ -15,7 +15,7 @@ public class MainActivity extends Activity
 		
 		
 	@Override
-	protected void onCreate(Bundle savedInstanceState) 
+	protected void onCreate(Bundle savedInstanceState)
 		{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
@@ -61,7 +61,7 @@ public class MainActivity extends Activity
 	 *                                                                                                        *
 	 **********************************************************************************************************/
 		
-	private int getWorkMonthId(Uri data) 
+	private int getWorkMonthId(Uri data)
 	{
 		if (data == null)
 		{
