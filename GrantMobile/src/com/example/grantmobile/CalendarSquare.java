@@ -27,6 +27,7 @@ public class CalendarSquare {
 	public int nonGrantHours = 0;
 	public int leave = 0;
 	public boolean weeklyTotal = false;
+	public boolean firstDayOfWeek = false;
 	public String displayString = "";
 	
 	/**
@@ -40,9 +41,10 @@ public class CalendarSquare {
 	 * @param n Non-grant hours
 	 * @param l Leave hours
 	 * @param wt Weekly totals
+	 * @param fd First day of the week
 	 * @param ds Display string for messages, titles, or totals
 	 */
-	public CalendarSquare(int x, int y, int w, int h, int d, int g, int n, int l, boolean wt, String ds)
+	public CalendarSquare(int x, int y, int w, int h, int d, int g, int n, int l, boolean wt, boolean fd, String ds)
 	{
 		positionX = x;
 		positionY = y;
@@ -53,6 +55,7 @@ public class CalendarSquare {
 		nonGrantHours = n;
 		leave = l;
 		weeklyTotal = wt;
+		firstDayOfWeek = fd;
 		displayString = ds;
 	}
 	
@@ -77,6 +80,34 @@ public class CalendarSquare {
 		nonGrantHours = 0;
 		leave = 0;
 		displayString = ds;
+	}
+	
+	/**
+	 * This constructor is for calendar square cloning.
+	 */
+	public CalendarSquare(CalendarSquare square)
+	{
+
+		positionX = square.positionX;
+		positionY = square.positionY;
+		sizeW = square.sizeW;
+		sizeH = square.sizeH;
+		dailyNumber = square.dailyNumber;
+		grantHours = square.grantHours;
+		nonGrantHours = square.nonGrantHours;
+		leave = square.leave;
+		displayString = square.displayString;
+		weeklyTotal = square.weeklyTotal;
+		firstDayOfWeek = square.weeklyTotal;
+		
+	}
+	
+	/**
+	 * This constructor is for calendar squares using the defaults for basic initialization.
+	 */
+	public CalendarSquare()
+	{
+		// No code
 	}
 	
 	/**

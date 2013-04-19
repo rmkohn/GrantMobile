@@ -2,7 +2,6 @@ package com.example.grantmobile;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,7 +17,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -26,8 +24,8 @@ import android.widget.Toast;
 
 public class DetailViewActivity extends Activity {
 	// these two named parameter are for the Intent interface to this activity (both reference Strings)
-	private static final String TAG_REQUEST_ID = "RequestId"; // required, no default!!!!
-	private static final String TAG_DAY_OF_MONTH = "DayOfMonth"; // optional, default is first day of month
+	public static final String TAG_REQUEST_ID = "RequestId"; // required, no default!!!!
+	public static final String TAG_DAY_OF_MONTH = "DayOfMonth"; // optional, default is first day of month
 
 	private static final String TAG = "detailview";
 	private static String requestURL = "http://mid-state.net/mobileclass2/android";
@@ -64,6 +62,8 @@ public class DetailViewActivity extends Activity {
 	// day of week string array
 	static final String[] DOW = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
 							"Friday", "Saturday" };
+	static final String[] MOY = { "January", "February", "March", "April", "May", "June",
+									"July", "August", "September", "October", "November", "December" };
 		
 	Integer dowStart; // month starts on Wednesday for test, use WED - 1 
 	Integer domCurrent; // current day of month
@@ -163,7 +163,7 @@ public class DetailViewActivity extends Activity {
 		// figure out what first day-of-week is for this month (dowStart)
     	Calendar cal = Calendar.getInstance();
     	cal.set(Calendar.DATE,1);
-    	cal.set(Calendar.MONTH, Integer.valueOf(map.get(TAG_MONTH))-1);
+    	cal.set(Calendar.MONTH, Integer.valueOf(map.get(TAG_MONTH)));
     	cal.set(Calendar.YEAR, Integer.valueOf(map.get(TAG_YEAR)));
     	cal.set(Calendar.DAY_OF_MONTH, 1); 	
         dowStart = (cal.get(Calendar.DAY_OF_WEEK)-Calendar.SUNDAY)%7;
@@ -173,7 +173,8 @@ public class DetailViewActivity extends Activity {
 		employeeNameView.setText(map.get(TAG_FIRST_NAME)+ " " + map.get(TAG_LAST_NAME));
 		catalogView.setText(map.get(TAG_STATE_CATALOG_NUM));
     	
-    	dateView.setText(map.get(TAG_MONTH)+"/"+domString+"/"+map.get(TAG_YEAR));
+		Integer moy = Integer.parseInt(map.get(TAG_MONTH));
+    	dateView.setText(MOY[moy]+" "+domString+", "+map.get(TAG_YEAR));
     	dayView.setText(DOW[(domCurrent+dowStart-1)%7]);
     	grantHoursView.setText(grantHours.get(domCurrent-1));
     	nonGrantHoursView.setText(nonGrantHours.get(domCurrent-1));
@@ -195,7 +196,7 @@ public class DetailViewActivity extends Activity {
 			params.add(new BasicNameValuePair("q","email"));
 			params.add(new BasicNameValuePair("id",requestId)); // this will come from intent
 			Log.d(TAG+"_GET_REQ", requestURL);
-			json = jParser.makeHttpRequest(requestURL, "GET", params);
+			json = JSONParser.makeHttpRequest(requestURL, "GET", params);
 			Log.d(TAG+"_GET_RET", json.toString());
 			return "OK";
 		}
@@ -206,8 +207,8 @@ public class DetailViewActivity extends Activity {
 				public void run() {
 					JSONArray jsa = null; // json array
 					JSONObject jso = null; // json object
-					JSONObject jsom = null; // message jsom
-					JSONObject jsoh = null; // hours jsom
+					JSONObject jsom = null; // message json
+					JSONObject jsoh = null; // hours json
 					try {
 						String s = json.getString(TAG_SUCCESS);
 						if (s.equals("true")) {
