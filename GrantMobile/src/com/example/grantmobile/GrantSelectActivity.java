@@ -28,6 +28,7 @@ public class GrantSelectActivity extends Activity {
 	
 	// TEMPORARY until we decide which values to display and which to discard
 	JSONObject[] grants;
+	String[] grantNames;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +57,7 @@ public class GrantSelectActivity extends Activity {
                 ArrayList<Integer> grantidlist = new ArrayList<Integer>();
                 try {
                 	for (int i = 0; i < 4; i++) {
-                		int pos = Arrays.binarySearch(grants, grantComparator);
+                		int pos = Arrays.binarySearch(grantNames, grantViews[i].getText().toString());
                 		if (pos >= 0)
                 			grantidlist.add(grants[pos].getInt("ID"));
                 	}
@@ -92,7 +93,7 @@ public class GrantSelectActivity extends Activity {
 	}
 
 	protected void loadAutocompleteViews() {
-		String[] grantNames = new String[grants.length];
+		grantNames = new String[grants.length];
 		try {
 			for (int i = 0; i < grantNames.length; i++) {
 				grantNames[i] = grants[i].getString("grantTitle");

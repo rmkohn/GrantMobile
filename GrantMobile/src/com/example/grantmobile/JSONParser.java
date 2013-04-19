@@ -149,7 +149,7 @@ public class JSONParser {
 				}
 				protected void onPostExecute(JSONObject result) {
 				    try {
-                        Log.i("JSONParser", result.toString(2));
+                        Log.i("JSONParser", result == null ? "null" : result.toString(2));
                     } catch (JSONException e1) {
                         // TODO Auto-generated catch block
                         e1.printStackTrace();
