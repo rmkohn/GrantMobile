@@ -50,12 +50,26 @@ public class GrantSelectActivity extends Activity {
 		
 		findViewById(R.id.grant_select_continue).setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                Intent i = new Intent(GrantSelectActivity.this, CalendarActivity.class);
-                i.putExtras(getIntent());
-                ArrayList<Integer> grantids = new ArrayList<Integer>();
-                for (int i = 0; i < 4; i++) {
-                    int pos = Arrays.
-                    if(grantViews[i].
+                Intent intent = new Intent(GrantSelectActivity.this, CalendarActivity.class);
+                intent.putExtras(getIntent());
+                
+                ArrayList<Integer> grantidlist = new ArrayList<Integer>();
+                try {
+                	for (int i = 0; i < 4; i++) {
+                		int pos = Arrays.binarySearch(grants, grantComparator);
+                		if (pos >= 0)
+                			grantidlist.add(grants[pos].getInt("ID"));
+                	}
+                } catch (JSONException e) {
+                	e.printStackTrace();
+                }
+                
+                int[] grants = new int[grantidlist.size()];
+                for (int i = 0; i < grantidlist.size(); i++)
+                	grants[i] = grantidlist.get(i);
+                
+                intent.putExtra("grantids", grants);
+                startActivity(intent);
             }
         });
 	}
@@ -71,15 +85,7 @@ public class GrantSelectActivity extends Activity {
 				for (int i = 0; i < jsonGrants.length(); i++) {
 					grants[i] = jsonGrants.getJSONObject(i);
 				}
-				Arrays.sort(grants, new Comparator<JSONObject>() {
-                    public int compare(JSONObject lhs, JSONObject rhs) {
-                        try {
-                            return lhs.getString("grantTitle").compareTo(rhs.getString("grantTitle"));
-                        } catch (JSONException e) {
-                            return 0;
-                        }
-                    }
-				});
+				Arrays.sort(grants, grantComparator);
 				loadAutocompleteViews();
 			}
 		});
@@ -138,5 +144,15 @@ public class GrantSelectActivity extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
+	
+	Comparator<JSONObject> grantComparator = new Comparator<JSONObject>() {
+		public int compare(JSONObject lhs, JSONObject rhs) {
+			try {
+				return lhs.getString("grantTitle").compareTo(rhs.getString("grantTitle"));
+			} catch (JSONException e) {
+				return 0;
+			}
+		}
+	};
 
 }
