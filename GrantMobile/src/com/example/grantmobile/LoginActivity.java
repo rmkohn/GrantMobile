@@ -23,6 +23,8 @@ import android.widget.Toast;
  */
 public class LoginActivity extends Activity {
     
+	public static final String TAG_INTENT_USERID = "userid";
+
 	/**
 	 * Keep track of the login task to ensure we can cancel it if requested.
 	 */
@@ -184,7 +186,7 @@ public class LoginActivity extends Activity {
 	
 	public void continueAsUser(int user) {
 		Intent i = new Intent(this, MonthSelectActivity.class);
-		i.putExtra("userid", user);
+		i.putExtra(TAG_INTENT_USERID, user);
 		startActivity(i);
 	}
 

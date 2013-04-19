@@ -22,6 +22,9 @@ public class MonthSelectActivity extends Activity {
 	private ListView mMonthView;
 	private TextView mSelectedDateView;
 	
+	public static final String TAG_INTENT_MONTH = "month";
+	public static final String TAG_INTENT_YEAR = "year";
+	
 	private int selectedYear = 2099;
 	private int selectedMonth = 0;
 
@@ -35,6 +38,7 @@ public class MonthSelectActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_month_select);
 
+		Log.i("monthselect", getIntent().getExtras().toString());
 
 		mYearView               = (ListView)findViewById(R.id.listYear);
 		mMonthView              = (ListView)findViewById(R.id.listMonth);
@@ -75,8 +79,8 @@ public class MonthSelectActivity extends Activity {
 			public void onClick(View v) {
 				Intent i = new Intent(MonthSelectActivity.this, GrantSelectActivity.class);
 				i.putExtras(getIntent());
-				i.putExtra("year", selectedYear);
-				i.putExtra("month", selectedMonth);
+				i.putExtra(TAG_INTENT_YEAR, selectedYear);
+				i.putExtra(TAG_INTENT_MONTH, selectedMonth);
 				startActivity(i);
 			}
 		});

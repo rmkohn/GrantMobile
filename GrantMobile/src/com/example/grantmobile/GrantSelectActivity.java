@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -11,6 +12,7 @@ import org.json.JSONObject;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,6 +26,10 @@ import android.content.Intent;
 import android.os.Build;
 
 public class GrantSelectActivity extends Activity {
+	public static final String TAG_INTENT_GRANT_NAMES = "grantnames";
+
+	public static final String TAG_INTENT_GRANT_IDS = "grantids";
+
 	AutoCompleteTextView[] grantViews;
 	
 	// TEMPORARY until we decide which values to display and which to discard
@@ -36,6 +42,9 @@ public class GrantSelectActivity extends Activity {
 		setContentView(R.layout.activity_grant_select);
 		// Show the Up button in the action bar.
 		setupActionBar();
+		
+		dumpBundle(getIntent().getExtras());
+		
 		
 		grantViews = new AutoCompleteTextView[4];
 		TableLayout grantTable = (TableLayout)findViewById(R.id.grantTable);
@@ -51,28 +60,64 @@ public class GrantSelectActivity extends Activity {
 		
 		findViewById(R.id.grant_select_continue).setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                Intent intent = new Intent(GrantSelectActivity.this, CalendarActivity.class);
-                intent.putExtras(getIntent());
-                
-                ArrayList<Integer> grantidlist = new ArrayList<Integer>();
-                try {
-                	for (int i = 0; i < 4; i++) {
-                		int pos = Arrays.binarySearch(grantNames, grantViews[i].getText().toString());
-                		if (pos >= 0)
-                			grantidlist.add(grants[pos].getInt("ID"));
-                	}
-                } catch (JSONException e) {
-                	e.printStackTrace();
-                }
-                
-                int[] grants = new int[grantidlist.size()];
-                for (int i = 0; i < grantidlist.size(); i++)
-                	grants[i] = grantidlist.get(i);
-                
-                intent.putExtra("grantids", grants);
-                startActivity(intent);
+            	loadCalendarEditActivity();
             }
         });
+	}
+
+	public static void dumpBundle(Bundle extras) {
+		Set<String> keys = extras.keySet();
+		JSONObject bundle = new JSONObject();
+		try {
+			for (String key: keys) {
+				bundle.put(key, extras.get(key));
+			}
+			Log.i("grantselect", bundle.toString(2));
+		} catch (JSONException e) { e.printStackTrace(); }
+	}
+
+	protected void loadCalendarEditActivity() {
+		boolean grantFail = false;
+		
+		ArrayList<JSONObject> grantidlist = new ArrayList<JSONObject>();
+		for (int i = 0; i < 4; i++) {
+			String text = grantViews[i].getText().toString();
+			int pos = Arrays.binarySearch(grantNames, text);
+			if (pos >= 0) {
+				grantidlist.add(grants[pos]);
+			} else if (text != null && !text.equals("")) {
+				grantViews[i].setError("Choose a grant from the dropdown, or leave empty");
+				grantFail = true;
+			}
+		}
+		
+		if (grantFail) {
+			return;
+		} else if (grantidlist.size() == 0) {
+			grantViews[0].setError("Select one or more grants");
+			return;
+		}
+		
+		Intent intent = new Intent(GrantSelectActivity.this, CalendarEditActivity.class);
+		intent.putExtras(getIntent());
+
+		int[] grants = new int[grantidlist.size()];
+		String[] grantnames = new String[grantidlist.size()];
+		try {
+			for (int i = 0; i < grantidlist.size(); i++) {
+				grants[i] = grantidlist.get(i).getInt("ID");
+				grantnames[i] = grantidlist.get(i).getString("grantTitle");
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+		intent.putExtra(TAG_INTENT_GRANT_IDS, grants);
+		intent.putExtra(TAG_INTENT_GRANT_NAMES, grantnames);
+		intent.putExtra("editing", true);
+		startActivity(intent);
+		// TODO Auto-generated method stub
+
 	}
 
 	private void loadGrants() {
