@@ -98,7 +98,8 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	}
 	
 	protected void updateCalendar() {
-		loadCalendar(getSelectedGrantHours(), time.get(KEY_NONGRANTHOURS), time.get(KEY_LEAVEHOURS));
+		if (time != null && grantSpinner != null)
+			loadCalendar(getSelectedGrantHours(), time.get(KEY_NONGRANTHOURS), time.get(KEY_LEAVEHOURS));
 	}
 	
 	protected JSONArray getSelectedGrantHours() {

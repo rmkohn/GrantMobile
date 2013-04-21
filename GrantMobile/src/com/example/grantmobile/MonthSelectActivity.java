@@ -80,7 +80,7 @@ public class MonthSelectActivity extends Activity {
 				Intent i = new Intent(MonthSelectActivity.this, GrantSelectActivity.class);
 				i.putExtras(getIntent());
 				i.putExtra(TAG_INTENT_YEAR, selectedYear);
-				i.putExtra(TAG_INTENT_MONTH, selectedMonth);
+				i.putExtra(TAG_INTENT_MONTH, selectedMonth+1);
 				startActivity(i);
 			}
 		});
