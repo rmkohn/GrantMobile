@@ -1,6 +1,8 @@
 package com.example.grantmobile;
 
 import java.io.IOException;
+import java.io.Serializable;
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -10,8 +12,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Messenger;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
@@ -27,9 +33,12 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	int[] grantids;
 	String[] grantnames;
 	int userid;
-	SparseArray<JSONArray> granthours;
-	JSONArray nongranthours;
-	JSONArray leavehours;
+	SparseArray<double[]> granthours;
+	double[] nongranthours;
+	double[] leavehours;
+	
+	public static final String TAG_REQUEST_DETAILS = "viewRequestDetails";
+	public static final String TAG_VIEWREQUEST_TYPE = "viewRequest";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -68,30 +77,12 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	}
 	
 	private void loadCalendar() {
-		new JSONParser.RequestBuilder("http://mid-state.net/mobileclass2/android")
-		.addParam("q", "viewrequest")
-		.addParam("withextras", "true")
-		.addParam("employee", String.valueOf(userid))
-		.addParam("year", String.valueOf(getYear()))
-		.addParam("month", String.valueOf(getMonth() - 1))
-		.addParam("grant", Arrays.toString(grantids).replaceAll("\\[|\\]| ", ""))
-		.makeRequest(new JSONParser.SimpleResultHandler() {
-
-			@Override
-			public void onSuccess(Object oResult) throws JSONException,
-					IOException {
-				JSONObject result = (JSONObject) oResult;
-				granthours = new SparseArray<JSONArray>();
-				for (int i: grantids) {
-					granthours.append(i, result.getJSONArray(String.valueOf(i)));
-				}
-				nongranthours = result.getJSONArray("non-grant");
-				leavehours    = result.getJSONArray("leave");
-				
-				updateCalendar();
-			}
-			
-		});
+		Log.i(this.getClass().getSimpleName(), "loadcalendar");
+		Intent i = new Intent(this, GrantService.class);
+		i.putExtra(TAG_REQUEST_DETAILS, new ViewRequestData(userid, getYear(), getMonth()-1, grantids));
+		i.putExtra(GrantService.TAG_REQUEST_TYPE, TAG_VIEWREQUEST_TYPE);
+		i.putExtra("MESSENGER", new Messenger(new CalendarEditHandler(this)));
+		startService(i);
 	}
 	
 	protected void updateCalendar() {
@@ -99,13 +90,54 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 			loadCalendar(getSelectedGrantHours(), nongranthours, leavehours);
 	}
 	
-	protected JSONArray getSelectedGrantHours() {
+	protected double[] getSelectedGrantHours() {
 		int grantid = grantids[grantSpinner.getSelectedItemPosition()];
 		return granthours.get(grantid);
 	}
 	
 	@Override
 	protected void openDetailView(ICalendarSquare detailSquare) {
+		
+	}
+	
+	public static class ViewRequestData implements Serializable {
+		int employee;
+		int year;
+		int month;
+		int[] grantids;
+		public ViewRequestData(int employee, int year, int month, int[] grantids) {
+			this.employee = employee;
+			this.year = year;
+			this.month = month;
+			this.grantids = grantids;
+		}
+	}
+	
+	public static class CalendarEditHandler extends Handler {
+		WeakReference<CalendarEditActivity> parent;
+		public CalendarEditHandler(CalendarEditActivity parent) {
+			this.parent = new WeakReference<CalendarEditActivity>(parent);
+		}
+		
+		@Override
+		public void handleMessage(Message msg) {
+			CalendarEditActivity a = parent.get();
+			if (a == null)
+				return;
+			if (msg.arg1 == Activity.RESULT_OK) {
+				Bundle data = msg.getData();
+				SparseArray<double[]> granthours = new SparseArray<double[]>();
+				for (int i: a.grantids) {
+					granthours.append(i, data.getDoubleArray(String.valueOf(i)));
+				}
+				a.granthours    = granthours;
+				a.nongranthours = data.getDoubleArray("non-grant");
+				a.leavehours    = data.getDoubleArray("leave");
+				
+				a.updateCalendar();
+			}
+		}
+			
 		
 	}
 

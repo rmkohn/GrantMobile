@@ -67,6 +67,14 @@ public class CalendarArray {
 		initCalendar();
 	}
 	
+	public void loadTimes(double[] granthours, double[] nongranthours, double[] leavehours) {
+		for (DaySquare cal : realDays) {
+			cal.leave         = (int)leavehours   [cal.dailyNumber-1];
+			cal.nonGrantHours = (int)nongranthours[cal.dailyNumber-1];
+			cal.grantHours    = (int)granthours   [cal.dailyNumber-1];
+		}
+	}
+	
 	public void loadTimes(JSONArray granthours, JSONArray nongranthours, JSONArray leavehours)
 	{
 		// load hours into calendar squares

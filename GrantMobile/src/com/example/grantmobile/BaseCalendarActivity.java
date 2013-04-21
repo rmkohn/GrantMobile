@@ -77,6 +77,12 @@ public abstract class BaseCalendarActivity extends FragmentActivity {
 		recreateAdapter();
 	}
 	
+	public void loadCalendar(double[] granthours, double[] nongranthours, double[] leavehours) {
+		calendar.loadTimes(granthours, nongranthours, leavehours);
+		initFooterMessage();
+		recreateAdapter();
+	}
+	
 	public void loadCalendar(JSONArray granthours, JSONArray nongranthours,
 			JSONArray leavehours) {
 		calendar.loadTimes(granthours, nongranthours, leavehours);

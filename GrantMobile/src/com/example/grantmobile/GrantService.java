@@ -1,7 +1,10 @@
 package com.example.grantmobile;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.http.NameValuePair;
@@ -9,6 +12,8 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.example.grantmobile.CalendarEditActivity.ViewRequestData;
 
 import android.app.Activity;
 import android.app.IntentService;
@@ -19,6 +24,8 @@ import android.os.Messenger;
 import android.util.Log;
 
 public class GrantService extends IntentService {
+	
+	public static final String TAG_REQUEST_TYPE = "requestType";
 	
 	private static final String TAG_SUCCESS = "success";  // "true" is good
 	private static final String TAG_MESSAGE = "message";
@@ -50,7 +57,6 @@ public class GrantService extends IntentService {
 	ArrayList<String> grantHours; // grant hour array 
 	ArrayList<String> nonGrantHours; // non-grant hour array
 	ArrayList<String> leaveHours;  // leave hour array
-	HashMap<String,String> map;
 	JSONObject json = null; // entire json object
 	
 	public GrantService() {
@@ -59,74 +65,123 @@ public class GrantService extends IntentService {
 		grantHours = new ArrayList<String>(); // grant hour array 
 		nonGrantHours = new ArrayList<String>(); // non-grant hour array
 		leaveHours = new ArrayList<String>();  // leave hour array
-		map = new HashMap<String,String>();
 		// TODO Auto-generated constructor stub
 	}
 	
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		JSONArray jsa = null; // json array
-		JSONObject jso, jsom, jsoh = null; // misc., message & hours object
+		Log.i(TAG, "handling intent");
 	    Bundle extras = intent.getExtras();
+    	Messenger messenger = (Messenger) extras.get("MESSENGER");
     	Message msg = Message.obtain();
+    	int result = Activity.RESULT_CANCELED;
 	    if (extras != null) {
-	    	Messenger messenger = (Messenger) extras.get("MESSENGER");
-	    	requestId = extras.getString(DetailViewActivity.TAG_REQUEST_ID);
-			Log.d(TAG+"_REQ_ID", "requestId = " + requestId);
-	    	List<NameValuePair> params = new ArrayList<NameValuePair>();
-	    	params.add(new BasicNameValuePair("q","email"));
-	    	params.add(new BasicNameValuePair("id",requestId)); // this will come from intent
-	    	json = JSONParser.makeHttpRequest(requestURL, "GET", params);
-			Log.d(TAG+"_GET_RET", json.toString());
-	    	try {
-	    		String s = json.getString(TAG_SUCCESS);
-	    		if (s.equals("true")) {
-	    			Log.d(TAG+"_processing...", "success = " + s);
-	    			Bundle returnData = new Bundle(); // going to return a "Bundle"
-	    			jsom = json.getJSONObject(TAG_MESSAGE);
-	    			jsoh = jsom.getJSONObject(TAG_HOURS);
-	    			jsa = jsoh.getJSONArray(TAG_GRANT);
-	    			for (int i = 0; i < jsa.length(); i++) {
-	    				grantHours.add((Integer.valueOf(jsa.getInt(i))).toString());  // these are the grant hours for each day of month
-	    			}
-	    			returnData.putStringArrayList(TAG_GRANT,grantHours);
-	    			jsa = jsoh.getJSONArray(TAG_NON_GRANT);
-	    			for (int i = 0; i < jsa.length(); i++){
-	    				nonGrantHours.add((Integer.valueOf(jsa.getInt(i))).toString());  // these are the non-grant hours for each day of month
-	    			}
-	    			returnData.putStringArrayList(TAG_NON_GRANT,nonGrantHours);
-	    			jsa = jsoh.getJSONArray(TAG_LEAVE);
-	    			for (int i = 0; i < jsa.length(); i++){
-	    				leaveHours.add((Integer.valueOf(jsa.getInt(i))).toString());  // these are the leave hours for each day of month
-	    			}
-	    			returnData.putStringArrayList(TAG_LEAVE,leaveHours);
-	    			returnData.putString(TAG_MONTH,(Integer.valueOf(jsom.getInt(TAG_MONTH))).toString());
-	    			returnData.putString(TAG_YEAR,(Integer.valueOf(jsom.getInt(TAG_YEAR))).toString());
-	    			jso = jsom.getJSONObject(TAG_EMPLOYEE);
-	    			returnData.putString(TAG_FIRST_NAME, jso.getString(TAG_FIRST_NAME));
-	    			returnData.putString(TAG_LAST_NAME, jso.getString(TAG_LAST_NAME));
-	    			Log.d(TAG+"_GET_REQ", "last name = " + jso.getString(TAG_LAST_NAME));
-	    			returnData.putString(TAG_EMPLOYEE_ID, jso.getString(TAG_EMPLOYEE_ID));
-	    			jso = jsom.getJSONObject(TAG_GRANT);	
-	    			returnData.putString(TAG_GRANT_ID, jso.getString(TAG_GRANT_ID));
-	    			returnData.putString(TAG_GRANT_NUMBER, jso.getString(TAG_GRANT_NUMBER));
-	    			returnData.putString(TAG_GRANT_TITLE, jso.getString(TAG_GRANT_TITLE));
-	    			returnData.putString(TAG_STATE_CATALOG_NUM, jso.getString(TAG_STATE_CATALOG_NUM));	
-	    			// now return via extras the grant and hour data...	
-			    	msg.setData(returnData);
-			    	result = Activity.RESULT_OK;
-	    		} else {
-	    			result = Activity.RESULT_CANCELED;
-	    		}
-			    try {
-		    		msg.arg1 = result;
-			   		messenger.send(msg);
-			    } catch (android.os.RemoteException e1) {
-			    	Log.w(getClass().getName(), "Exception sending message", e1);
-			    }
-	    	} catch (JSONException e) {
-	    		e.printStackTrace();
+	    	Bundle data;
+	    	if (extras.get(TAG_REQUEST_TYPE).equals(CalendarEditActivity.TAG_VIEWREQUEST_TYPE)) {
+	    		data = getViewRequest(extras);
+	    	} else {
+	    		data = getEmailRequest(extras);
+	    	}
+	    	if (data != null) {
+	    		result = Activity.RESULT_OK;
+	    		msg.setData(data);
 	    	}
 	    }
+	    try {
+	    	msg.arg1 = result;
+	    	messenger.send(msg);
+	    } catch (android.os.RemoteException e1) {
+	    	Log.w(getClass().getName(), "Exception sending message", e1);
+	    }
+	}
+	
+	private Bundle getViewRequest(Bundle extras) {
+		Log.i(TAG, "handling viewrequest");
+		CalendarEditActivity.ViewRequestData data = (ViewRequestData)
+				extras.getSerializable(CalendarEditActivity.TAG_REQUEST_DETAILS);
+		List<NameValuePair> params = new ArrayList<NameValuePair>();
+		params.add(new BasicNameValuePair("q", "viewrequest"));
+		params.add(new BasicNameValuePair("withextras", "true"));
+		params.add(new BasicNameValuePair("employee", String.valueOf(data.employee)));
+		params.add(new BasicNameValuePair("year", String.valueOf(data.year)));
+		params.add(new BasicNameValuePair("month", String.valueOf(data.month)));
+		params.add(new BasicNameValuePair("grant", Arrays.toString(data.grantids).replaceAll("\\[|\\]| ", "")));
+		json = JSONParser.makeHttpRequest(requestURL, "GET", params);
+		try {
+			if (json.getBoolean("success")) {
+				Bundle result = new Bundle();
+				JSONObject message = json.getJSONObject("message");
+				@SuppressWarnings("unchecked")
+				Iterator<String> keys = message.keys();
+				while(keys.hasNext()) {
+					String key = keys.next();
+					JSONArray jsonHours = message.getJSONArray(key);
+					double[] hours = new double[jsonHours.length()];
+					for (int i = 0; i < hours.length; i++) {
+						hours[i] = jsonHours.getDouble(i);
+					}
+					result.putDoubleArray(key, hours);
+				}
+				return result;
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+		
+	private Bundle getEmailRequest(Bundle extras) {
+		JSONArray jsa = null; // json array
+		JSONObject jso, jsom, jsoh = null; // misc., message & hours object
+		requestId = extras.getString(DetailViewActivity.TAG_REQUEST_ID);
+		Log.d(TAG+"_REQ_ID", "requestId = " + requestId);
+		List<NameValuePair> params = new ArrayList<NameValuePair>();
+		params.add(new BasicNameValuePair("q","email"));
+		params.add(new BasicNameValuePair("id",requestId)); // this will come from intent
+		json = JSONParser.makeHttpRequest(requestURL, "GET", params);
+		Log.d(TAG+"_GET_RET", json.toString());
+		try {
+			String s = json.getString(TAG_SUCCESS);
+			if (s.equals("true")) {
+				Log.d(TAG+"_processing...", "success = " + s);
+				Bundle returnData = new Bundle(); // going to return a "Bundle"
+				jsom = json.getJSONObject(TAG_MESSAGE);
+				jsoh = jsom.getJSONObject(TAG_HOURS);
+				jsa = jsoh.getJSONArray(TAG_GRANT);
+				for (int i = 0; i < jsa.length(); i++) {
+					grantHours.add((Integer.valueOf(jsa.getInt(i))).toString());  // these are the grant hours for each day of month
+				}
+				returnData.putStringArrayList(TAG_GRANT,grantHours);
+				jsa = jsoh.getJSONArray(TAG_NON_GRANT);
+				for (int i = 0; i < jsa.length(); i++){
+					nonGrantHours.add((Integer.valueOf(jsa.getInt(i))).toString());  // these are the non-grant hours for each day of month
+				}
+				returnData.putStringArrayList(TAG_NON_GRANT,nonGrantHours);
+				jsa = jsoh.getJSONArray(TAG_LEAVE);
+				for (int i = 0; i < jsa.length(); i++){
+					leaveHours.add((Integer.valueOf(jsa.getInt(i))).toString());  // these are the leave hours for each day of month
+				}
+				returnData.putStringArrayList(TAG_LEAVE,leaveHours);
+				returnData.putString(TAG_MONTH,(Integer.valueOf(jsom.getInt(TAG_MONTH))).toString());
+				returnData.putString(TAG_YEAR,(Integer.valueOf(jsom.getInt(TAG_YEAR))).toString());
+				jso = jsom.getJSONObject(TAG_EMPLOYEE);
+				returnData.putString(TAG_FIRST_NAME, jso.getString(TAG_FIRST_NAME));
+				returnData.putString(TAG_LAST_NAME, jso.getString(TAG_LAST_NAME));
+				Log.d(TAG+"_GET_REQ", "last name = " + jso.getString(TAG_LAST_NAME));
+				returnData.putString(TAG_EMPLOYEE_ID, jso.getString(TAG_EMPLOYEE_ID));
+				jso = jsom.getJSONObject(TAG_GRANT);	
+				returnData.putString(TAG_GRANT_ID, jso.getString(TAG_GRANT_ID));
+				returnData.putString(TAG_GRANT_NUMBER, jso.getString(TAG_GRANT_NUMBER));
+				returnData.putString(TAG_GRANT_TITLE, jso.getString(TAG_GRANT_TITLE));
+				returnData.putString(TAG_STATE_CATALOG_NUM, jso.getString(TAG_STATE_CATALOG_NUM));	
+				// now return via extras the grant and hour data...	
+				return returnData;
+			} else {
+				return null;
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }
