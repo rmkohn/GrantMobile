@@ -1,5 +1,8 @@
 package com.example.grantmobile;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
@@ -166,10 +169,12 @@ public class LoginActivity extends Activity {
         			showProgress(false);
 		        }
 
-		        public void onSuccess(Object result) {
-		            Toast.makeText(LoginActivity.this, (String) result, Toast.LENGTH_LONG).show();
-		            // FIXME get the actual user ID, if we even need it?
-		            continueAsUser(-1);
+		        public void onSuccess(Object oResult) throws JSONException {
+		        	JSONObject result = (JSONObject) oResult;
+		        	String name = result.getString("firstname") + " " + result.getString("lastname");
+		        	int id = result.getInt("id");
+		            Toast.makeText(LoginActivity.this, "Logged in as " + name, Toast.LENGTH_LONG).show();
+		            continueAsUser(id);
 		        }
 		        public void onFailure(String message) {
     				mPasswordView

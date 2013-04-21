@@ -1,6 +1,7 @@
 package com.example.grantmobile;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -70,10 +71,19 @@ public class GrantSelectActivity extends Activity {
 		JSONObject bundle = new JSONObject();
 		try {
 			for (String key: keys) {
-				bundle.put(key, extras.get(key));
+				Object value = extras.get(key);
+				Object jsonval = value.getClass().isArray() ? getJSONArray(value) : value;
+				bundle.put(key, jsonval);
 			}
 			Log.i("grantselect", bundle.toString(2));
 		} catch (JSONException e) { e.printStackTrace(); }
+	}
+	
+	public static JSONArray getJSONArray(Object array) {
+		JSONArray j = new JSONArray();
+		for (int i = 0; i < Array.getLength(array); i++)
+			j.put(Array.get(array, i));
+		return j;
 	}
 
 	protected void loadCalendarEditActivity() {

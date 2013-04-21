@@ -27,9 +27,9 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	int[] grantids;
 	String[] grantnames;
 	int userid;
-	Map<Integer, JSONArray> time;
-	int KEY_NONGRANTHOURS = -1;
-	int KEY_LEAVEHOURS    = -2;
+	SparseArray<JSONArray> granthours;
+	JSONArray nongranthours;
+	JSONArray leavehours;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +69,8 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	
 	private void loadCalendar() {
 		new JSONParser.RequestBuilder("http://mid-state.net/mobileclass2/android")
+		.addParam("q", "viewrequest")
+		.addParam("withextras", "true")
 		.addParam("employee", String.valueOf(userid))
 		.addParam("year", String.valueOf(getYear()))
 		.addParam("month", String.valueOf(getMonth()))
@@ -79,18 +81,13 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 			public void onSuccess(Object oResult) throws JSONException,
 					IOException {
 				JSONObject result = (JSONObject) oResult;
-				time = new HashMap<Integer, JSONArray>();
-				Iterator<String> keys = result.keys();
-				while (keys.hasNext()) {
-					String key = keys.next();
-					JSONArray value = result.getJSONArray(key);
-					if (key.equals("nongrant"))
-						time.put(KEY_NONGRANTHOURS, value);
-					else if (key.equals("leave"))
-						time.put(KEY_LEAVEHOURS, value);
-					else
-						time.put(Integer.parseInt(key), value);
+				granthours = new SparseArray<JSONArray>();
+				for (int i: grantids) {
+					granthours.append(i, result.getJSONArray(String.valueOf(i)));
 				}
+				nongranthours = result.getJSONArray("non-grant");
+				leavehours    = result.getJSONArray("leave");
+				
 				updateCalendar();
 			}
 			
@@ -98,12 +95,12 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	}
 	
 	protected void updateCalendar() {
-		if (time != null && grantSpinner != null)
-			loadCalendar(getSelectedGrantHours(), time.get(KEY_NONGRANTHOURS), time.get(KEY_LEAVEHOURS));
+		if (granthours != null && grantSpinner != null)
+			loadCalendar(getSelectedGrantHours(), nongranthours, leavehours);
 	}
 	
 	protected JSONArray getSelectedGrantHours() {
-		return time.get(grantSpinner.getSelectedItemPosition());
+		return granthours.get(grantSpinner.getSelectedItemPosition());
 	}
 	
 	@Override
