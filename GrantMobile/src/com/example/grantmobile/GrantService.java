@@ -103,16 +103,22 @@ public class GrantService extends IntentService {
 		Log.i(TAG, "handling viewrequest");
 		GrantData     data = (GrantData) extras.getSerializable(CalendarEditActivity.TAG_REQUEST_DETAILS);
 		int[]     grantids =             extras.getIntArray    (CalendarEditActivity.TAG_REQUEST_GRANTS);
-		Map<String, double[]> allHours = getFromCache(data);
+		DBAdapter db = new DBAdapter(this);
+		db.open();
 		
-		Set<String> grantStrings = new HashSet<String>();
-		for (int id: grantids) {
-			grantStrings.add(String.valueOf(id));
+		String[] grantStrings = new String[grantids.length + 2];
+		for (int i = 0; i < grantids.length; i++) {
+			grantStrings[i] = String.valueOf(grantids[i]);
 		}
-		grantStrings.add("non-grant");
-		grantStrings.add("leave");
+		grantStrings[grantids.length]   = "non-grant";
+		grantStrings[grantids.length+1] = "leave";
 		
-		if (!allHours.keySet().containsAll(grantStrings)) {
+		Map<String, double[]> allHours = db.getTimes(data, grantStrings);
+		
+		if (!allHours.keySet().containsAll(Arrays.asList(grantStrings))) {
+			// TODO: don't retrieve unneeded values
+			// this is actually pretty important, as CalendarEdit and DetailEdit are going to be stashing
+			// data here before uploading, and we don't want to overwrite any changes with old data
 			Log.i(TAG, "retrieving values");
 			List<NameValuePair> params = new ArrayList<NameValuePair>();
 			params.add(new BasicNameValuePair("q", "viewrequest"));
@@ -135,10 +141,12 @@ public class GrantService extends IntentService {
 							hours[i] = jsonHours.getDouble(i);
 						}
 						allHours.put(key, hours);
+						db.saveEntry(data, key, hours);
 					}
 				}
 			} catch (JSONException e) {
 				e.printStackTrace();
+				db.close();
 				return null;
 			}
 		} else {
@@ -148,19 +156,12 @@ public class GrantService extends IntentService {
 		for (String s: grantStrings) {
 			result.putDoubleArray(s, allHours.get(s));
 		}
+		db.close();
 		return result;
 	}
 		
-	private Map<String, double[]> getFromCache(GrantData data) {
-		if (viewRequestCache == null)
-			viewRequestCache = new HashMap<GrantService.GrantData, Map<String,double[]>>();
-		Map<String, double[]> result = viewRequestCache.get(data);
-		if (result == null) {
-			result = new HashMap<String, double[]>();
-			viewRequestCache.put(data, result);
-		}
-		return result;
-	}
+//	private Map<String, double[]> getFromCache(GrantData data, int[] grantids) {
+//	}
 
 	private Bundle getEmailRequest(Bundle extras) {
 		JSONArray jsa = null; // json array
