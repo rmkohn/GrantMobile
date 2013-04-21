@@ -86,6 +86,14 @@ public abstract class BaseCalendarActivity extends FragmentActivity {
 		recreateAdapter();
 	}
 	
+	public int getYear() {
+		return calendar.year;
+	}
+	
+	public int getMonth() {
+		return calendar.monthNumber;
+	}
+	
 	private void recreateAdapter() {
 		calendarGrid.setAdapter(new CalendarSquareAdapter(this, calendar));
 	}
