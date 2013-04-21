@@ -1,5 +1,6 @@
 package com.example.grantmobile;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -155,7 +156,7 @@ public class DetailViewActivity extends Activity {
 //		new GetGrantData().execute();
 	    intent = new Intent(context,GrantService.class);
 	    // Create a new Messenger for the communication back
-	    Messenger messenger = new Messenger(handler);
+	    Messenger messenger = new Messenger(new DetailHandler(this));
 	    intent.putExtra("MESSENGER", messenger); // pass the callback
 	    intent.putExtra(DetailViewActivity.TAG_REQUEST_ID, requestId); // pass the parameter
 	    startService(intent);
@@ -192,29 +193,41 @@ public class DetailViewActivity extends Activity {
     	monthTotalHoursView.setText(tgh.toString());
 	}
 	
-	@SuppressLint("HandlerLeak")
-	private Handler handler = new Handler() {
+//	private Handler handler = new Handler() {
+	public static class DetailHandler extends Handler {
+		WeakReference<DetailViewActivity> parent;
+		public DetailHandler(DetailViewActivity parent) {
+			super();
+			this.parent = new WeakReference<DetailViewActivity>(parent);
+		}
+
+		@Override
 		public void handleMessage(Message message) {
-			if (message.arg1 == RESULT_OK) {
-//				Toast.makeText(DetailViewActivity.this,
-//					message.getData().toString(), Toast.LENGTH_LONG)
-//		            .show();
-				grantHours = message.getData().getStringArrayList(TAG_GRANT);
-				nonGrantHours = message.getData().getStringArrayList(TAG_NON_GRANT);
-				leaveHours = message.getData().getStringArrayList(TAG_LEAVE);
-				map.put(TAG_GRANT_TITLE,message.getData().getString(TAG_GRANT_TITLE));
-				map.put(TAG_GRANT_ID,message.getData().getString(TAG_GRANT_ID));
-				map.put(TAG_STATE_CATALOG_NUM,message.getData().getString(TAG_STATE_CATALOG_NUM));		    	
-				map.put(TAG_FIRST_NAME,message.getData().getString(TAG_FIRST_NAME));
-				map.put(TAG_LAST_NAME,message.getData().getString(TAG_LAST_NAME));
-				map.put(TAG_MONTH,message.getData().getString(TAG_MONTH));
-				map.put(TAG_YEAR,message.getData().getString(TAG_YEAR));
-				moy = Integer.parseInt(message.getData().getString(TAG_MONTH));
-				updateView();
-			} else {
-				Toast.makeText(DetailViewActivity.this, "Download failed.",
-		            Toast.LENGTH_LONG).show();
+			DetailViewActivity a = parent.get();
+			if (a == null)
+			{
+				return;
 			}
-	    };
-	};
+			if (message.arg1 == RESULT_OK) {
+				//				Toast.makeText(DetailViewActivity.this,
+				//					message.getData().toString(), Toast.LENGTH_LONG)
+				//		            .show();
+				a.grantHours = message.getData().getStringArrayList(TAG_GRANT);
+				a.nonGrantHours = message.getData().getStringArrayList(TAG_NON_GRANT);
+				a.leaveHours = message.getData().getStringArrayList(TAG_LEAVE);
+				a.map.put(TAG_GRANT_TITLE,message.getData().getString(TAG_GRANT_TITLE));
+				a.map.put(TAG_GRANT_ID,message.getData().getString(TAG_GRANT_ID));
+				a.map.put(TAG_STATE_CATALOG_NUM,message.getData().getString(TAG_STATE_CATALOG_NUM));		    	
+				a.map.put(TAG_FIRST_NAME,message.getData().getString(TAG_FIRST_NAME));
+				a.map.put(TAG_LAST_NAME,message.getData().getString(TAG_LAST_NAME));
+				a.map.put(TAG_MONTH,message.getData().getString(TAG_MONTH));
+				a.map.put(TAG_YEAR,message.getData().getString(TAG_YEAR));
+				a.moy = Integer.parseInt(message.getData().getString(TAG_MONTH));
+				a.updateView();
+			} else {
+				Toast.makeText(a, "Download failed.",
+						Toast.LENGTH_LONG).show();
+			}
+		}
+	}
 }
