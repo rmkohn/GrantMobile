@@ -3,6 +3,7 @@ package com.example.grantmobile;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -26,6 +27,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import com.example.grantmobile.CalendarSquare.DaySquare;
 import com.example.grantmobile.CalendarSquare.ICalendarSquare;
 
 public class CalendarEditActivity extends BaseCalendarActivity {
@@ -39,6 +41,7 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	
 	public static final String TAG_REQUEST_DETAILS = "viewRequestDetails";
 	public static final String TAG_VIEWREQUEST_TYPE = "viewRequest";
+	public static final String TAG_REQUEST_GRANTS = "viewRequestGrants";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -78,8 +81,13 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	
 	private void loadCalendar() {
 		Log.i(this.getClass().getSimpleName(), "loadcalendar");
+		ArrayList<String> loadGrants = new ArrayList<String>();
+		for (int id: grantids) {
+			loadGrants.add(String.valueOf(id));
+		}
 		Intent i = new Intent(this, GrantService.class);
-		i.putExtra(TAG_REQUEST_DETAILS, new ViewRequestData(userid, getYear(), getMonth()-1, grantids));
+		i.putExtra(TAG_REQUEST_DETAILS, new GrantService.GrantData(getYear(), getMonth()-1, userid));
+		i.putExtra(TAG_REQUEST_GRANTS, grantids);
 		i.putExtra(GrantService.TAG_REQUEST_TYPE, TAG_VIEWREQUEST_TYPE);
 		i.putExtra("MESSENGER", new Messenger(new CalendarEditHandler(this)));
 		startService(i);
@@ -97,19 +105,12 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	
 	@Override
 	protected void openDetailView(ICalendarSquare detailSquare) {
-		
-	}
-	
-	public static class ViewRequestData implements Serializable {
-		int employee;
-		int year;
-		int month;
-		int[] grantids;
-		public ViewRequestData(int employee, int year, int month, int[] grantids) {
-			this.employee = employee;
-			this.year = year;
-			this.month = month;
-			this.grantids = grantids;
+		if (detailSquare instanceof DaySquare) {
+			Intent i = new Intent(this, DetailEditActivity.class);
+			i.putExtra(DetailEditActivity.TAG_DAY_OF_MONTH, ((DaySquare) detailSquare).dailyNumber);
+			i.putExtra(TAG_REQUEST_DETAILS, new GrantService.GrantData(getYear(), getMonth()-1, userid));
+			i.putExtra("grantid", grantids[grantSpinner.getSelectedItemPosition()]);
+			startActivity(i);
 		}
 	}
 	

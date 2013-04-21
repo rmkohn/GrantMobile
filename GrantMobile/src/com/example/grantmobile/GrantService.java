@@ -3,17 +3,19 @@ package com.example.grantmobile;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.example.grantmobile.CalendarEditActivity.ViewRequestData;
 
 import android.app.Activity;
 import android.app.IntentService;
@@ -52,6 +54,8 @@ public class GrantService extends IntentService {
 	private static final String TAG = "grantservice";
 	public static String requestId;
 	private int result;
+	
+	private static Map<GrantData, Map<String, double[]>> viewRequestCache;
 	
 	JSONParser jParser;
 	ArrayList<String> grantHours; // grant hour array 
@@ -97,39 +101,67 @@ public class GrantService extends IntentService {
 	
 	private Bundle getViewRequest(Bundle extras) {
 		Log.i(TAG, "handling viewrequest");
-		CalendarEditActivity.ViewRequestData data = (ViewRequestData)
-				extras.getSerializable(CalendarEditActivity.TAG_REQUEST_DETAILS);
-		List<NameValuePair> params = new ArrayList<NameValuePair>();
-		params.add(new BasicNameValuePair("q", "viewrequest"));
-		params.add(new BasicNameValuePair("withextras", "true"));
-		params.add(new BasicNameValuePair("employee", String.valueOf(data.employee)));
-		params.add(new BasicNameValuePair("year", String.valueOf(data.year)));
-		params.add(new BasicNameValuePair("month", String.valueOf(data.month)));
-		params.add(new BasicNameValuePair("grant", Arrays.toString(data.grantids).replaceAll("\\[|\\]| ", "")));
-		json = JSONParser.makeHttpRequest(requestURL, "GET", params);
-		try {
-			if (json.getBoolean("success")) {
-				Bundle result = new Bundle();
-				JSONObject message = json.getJSONObject("message");
-				@SuppressWarnings("unchecked")
-				Iterator<String> keys = message.keys();
-				while(keys.hasNext()) {
-					String key = keys.next();
-					JSONArray jsonHours = message.getJSONArray(key);
-					double[] hours = new double[jsonHours.length()];
-					for (int i = 0; i < hours.length; i++) {
-						hours[i] = jsonHours.getDouble(i);
-					}
-					result.putDoubleArray(key, hours);
-				}
-				return result;
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
+		GrantData     data = (GrantData) extras.getSerializable(CalendarEditActivity.TAG_REQUEST_DETAILS);
+		int[]     grantids =             extras.getIntArray    (CalendarEditActivity.TAG_REQUEST_GRANTS);
+		Map<String, double[]> allHours = getFromCache(data);
+		
+		Set<String> grantStrings = new HashSet<String>();
+		for (int id: grantids) {
+			grantStrings.add(String.valueOf(id));
 		}
-		return null;
+		grantStrings.add("non-grant");
+		grantStrings.add("leave");
+		
+		if (!allHours.keySet().containsAll(grantStrings)) {
+			Log.i(TAG, "retrieving values");
+			List<NameValuePair> params = new ArrayList<NameValuePair>();
+			params.add(new BasicNameValuePair("q", "viewrequest"));
+			params.add(new BasicNameValuePair("withextras", "true"));
+			params.add(new BasicNameValuePair("employee", String.valueOf(data.employeeid)));
+			params.add(new BasicNameValuePair("year", String.valueOf(data.year)));
+			params.add(new BasicNameValuePair("month", String.valueOf(data.month)));
+			params.add(new BasicNameValuePair("grant", Arrays.toString(grantids).replaceAll("\\[|\\]| ", "")));
+			json = JSONParser.makeHttpRequest(requestURL, "GET", params);
+			try {
+				if (json.getBoolean("success")) {
+					JSONObject message = json.getJSONObject("message");
+					@SuppressWarnings("unchecked")
+					Iterator<String> keys = message.keys();
+					while(keys.hasNext()) {
+						String key = keys.next();
+						JSONArray jsonHours = message.getJSONArray(key);
+						double[] hours = new double[jsonHours.length()];
+						for (int i = 0; i < hours.length; i++) {
+							hours[i] = jsonHours.getDouble(i);
+						}
+						allHours.put(key, hours);
+					}
+				}
+			} catch (JSONException e) {
+				e.printStackTrace();
+				return null;
+			}
+		} else {
+			Log.i(TAG, "got values from cache");
+		}
+		Bundle result = new Bundle();
+		for (String s: grantStrings) {
+			result.putDoubleArray(s, allHours.get(s));
+		}
+		return result;
 	}
 		
+	private Map<String, double[]> getFromCache(GrantData data) {
+		if (viewRequestCache == null)
+			viewRequestCache = new HashMap<GrantService.GrantData, Map<String,double[]>>();
+		Map<String, double[]> result = viewRequestCache.get(data);
+		if (result == null) {
+			result = new HashMap<String, double[]>();
+			viewRequestCache.put(data, result);
+		}
+		return result;
+	}
+
 	private Bundle getEmailRequest(Bundle extras) {
 		JSONArray jsa = null; // json array
 		JSONObject jso, jsom, jsoh = null; // misc., message & hours object
@@ -184,4 +216,26 @@ public class GrantService extends IntentService {
 		}
 		return null;
 	}
+	
+	public static class GrantData implements Serializable {
+		public static final int GRANTID_LEAVE = -1;
+		public static final int GRANTID_NONGRANT = -2;
+		int employeeid;
+		int year;
+		int month;
+		@Override public int hashCode() {
+			// pretty much copied out of the android reference, is this the best approach?
+			int result = 0xABCD;
+			result += 31 * result + employeeid;
+			result += 31 * result + year;
+			result += 31 * result + month;
+			return result;
+		}
+		public GrantData(int year, int month, int employeeid) {
+			this.year = year;
+			this.month = month;
+			this.employeeid = employeeid;
+		}
+	}
+	
 }

@@ -8,24 +8,6 @@
         android:layout_height="wrap_content"
         android:layout_weight="0.42"
         android:background="#ABABAB" >
-        
-        
-        <TextView
-            android:id="@+id/tvGrantID"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/textView1"
-            android:text="@string/grantIdLabel"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-        
-        
-        
-        
-        
-        
-        
-        
 
         <TextView
             android:id="@+id/employeeNameView"
@@ -47,7 +29,14 @@
             android:text="catalog number"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/textView1"
+            android:text="@string/grantIdLabel"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <ImageView
             android:id="@+id/imageView1"
@@ -65,6 +54,15 @@
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:text="@string/grantNameLabel"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/textView13"
+            android:text="@string/employeeNameLabel"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
@@ -95,15 +93,6 @@
             android:text="waiting for data..."
             android:textAppearance="?android:attr/textAppearanceSmall" />
 
-        <TextView
-            android:id="@+id/textView5"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/textView13"
-            android:text="@string/employeeNameLabel"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
     </RelativeLayout>
 
     <RelativeLayout
@@ -120,7 +109,7 @@
             android:text="@string/leaveHoursLabel"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <TextView
+        <EditText
             android:id="@+id/leaveHoursView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -139,7 +128,7 @@
             android:text="@string/nonGrantHoursLabel"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <TextView
+        <EditText
             android:id="@+id/nonGrantHoursView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -180,7 +169,7 @@
             android:text="monthly hours"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <TextView
+        <EditText
             android:id="@+id/grantHoursView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

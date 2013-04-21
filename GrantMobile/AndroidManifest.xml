@@ -60,6 +60,10 @@
             android:name="com.example.grantmobile.CalendarEditActivity"
             android:label="@string/title_activity_calendar_edit">
         </activity>
+        <activity
+            android:name="com.example.grantmobile.DetailEditActivity"
+            android:label="@string/app_name">
+        </activity>
         <service
             android:name="com.example.grantmobile.GrantService">
         </service>
