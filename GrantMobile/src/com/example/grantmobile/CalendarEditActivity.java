@@ -73,7 +73,7 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 		.addParam("withextras", "true")
 		.addParam("employee", String.valueOf(userid))
 		.addParam("year", String.valueOf(getYear()))
-		.addParam("month", String.valueOf(getMonth()))
+		.addParam("month", String.valueOf(getMonth() - 1))
 		.addParam("grant", Arrays.toString(grantids).replaceAll("\\[|\\]| ", ""))
 		.makeRequest(new JSONParser.SimpleResultHandler() {
 
@@ -100,7 +100,8 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	}
 	
 	protected JSONArray getSelectedGrantHours() {
-		return granthours.get(grantSpinner.getSelectedItemPosition());
+		int grantid = grantids[grantSpinner.getSelectedItemPosition()];
+		return granthours.get(grantid);
 	}
 	
 	@Override
