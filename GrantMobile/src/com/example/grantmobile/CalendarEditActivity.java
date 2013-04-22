@@ -39,11 +39,6 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	double[] nongranthours;
 	double[] leavehours;
 	
-	public static final String TAG_REQUEST_DETAILS = "viewRequestDetails";
-	public static final String TAG_VIEWREQUEST_TYPE = "viewRequest";
-	public static final String TAG_REQUEST_GRANTS = "viewRequestGrants";
-	public static final String TAG_SAVEREQUEST_TYPE = "saveHours";
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -81,17 +76,9 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	}
 	
 	private void loadCalendar() {
-		Log.i(this.getClass().getSimpleName(), "loadcalendar");
-		ArrayList<String> loadGrants = new ArrayList<String>();
-		for (int id: grantids) {
-			loadGrants.add(String.valueOf(id));
-		}
-		Intent i = new Intent(this, GrantService.class);
-		i.putExtra(TAG_REQUEST_DETAILS, new GrantService.GrantData(getYear(), getMonth()-1, userid));
-		i.putExtra(TAG_REQUEST_GRANTS, grantids);
-		i.putExtra(GrantService.TAG_REQUEST_TYPE, TAG_VIEWREQUEST_TYPE);
-		i.putExtra("MESSENGER", new Messenger(new CalendarEditHandler(this)));
-		startService(i);
+		Log.i("calendareditactivity", "loadcalendar");
+		GrantService.GrantData data = new GrantService.GrantData(getYear(), getMonth()-1, userid);
+		GrantService.getHours(this, new CalendarEditHandler().setParent(this), data, grantids);
 	}
 	
 	protected void updateCalendar() {
@@ -109,18 +96,13 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 		if (detailSquare instanceof DaySquare) {
 			Intent i = new Intent(this, DetailEditActivity.class);
 			i.putExtra(DetailEditActivity.TAG_DAY_OF_MONTH, ((DaySquare) detailSquare).dailyNumber);
-			i.putExtra(TAG_REQUEST_DETAILS, new GrantService.GrantData(getYear(), getMonth()-1, userid));
+			i.putExtra(GrantService.TAG_REQUEST_DETAILS, new GrantService.GrantData(getYear(), getMonth()-1, userid));
 			i.putExtra("grantid", grantids[grantSpinner.getSelectedItemPosition()]);
 			startActivity(i);
 		}
 	}
 	
-	public static class CalendarEditHandler extends Handler {
-		WeakReference<CalendarEditActivity> parent;
-		public CalendarEditHandler(CalendarEditActivity parent) {
-			this.parent = new WeakReference<CalendarEditActivity>(parent);
-		}
-		
+	public static class CalendarEditHandler extends GrantService.WeakrefHandler<CalendarEditActivity> {
 		@Override
 		public void handleMessage(Message msg) {
 			CalendarEditActivity a = parent.get();
@@ -139,8 +121,6 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 				a.updateCalendar();
 			}
 		}
-			
-		
 	}
 
 	@Override

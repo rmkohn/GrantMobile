@@ -90,7 +90,7 @@ public class DetailEditActivity extends Activity {
 		// intent interface
 		Intent intent = getIntent();
 		domCurrent = intent.getIntExtra(TAG_DAY_OF_MONTH, 0);
-		GrantData grantdata = (GrantData)intent.getSerializableExtra(CalendarEditActivity.TAG_REQUEST_DETAILS);
+		GrantData grantdata = (GrantData)intent.getSerializableExtra(GrantService.TAG_REQUEST_DETAILS);
 		year = grantdata.year;
 		month = grantdata.month;
 		employeeid = grantdata.employeeid;
@@ -116,6 +116,7 @@ public class DetailEditActivity extends Activity {
         backwardButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Perform action on click
+            	saveHours();
             	if (--domCurrent == 0) domCurrent = grantHours.length; // underflow wrap
             	updateView();
             }
@@ -123,6 +124,7 @@ public class DetailEditActivity extends Activity {
         final Button forwardButton = (Button) findViewById(R.id.nextBtn);
         forwardButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+            	saveHours();
             	if (++domCurrent >  grantHours.length) domCurrent = 1; // overflow wrap
             	updateView();
             }
@@ -131,6 +133,7 @@ public class DetailEditActivity extends Activity {
         final Button returnButton = (Button) findViewById(R.id.returnBtn);
         returnButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+            	saveHours();
                 Toast.makeText(DetailEditActivity.this, "Return to Calendar View", Toast.LENGTH_LONG).show();
                 setResult(RESULT_CANCELED);
                 finish();
@@ -140,19 +143,7 @@ public class DetailEditActivity extends Activity {
         OnFocusChangeListener editListener = new OnFocusChangeListener() {
 			@Override
 			public void onFocusChange(View v, boolean hasFocus) {
-				double grant    = getTimeFromView(grantHoursView);
-				double nongrant = getTimeFromView(nonGrantHoursView);
-				double leave    = getTimeFromView(leaveHoursView);
-				grantHours   [domCurrent-1] = grant;
-				leaveHours   [domCurrent-1] = leave;
-				nonGrantHours[domCurrent-1] = nongrant;
-			}
-			private double getTimeFromView(EditText view) {
-				try {
-					return Double.valueOf(view.getText().toString());
-				} catch (NumberFormatException e) {
-					return 0;
-				}
+				saveHours();
 			}
 		};
 		
@@ -162,18 +153,11 @@ public class DetailEditActivity extends Activity {
 		leaveHours    = new double[monthLength];
 		nonGrantHours = new double[monthLength];
 		
-		grantHoursView.setOnFocusChangeListener(editListener);
+		grantHoursView   .setOnFocusChangeListener(editListener);
 		nonGrantHoursView.setOnFocusChangeListener(editListener);
-		leaveHoursView.setOnFocusChangeListener(editListener);
+		leaveHoursView   .setOnFocusChangeListener(editListener);
         
-	    intent = new Intent(DetailEditActivity.this, GrantService.class);
-	    // Create a new Messenger for the communication back
-	    Messenger messenger = new Messenger(new DetailHandler().setParent(this));
-	    intent.putExtra("MESSENGER", messenger); // pass the callback
-	    intent.putExtra(CalendarEditActivity.TAG_REQUEST_DETAILS, grantdata);
-	    intent.putExtra(CalendarEditActivity.TAG_REQUEST_GRANTS, new int[] { grantId });
-		intent.putExtra(GrantService.TAG_REQUEST_TYPE, CalendarEditActivity.TAG_VIEWREQUEST_TYPE);
-	    startService(intent);
+		GrantService.getHours(this, new DetailHandler().setParent(this), grantdata, new int[] { grantId });
 	}
         
     private void updateView() {
@@ -206,8 +190,22 @@ public class DetailEditActivity extends Activity {
     		tgh = tgh + gh;
     	monthTotalHoursView.setText(String.valueOf(tgh));
 	}
+    private void saveHours() {
+    	double grant    = getTimeFromView(grantHoursView);
+    	double nongrant = getTimeFromView(nonGrantHoursView);
+    	double leave    = getTimeFromView(leaveHoursView);
+    	grantHours   [domCurrent-1] = grant;
+    	leaveHours   [domCurrent-1] = leave;
+    	nonGrantHours[domCurrent-1] = nongrant;
+    }
+    private double getTimeFromView(EditText view) {
+    	try {
+    		return Double.valueOf(view.getText().toString());
+    	} catch (NumberFormatException e) {
+    		return 0;
+    	}
+    }
 	
-//	private Handler handler = new Handler() {
 	public static class DetailHandler extends WeakrefHandler<DetailEditActivity> {
 		@Override
 		public void handleMessage(Message message) {
@@ -240,16 +238,11 @@ public class DetailEditActivity extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-	    Intent intent = new Intent(this, GrantService.class);
 	    GrantData data = new GrantData(year, month, employeeid);
 	    Bundle hourBundle = new Bundle();
 	    hourBundle.putDoubleArray(TAG_NON_GRANT, nonGrantHours);
 	    hourBundle.putDoubleArray(TAG_LEAVE, leaveHours);
 	    hourBundle.putDoubleArray(String.valueOf(grantId), grantHours);
-	    intent.putExtra(CalendarEditActivity.TAG_REQUEST_DETAILS, data);
-	    intent.putExtra("hours", hourBundle);
-		intent.putExtra(GrantService.TAG_REQUEST_TYPE, CalendarEditActivity.TAG_SAVEREQUEST_TYPE);
-		intent.putExtra("MESSENGER", new Messenger(new SaveHandler().setParent(this)));
-	    startService(intent);
+	    GrantService.saveHours(this, new SaveHandler().setParent(this), data, hourBundle);
 	}
 }

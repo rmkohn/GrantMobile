@@ -20,6 +20,8 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.IntentService;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,9 +30,6 @@ import android.os.Messenger;
 import android.util.Log;
 
 public class GrantService extends IntentService {
-	
-	public static final String TAG_REQUEST_TYPE = "requestType";
-	
 	private static final String TAG_SUCCESS = "success";  // "true" is good
 	private static final String TAG_MESSAGE = "message";
 
@@ -55,15 +54,26 @@ public class GrantService extends IntentService {
 	private static String requestURL = "http://mid-state.net/mobileclass2/android";
 	private static final String TAG = "grantservice";
 	public static String requestId;
-	private int result;
+//	private int result;
 	
-	private static Map<GrantData, Map<String, double[]>> viewRequestCache;
+	public static final String TAG_REQUEST_TYPE = "requestType";
+	
+	public static final String TAG_SAVEREQUEST_TYPE = "saveHours";
+	public static final String TAG_VIEWREQUEST_TYPE = "getHours";
+	public static final String TAG_UPLOAD_TYPE = "uploadHours";
+
+	public static final String TAG_REQUEST_GRANTS = "grantIds";
+	public static final String TAG_REQUEST_DETAILS = "grantDetails";
+	
+	
+	
 	
 	JSONParser jParser;
 	ArrayList<String> grantHours; // grant hour array 
 	ArrayList<String> nonGrantHours; // non-grant hour array
 	ArrayList<String> leaveHours;  // leave hour array
 	JSONObject json = null; // entire json object
+
 	
 	public GrantService() {
 		super("GrantService");
@@ -84,10 +94,12 @@ public class GrantService extends IntentService {
 	    if (extras != null) {
 	    	Bundle data = null;
 	    	Object requestType = extras.get(TAG_REQUEST_TYPE);
-	    	if (CalendarEditActivity.TAG_VIEWREQUEST_TYPE.equals(requestType)) {
+	    	if (GrantService.TAG_VIEWREQUEST_TYPE.equals(requestType)) {
 	    		data = getViewRequest(extras);
-	    	} else if (CalendarEditActivity.TAG_SAVEREQUEST_TYPE.equals(requestType)) {
+	    	} else if (GrantService.TAG_SAVEREQUEST_TYPE.equals(requestType)) {
 	    		result = saveHours(extras);
+	    	} else if (GrantService.TAG_UPLOAD_TYPE.equals(requestType)) {
+	    		result = uploadHours(extras);
 	    	} else {
 	    		data = getEmailRequest(extras);
 	    	}
@@ -118,8 +130,8 @@ public class GrantService extends IntentService {
 	
 	private int uploadHours(Bundle extras) {
 		Log.i(TAG, "saving hours");
-		GrantData     data = (GrantData) extras.getSerializable(CalendarEditActivity.TAG_REQUEST_DETAILS);
-		int[]     grantids =             extras.getIntArray    (CalendarEditActivity.TAG_REQUEST_GRANTS);
+		GrantData     data = (GrantData) extras.getSerializable(GrantService.TAG_REQUEST_DETAILS);
+		int[]     grantids =             extras.getIntArray    (GrantService.TAG_REQUEST_GRANTS);
 		DBAdapter db = new DBAdapter(this);
 		db.open();
 		Map<String, double[]> hours = db.getTimes(data, getGrantStrings(grantids));
@@ -133,6 +145,7 @@ public class GrantService extends IntentService {
 			params.add(new BasicNameValuePair("month", String.valueOf(data.month)));
 			params.add(new BasicNameValuePair("hours", jsonHours.toString()));
 			JSONObject result = JSONParser.makeHttpRequest(requestURL, "GET", params);
+			Log.i(TAG, result.get("message").toString());
 			return result.getBoolean("success") ? Activity.RESULT_OK : Activity.RESULT_CANCELED;
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -142,7 +155,7 @@ public class GrantService extends IntentService {
 	
 	private int saveHours(Bundle extras) {
 		Log.i(TAG, "saving hours");
-		GrantData     data = (GrantData) extras.getSerializable(CalendarEditActivity.TAG_REQUEST_DETAILS);
+		GrantData     data = (GrantData) extras.getSerializable(GrantService.TAG_REQUEST_DETAILS);
 		Bundle hourBundle  = extras.getBundle("hours");
 		DBAdapter db = new DBAdapter(this);
 		db.open();
@@ -155,8 +168,8 @@ public class GrantService extends IntentService {
 
 	private Bundle getViewRequest(Bundle extras) {
 		Log.i(TAG, "handling viewrequest");
-		GrantData     data = (GrantData) extras.getSerializable(CalendarEditActivity.TAG_REQUEST_DETAILS);
-		int[]     grantids =             extras.getIntArray    (CalendarEditActivity.TAG_REQUEST_GRANTS);
+		GrantData     data = (GrantData) extras.getSerializable(GrantService.TAG_REQUEST_DETAILS);
+		int[]     grantids =             extras.getIntArray    (GrantService.TAG_REQUEST_GRANTS);
 		DBAdapter db = new DBAdapter(this);
 		db.open();
 		
@@ -267,6 +280,35 @@ public class GrantService extends IntentService {
 		return null;
 	}
 	
+	public static ComponentName getHours(Context context, Handler callback, GrantData details, int[] grants) {
+	    Intent intent = new Intent(context, GrantService.class);
+	    // Create a new Messenger for the communication back
+	    Messenger messenger = new Messenger(callback);
+	    intent.putExtra("MESSENGER", messenger); // pass the callback
+	    intent.putExtra(TAG_REQUEST_DETAILS, details);
+	    intent.putExtra(TAG_REQUEST_GRANTS, grants);
+		intent.putExtra(TAG_REQUEST_TYPE, TAG_VIEWREQUEST_TYPE);
+	    return context.startService(intent);
+	}
+	
+	public static ComponentName saveHours(Context context, Handler callback, GrantData details, Bundle hours) {
+	    Intent intent = new Intent(context, GrantService.class);
+	    intent.putExtra(TAG_REQUEST_DETAILS, details);
+	    intent.putExtra("hours", hours);
+		intent.putExtra(TAG_REQUEST_TYPE, TAG_SAVEREQUEST_TYPE);
+		intent.putExtra("MESSENGER", new Messenger(callback));
+	    return context.startService(intent);
+	}
+	
+	public static ComponentName uploadHours(Context context, Handler callback, GrantData details, int[] hours) {
+	    Intent intent = new Intent(context, GrantService.class);
+	    intent.putExtra(TAG_REQUEST_DETAILS, details);
+	    intent.putExtra(TAG_REQUEST_GRANTS, hours);
+		intent.putExtra(TAG_REQUEST_TYPE, TAG_UPLOAD_TYPE);
+		intent.putExtra("MESSENGER", new Messenger(callback));
+	    return context.startService(intent);
+	}
+	
 	public static abstract class WeakrefHandler<T> extends Handler {
 		WeakReference<T> parent;
 		public WeakrefHandler<T> setParent(T parent) {
@@ -276,6 +318,10 @@ public class GrantService extends IntentService {
 	}
 	
 	public static class GrantData implements Serializable {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 3194878610273425327L;
 		public static final int GRANTID_LEAVE = -1;
 		public static final int GRANTID_NONGRANT = -2;
 		int employeeid;
