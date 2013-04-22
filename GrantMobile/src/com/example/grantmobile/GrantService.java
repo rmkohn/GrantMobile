@@ -116,25 +116,13 @@ public class GrantService extends IntentService {
 	    }
 	}
 	
-	private String[] getGrantStrings(int[] grantids) {
-		String[] grantStrings = new String[grantids.length + 2];
-		for (int i = 0; i < grantids.length; i++) {
-			grantStrings[i] = String.valueOf(grantids[i]);
-		}
-		// adding and removing these is terrible, but dealing with them in db.getTimes only moves the problem
-		// it messes up set membership tests too
-		grantStrings[grantids.length]   = "non-grant";
-		grantStrings[grantids.length+1] = "leave";
-		return grantStrings;
-	}
-	
 	private int uploadHours(Bundle extras) {
 		Log.i(TAG, "saving hours");
-		GrantData     data = (GrantData) extras.getSerializable(GrantService.TAG_REQUEST_DETAILS);
-		int[]     grantids =             extras.getIntArray    (GrantService.TAG_REQUEST_GRANTS);
+		GrantData        data = (GrantData) extras.getSerializable(GrantService.TAG_REQUEST_DETAILS);
+		String[] grantStrings =             extras.getStringArray (GrantService.TAG_REQUEST_GRANTS);
 		DBAdapter db = new DBAdapter(this);
 		db.open();
-		Map<String, double[]> hours = db.getTimes(data, getGrantStrings(grantids));
+		Map<String, double[]> hours = db.getTimes(data, grantStrings);
 		try {
 			JSONObject jsonHours = new JSONObject(hours);
 			Log.i(TAG, jsonHours.toString(2));
@@ -168,19 +156,18 @@ public class GrantService extends IntentService {
 
 	private Bundle getViewRequest(Bundle extras) {
 		Log.i(TAG, "handling viewrequest");
-		GrantData     data = (GrantData) extras.getSerializable(GrantService.TAG_REQUEST_DETAILS);
-		int[]     grantids =             extras.getIntArray    (GrantService.TAG_REQUEST_GRANTS);
+		GrantData        data = (GrantData) extras.getSerializable(GrantService.TAG_REQUEST_DETAILS);
+		String[] grantStrings =             extras.getStringArray (GrantService.TAG_REQUEST_GRANTS);
 		DBAdapter db = new DBAdapter(this);
 		db.open();
 		
-		String[] grantStrings = getGrantStrings(grantids);
 		Map<String, double[]> allHours = db.getTimes(data, grantStrings);
 		
 		if (allHours.size() < grantStrings.length) {
 			Set<String> missingKeys = new HashSet<String>(Arrays.asList(grantStrings));
 			missingKeys.removeAll(allHours.keySet());
-			missingKeys.remove("non-grant");
-			missingKeys.remove("leave");
+//			missingKeys.remove("non-grant");
+//			missingKeys.remove("leave");
 			Log.i(TAG, "retrieving values");
 			List<NameValuePair> params = new ArrayList<NameValuePair>();
 			params.add(new BasicNameValuePair("q", "viewrequest"));
@@ -188,7 +175,8 @@ public class GrantService extends IntentService {
 			params.add(new BasicNameValuePair("employee", String.valueOf(data.employeeid)));
 			params.add(new BasicNameValuePair("year", String.valueOf(data.year)));
 			params.add(new BasicNameValuePair("month", String.valueOf(data.month)));
-			params.add(new BasicNameValuePair("grant", Arrays.toString(grantids).replaceAll("\\[|\\]| ", "")));
+			params.add(new BasicNameValuePair("grant", DBAdapter.mkString(missingKeys, ",", "", "")));
+			Log.i(TAG, "making request with params: " + params);
 			json = JSONParser.makeHttpRequest(requestURL, "GET", params);
 			try {
 				if (json.getBoolean("success")) {
@@ -222,9 +210,6 @@ public class GrantService extends IntentService {
 		return result;
 	}
 		
-//	private Map<String, double[]> getFromCache(GrantData data, int[] grantids) {
-//	}
-
 	private Bundle getEmailRequest(Bundle extras) {
 		JSONArray jsa = null; // json array
 		JSONObject jso, jsom, jsoh = null; // misc., message & hours object
@@ -280,7 +265,7 @@ public class GrantService extends IntentService {
 		return null;
 	}
 	
-	public static ComponentName getHours(Context context, Handler callback, GrantData details, int[] grants) {
+	public static ComponentName getHours(Context context, Handler callback, GrantData details, String[] grants) {
 	    Intent intent = new Intent(context, GrantService.class);
 	    // Create a new Messenger for the communication back
 	    Messenger messenger = new Messenger(callback);
@@ -300,10 +285,10 @@ public class GrantService extends IntentService {
 	    return context.startService(intent);
 	}
 	
-	public static ComponentName uploadHours(Context context, Handler callback, GrantData details, int[] hours) {
+	public static ComponentName uploadHours(Context context, Handler callback, GrantData details, String[] grants) {
 	    Intent intent = new Intent(context, GrantService.class);
 	    intent.putExtra(TAG_REQUEST_DETAILS, details);
-	    intent.putExtra(TAG_REQUEST_GRANTS, hours);
+	    intent.putExtra(TAG_REQUEST_GRANTS, grants);
 		intent.putExtra(TAG_REQUEST_TYPE, TAG_UPLOAD_TYPE);
 		intent.putExtra("MESSENGER", new Messenger(callback));
 	    return context.startService(intent);

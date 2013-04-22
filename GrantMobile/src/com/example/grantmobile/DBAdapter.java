@@ -4,7 +4,9 @@ import java.io.DataOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import com.example.grantmobile.GrantService.GrantData;
@@ -140,12 +142,34 @@ public class DBAdapter {
     	return ret;
     }
     
-    public String getArrayQueryString(String[] array) {
-    	StringBuilder b = new StringBuilder("(");
-    	for (int i = 0; i < array.length - 1; i++) {
-    		b.append("\"" + array[i] + "\", ");
+//    public String getArrayQueryString(String[] array) {
+//    	StringBuilder b = new StringBuilder("(");
+//    	for (int i = 0; i < array.length - 1; i++) {
+//    		b.append("\"" + array[i] + "\", ");
+//    	}
+//    	b.append("\"" + array[array.length - 1] + "\")");
+//    	return b.toString();
+//    }
+    public static String getArrayQueryString(String[] array) {
+    	return mkString(array, "\", \"", "(\"", "\")");
+    }
+
+    public static String mkString(Object[] array, String sep, String start, String end) {
+    	return mkString(Arrays.asList(array), sep, start, end);
+    }
+
+    public static String mkString(Collection<?> array, String sep, String start, String end) {
+    	if (array.isEmpty())
+    		return start + end;
+    	StringBuilder b = new StringBuilder(start);
+    	Iterator<?> iter = array.iterator();
+    	while (true) {
+    		b.append(iter.next());
+    		if (!iter.hasNext())
+    			break;
+    		b.append(sep);
     	}
-    	b.append("\"" + array[array.length - 1] + "\")");
+    	b.append(end);
     	return b.toString();
     }
     

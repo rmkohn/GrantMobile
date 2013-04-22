@@ -68,7 +68,8 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 			public void onNothingSelected(AdapterView<?> parent) { }
 		});
 		
-		loadCalendar();
+		// called in onResume()
+//		loadCalendar();
 	}
 	
 	private void populateGrantSpinner() {
@@ -78,12 +79,26 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	private void loadCalendar() {
 		Log.i("calendareditactivity", "loadcalendar");
 		GrantService.GrantData data = new GrantService.GrantData(getYear(), getMonth()-1, userid);
-		GrantService.getHours(this, new CalendarEditHandler().setParent(this), data, grantids);
+		GrantService.getHours(this, new CalendarEditHandler().setParent(this), data, getGrantStrings());
+	}
+
+	private String[] getGrantStrings() {
+		String[] grantStrings = new String[grantids.length + 2];
+		for (int i = 0; i < grantids.length; i++) {
+			grantStrings[i] = String.valueOf(grantids[i]);
+		}
+		grantStrings[grantids.length]   = "non-grant";
+		grantStrings[grantids.length+1] = "leave";
+		return grantStrings;
 	}
 	
 	protected void updateCalendar() {
-		if (granthours != null && grantSpinner != null)
+		if (granthours != null && grantSpinner != null) {
+			Log.i("updatecalendar", String.format("selected grant %d: %s\nnongrant: %s\nleave: %s",
+					grantSpinner.getSelectedItemPosition(), getSelectedGrantHours(),
+					nongranthours, leavehours));
 			loadCalendar(getSelectedGrantHours(), nongranthours, leavehours);
+		}
 	}
 	
 	protected double[] getSelectedGrantHours() {

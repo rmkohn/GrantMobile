@@ -157,7 +157,8 @@ public class DetailEditActivity extends Activity {
 		nonGrantHoursView.setOnFocusChangeListener(editListener);
 		leaveHoursView   .setOnFocusChangeListener(editListener);
         
-		GrantService.getHours(this, new DetailHandler().setParent(this), grantdata, new int[] { grantId });
+		String[] hours = { String.valueOf(grantId), "non-grant", "leave" };
+		GrantService.getHours(this, new DetailHandler().setParent(this), grantdata, hours);
 	}
         
     private void updateView() {
