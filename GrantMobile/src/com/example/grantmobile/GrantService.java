@@ -17,6 +17,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import android.app.Activity;
 import android.app.IntentService;
@@ -28,6 +29,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 import android.util.Log;
+import android.widget.Toast;
 
 public class GrantService extends IntentService {
 	private static final String TAG_SUCCESS = "success";  // "true" is good
@@ -61,6 +63,7 @@ public class GrantService extends IntentService {
 	public static final String TAG_SAVEREQUEST_TYPE = "saveHours";
 	public static final String TAG_VIEWREQUEST_TYPE = "getHours";
 	public static final String TAG_UPLOAD_TYPE = "uploadHours";
+	public static final String TAG_DELETE_TYPE = "removeHours";
 
 	public static final String TAG_REQUEST_GRANTS = "grantIds";
 	public static final String TAG_REQUEST_DETAILS = "grantDetails";
@@ -100,6 +103,8 @@ public class GrantService extends IntentService {
 	    		result = saveHours(extras);
 	    	} else if (GrantService.TAG_UPLOAD_TYPE.equals(requestType)) {
 	    		result = uploadHours(extras);
+	    	} else if (GrantService.TAG_DELETE_TYPE.equals(requestType)) {
+	    		result = deleteHours(extras);
 	    	} else {
 	    		data = getEmailRequest(extras);
 	    	}
@@ -110,7 +115,9 @@ public class GrantService extends IntentService {
 	    }
 	    try {
 	    	msg.arg1 = result;
-	    	messenger.send(msg);
+	    	if (messenger != null) {
+		    	messenger.send(msg);
+	    	}
 	    } catch (android.os.RemoteException e1) {
 	    	Log.w(getClass().getName(), "Exception sending message", e1);
 	    }
@@ -123,17 +130,28 @@ public class GrantService extends IntentService {
 		DBAdapter db = new DBAdapter(this);
 		db.open();
 		Map<String, double[]> hours = db.getTimes(data, grantStrings);
+		db.close();
 		try {
-			JSONObject jsonHours = new JSONObject(hours);
+			// this is seriously the only way to load variables into the json object
+			// the map constructor for JSONObject and collection constructor for JSONArray don't work
+			JSONObject jsonHours = new JSONObject();
+			for (String key: hours.keySet()) {
+				JSONArray array = new JSONArray();
+				for (double hour: hours.get(key)) {
+					array.put(hour);
+				}
+				jsonHours.put(key, array);
+			}
 			Log.i(TAG, jsonHours.toString(2));
 			List<NameValuePair> params = new ArrayList<NameValuePair>();
-			params.add(new BasicNameValuePair("q", "add"));
+			params.add(new BasicNameValuePair("q", "updatehours"));
 			params.add(new BasicNameValuePair("employee", String.valueOf(data.employeeid)));
 			params.add(new BasicNameValuePair("year", String.valueOf(data.year)));
 			params.add(new BasicNameValuePair("month", String.valueOf(data.month)));
 			params.add(new BasicNameValuePair("hours", jsonHours.toString()));
+			params.add(new BasicNameValuePair("supervisor", "-1")); // not actually used, due to reasons
 			JSONObject result = JSONParser.makeHttpRequest(requestURL, "GET", params);
-			Log.i(TAG, result.get("message").toString());
+			Log.i(TAG, result.toString());
 			return result.getBoolean("success") ? Activity.RESULT_OK : Activity.RESULT_CANCELED;
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -153,6 +171,17 @@ public class GrantService extends IntentService {
 		db.close();
 		return Activity.RESULT_OK;
 	}
+	
+	private int deleteHours(Bundle extras) {
+		Log.i(TAG, "deleting hours");
+		GrantData        data = (GrantData) extras.getSerializable(GrantService.TAG_REQUEST_DETAILS);
+		String[] grantStrings =             extras.getStringArray (GrantService.TAG_REQUEST_GRANTS);
+		DBAdapter db = new DBAdapter(this);
+		db.open();
+		int deletedCount = db.deleteEntries(data, grantStrings);
+		db.close();
+		return deletedCount == grantStrings.length ? Activity.RESULT_OK : Activity.RESULT_CANCELED;
+	}
 
 	private Bundle getViewRequest(Bundle extras) {
 		Log.i(TAG, "handling viewrequest");
@@ -171,7 +200,6 @@ public class GrantService extends IntentService {
 			Log.i(TAG, "retrieving values");
 			List<NameValuePair> params = new ArrayList<NameValuePair>();
 			params.add(new BasicNameValuePair("q", "viewrequest"));
-			params.add(new BasicNameValuePair("withextras", "true"));
 			params.add(new BasicNameValuePair("employee", String.valueOf(data.employeeid)));
 			params.add(new BasicNameValuePair("year", String.valueOf(data.year)));
 			params.add(new BasicNameValuePair("month", String.valueOf(data.month)));
@@ -266,32 +294,36 @@ public class GrantService extends IntentService {
 	}
 	
 	public static ComponentName getHours(Context context, Handler callback, GrantData details, String[] grants) {
-	    Intent intent = new Intent(context, GrantService.class);
-	    // Create a new Messenger for the communication back
-	    Messenger messenger = new Messenger(callback);
-	    intent.putExtra("MESSENGER", messenger); // pass the callback
-	    intent.putExtra(TAG_REQUEST_DETAILS, details);
+	    Intent intent = getCommonIntent(context, callback, details, TAG_VIEWREQUEST_TYPE);
 	    intent.putExtra(TAG_REQUEST_GRANTS, grants);
-		intent.putExtra(TAG_REQUEST_TYPE, TAG_VIEWREQUEST_TYPE);
 	    return context.startService(intent);
 	}
 	
 	public static ComponentName saveHours(Context context, Handler callback, GrantData details, Bundle hours) {
-	    Intent intent = new Intent(context, GrantService.class);
-	    intent.putExtra(TAG_REQUEST_DETAILS, details);
+	    Intent intent = getCommonIntent(context, callback, details, TAG_SAVEREQUEST_TYPE);
 	    intent.putExtra("hours", hours);
-		intent.putExtra(TAG_REQUEST_TYPE, TAG_SAVEREQUEST_TYPE);
-		intent.putExtra("MESSENGER", new Messenger(callback));
 	    return context.startService(intent);
 	}
 	
 	public static ComponentName uploadHours(Context context, Handler callback, GrantData details, String[] grants) {
+	    Intent intent = getCommonIntent(context, callback, details, TAG_UPLOAD_TYPE);
+	    intent.putExtra(TAG_REQUEST_GRANTS, grants);
+	    return context.startService(intent);
+	}
+	
+	public static ComponentName deleteHours(Context context, Handler callback, GrantData details, String[] grants) {
+	    Intent intent = getCommonIntent(context, callback, details, TAG_DELETE_TYPE);
+	    intent.putExtra(TAG_REQUEST_GRANTS, grants);
+	    return context.startService(intent);
+	}
+	
+	private static Intent getCommonIntent(Context context, Handler callback, GrantData details, String requestType) {
 	    Intent intent = new Intent(context, GrantService.class);
 	    intent.putExtra(TAG_REQUEST_DETAILS, details);
-	    intent.putExtra(TAG_REQUEST_GRANTS, grants);
-		intent.putExtra(TAG_REQUEST_TYPE, TAG_UPLOAD_TYPE);
-		intent.putExtra("MESSENGER", new Messenger(callback));
-	    return context.startService(intent);
+		intent.putExtra(TAG_REQUEST_TYPE, requestType);
+		if (callback != null)
+			intent.putExtra("MESSENGER", new Messenger(callback));
+		return intent;
 	}
 	
 	public static abstract class WeakrefHandler<T> extends Handler {
@@ -299,6 +331,18 @@ public class GrantService extends IntentService {
 		public WeakrefHandler<T> setParent(T parent) {
 			this.parent = new WeakReference<T>(parent);
 			return this;
+		}
+	}
+	
+	public static class ToastHandler extends WeakrefHandler<Context> {
+		String successMessage, failureMessage;
+		public ToastHandler(String successMessage, String failureMessage) {
+			this.successMessage = successMessage;
+			this.failureMessage = failureMessage;
+		}
+		public void handleMessage(Message msg) {
+			String resultText = msg.arg1 == Activity.RESULT_OK ? successMessage : failureMessage;
+			Toast.makeText(parent.get(), resultText, Toast.LENGTH_LONG).show();
 		}
 	}
 	

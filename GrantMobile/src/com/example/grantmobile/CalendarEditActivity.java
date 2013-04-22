@@ -21,14 +21,18 @@ import android.os.Message;
 import android.os.Messenger;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.example.grantmobile.CalendarSquare.DaySquare;
 import com.example.grantmobile.CalendarSquare.ICalendarSquare;
+import com.example.grantmobile.GrantService.ToastHandler;
 
 public class CalendarEditActivity extends BaseCalendarActivity {
 	Spinner grantSpinner;
@@ -137,11 +141,39 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 			}
 		}
 	}
-
+	
 	@Override
 	protected void onResume() {
 		super.onResume();
 		loadCalendar();
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.edit, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		GrantService.GrantData data = new GrantService.GrantData(getYear(), getMonth()-1, userid);
+		String[] grantstrings = getGrantStrings();
+		switch (item.getItemId()) {
+		case R.id.mnuLoad:
+			// IntentService uses a single background thread, so this should work
+			GrantService.deleteHours(this, null, data, grantstrings);
+			loadCalendar();
+			break;
+		case R.id.mnuDialog:
+			Toast.makeText(this, "Sorry, not implemented yet", Toast.LENGTH_LONG).show();
+			break;
+		case R.id.mnuUpload:
+			Handler toaster = new ToastHandler("uploaded successfully", "error uploading").setParent(this);
+			GrantService.uploadHours(this, toaster, data, grantstrings);
+			break;
+		default: return false;
+		}
+		return true;
 	}
 
 

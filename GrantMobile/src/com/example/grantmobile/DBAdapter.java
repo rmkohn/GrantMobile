@@ -124,8 +124,7 @@ public class DBAdapter {
     }
     
     private Cursor getTimeCursor(GrantData data, String[] columns, String[] grants) {
-    	String query = String.format("year = %d and month = %d and userid = %d and grant in "
-    			+ getArrayQueryString(grants), data.year, data.month, data.employeeid);
+    	String query = getQueryString(data, grants);
     	Log.i("query", query);
     	Cursor c = db.query(TABLE_SAVEDREQUESTS, columns, query, null, null, null, null);
     	return c;
@@ -142,14 +141,15 @@ public class DBAdapter {
     	return ret;
     }
     
-//    public String getArrayQueryString(String[] array) {
-//    	StringBuilder b = new StringBuilder("(");
-//    	for (int i = 0; i < array.length - 1; i++) {
-//    		b.append("\"" + array[i] + "\", ");
-//    	}
-//    	b.append("\"" + array[array.length - 1] + "\")");
-//    	return b.toString();
-//    }
+    private String getQueryString(GrantData data, String[] grants) {
+    	return String.format("year = %d and month = %d and userid = %d and grant in "
+    			+ getArrayQueryString(grants), data.year, data.month, data.employeeid);
+    }
+    
+    public int deleteEntries(GrantData data, String[] grants) {
+    	return db.delete(TABLE_SAVEDREQUESTS, getQueryString(data, grants), null);
+    }
+    
     public static String getArrayQueryString(String[] array) {
     	return mkString(array, "\", \"", "(\"", "\")");
     }

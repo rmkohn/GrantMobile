@@ -20,6 +20,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.widget.Button;
@@ -246,4 +248,5 @@ public class DetailEditActivity extends Activity {
 	    hourBundle.putDoubleArray(String.valueOf(grantId), grantHours);
 	    GrantService.saveHours(this, new SaveHandler().setParent(this), data, hourBundle);
 	}
+
 }
