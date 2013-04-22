@@ -3,11 +3,13 @@ package com.example.grantmobile;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 
 import org.json.JSONObject;
 
 import com.example.grantmobile.GrantService.GrantData;
+import com.example.grantmobile.GrantService.WeakrefHandler;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,7 +21,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnFocusChangeListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,9 +70,9 @@ public class DetailEditActivity extends Activity {
 		
 	TextView dateView;
 	TextView dayView;
-	TextView grantHoursView;
-	TextView nonGrantHoursView;
-	TextView leaveHoursView;
+	EditText grantHoursView;
+	EditText nonGrantHoursView;
+	EditText leaveHoursView;
 	
 	TextView dayTotalHoursView;
 	TextView monthTotalHoursView;
@@ -77,7 +81,7 @@ public class DetailEditActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_detail_view);
+		setContentView(R.layout.edit_detail_view);
 		
 //		grantHours = new ArrayList<String>(); // grant hour array 
 //		nonGrantHours = new ArrayList<String>(); // non-grant hour array
@@ -101,9 +105,9 @@ public class DetailEditActivity extends Activity {
 		// setup view for displaying specific info for a given date
 		dateView = (TextView)findViewById(R.id.dateView);
 		dayView = (TextView)findViewById(R.id.dayOfWeekView);
-		grantHoursView = (TextView)findViewById(R.id.grantHoursView);
-		nonGrantHoursView = (TextView)findViewById(R.id.nonGrantHoursView);
-		leaveHoursView = (TextView)findViewById(R.id.leaveHoursView);
+		grantHoursView = (EditText)findViewById(R.id.grantHoursView);
+		nonGrantHoursView = (EditText)findViewById(R.id.nonGrantHoursView);
+		leaveHoursView = (EditText)findViewById(R.id.leaveHoursView);
 
 		dayTotalHoursView = (TextView)findViewById(R.id.dayTotalHoursView);
 		monthTotalHoursView = (TextView)findViewById(R.id.monthTotalHoursView);
@@ -133,9 +137,38 @@ public class DetailEditActivity extends Activity {
             }
         });
         
+        OnFocusChangeListener editListener = new OnFocusChangeListener() {
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+				double grant    = getTimeFromView(grantHoursView);
+				double nongrant = getTimeFromView(nonGrantHoursView);
+				double leave    = getTimeFromView(leaveHoursView);
+				grantHours   [domCurrent-1] = grant;
+				leaveHours   [domCurrent-1] = leave;
+				nonGrantHours[domCurrent-1] = nongrant;
+			}
+			private double getTimeFromView(EditText view) {
+				try {
+					return Double.valueOf(view.getText().toString());
+				} catch (NumberFormatException e) {
+					return 0;
+				}
+			}
+		};
+		
+		// prevent NPE if onFocusChange fires before we've loaded hours from the server
+		int monthLength = new GregorianCalendar(year, month, 1).getActualMaximum(Calendar.DATE);
+		grantHours    = new double[monthLength];
+		leaveHours    = new double[monthLength];
+		nonGrantHours = new double[monthLength];
+		
+		grantHoursView.setOnFocusChangeListener(editListener);
+		nonGrantHoursView.setOnFocusChangeListener(editListener);
+		leaveHoursView.setOnFocusChangeListener(editListener);
+        
 	    intent = new Intent(DetailEditActivity.this, GrantService.class);
 	    // Create a new Messenger for the communication back
-	    Messenger messenger = new Messenger(new DetailHandler(this));
+	    Messenger messenger = new Messenger(new DetailHandler().setParent(this));
 	    intent.putExtra("MESSENGER", messenger); // pass the callback
 	    intent.putExtra(CalendarEditActivity.TAG_REQUEST_DETAILS, grantdata);
 	    intent.putExtra(CalendarEditActivity.TAG_REQUEST_GRANTS, new int[] { grantId });
@@ -175,13 +208,7 @@ public class DetailEditActivity extends Activity {
 	}
 	
 //	private Handler handler = new Handler() {
-	public static class DetailHandler extends Handler {
-		WeakReference<DetailEditActivity> parent;
-		public DetailHandler(DetailEditActivity parent) {
-			super();
-			this.parent = new WeakReference<DetailEditActivity>(parent);
-		}
-
+	public static class DetailHandler extends WeakrefHandler<DetailEditActivity> {
 		@Override
 		public void handleMessage(Message message) {
 			DetailEditActivity a = parent.get();
@@ -199,5 +226,30 @@ public class DetailEditActivity extends Activity {
 						Toast.LENGTH_LONG).show();
 			}
 		}
+	}
+	
+	public static class SaveHandler extends WeakrefHandler<DetailEditActivity> {
+		public void handleMessage(Message message) {
+			String result = (message.arg1 == Activity.RESULT_OK)
+				? "hours saved"
+				: "something went wrong";
+			Toast.makeText(parent.get(), result, Toast.LENGTH_LONG).show();
+		}
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+	    Intent intent = new Intent(this, GrantService.class);
+	    GrantData data = new GrantData(year, month, employeeid);
+	    Bundle hourBundle = new Bundle();
+	    hourBundle.putDoubleArray(TAG_NON_GRANT, nonGrantHours);
+	    hourBundle.putDoubleArray(TAG_LEAVE, leaveHours);
+	    hourBundle.putDoubleArray(String.valueOf(grantId), grantHours);
+	    intent.putExtra(CalendarEditActivity.TAG_REQUEST_DETAILS, data);
+	    intent.putExtra("hours", hourBundle);
+		intent.putExtra(GrantService.TAG_REQUEST_TYPE, CalendarEditActivity.TAG_SAVEREQUEST_TYPE);
+		intent.putExtra("MESSENGER", new Messenger(new SaveHandler().setParent(this)));
+	    startService(intent);
 	}
 }

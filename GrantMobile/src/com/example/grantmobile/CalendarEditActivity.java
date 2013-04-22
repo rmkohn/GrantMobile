@@ -42,6 +42,7 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	public static final String TAG_REQUEST_DETAILS = "viewRequestDetails";
 	public static final String TAG_VIEWREQUEST_TYPE = "viewRequest";
 	public static final String TAG_REQUEST_GRANTS = "viewRequestGrants";
+	public static final String TAG_SAVEREQUEST_TYPE = "saveHours";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -140,6 +141,12 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 		}
 			
 		
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		loadCalendar();
 	}
 
 

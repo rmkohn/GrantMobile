@@ -1,6 +1,7 @@
 package com.example.grantmobile;
 
 import java.io.Serializable;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,6 +22,7 @@ import android.app.Activity;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 import android.util.Log;
@@ -80,9 +82,12 @@ public class GrantService extends IntentService {
     	Message msg = Message.obtain();
     	int result = Activity.RESULT_CANCELED;
 	    if (extras != null) {
-	    	Bundle data;
-	    	if (extras.get(TAG_REQUEST_TYPE).equals(CalendarEditActivity.TAG_VIEWREQUEST_TYPE)) {
+	    	Bundle data = null;
+	    	Object requestType = extras.get(TAG_REQUEST_TYPE);
+	    	if (CalendarEditActivity.TAG_VIEWREQUEST_TYPE.equals(requestType)) {
 	    		data = getViewRequest(extras);
+	    	} else if (CalendarEditActivity.TAG_SAVEREQUEST_TYPE.equals(requestType)) {
+	    		result = saveHours(extras);
 	    	} else {
 	    		data = getEmailRequest(extras);
 	    	}
@@ -99,6 +104,55 @@ public class GrantService extends IntentService {
 	    }
 	}
 	
+	private String[] getGrantStrings(int[] grantids) {
+		String[] grantStrings = new String[grantids.length + 2];
+		for (int i = 0; i < grantids.length; i++) {
+			grantStrings[i] = String.valueOf(grantids[i]);
+		}
+		// adding and removing these is terrible, but dealing with them in db.getTimes only moves the problem
+		// it messes up set membership tests too
+		grantStrings[grantids.length]   = "non-grant";
+		grantStrings[grantids.length+1] = "leave";
+		return grantStrings;
+	}
+	
+	private int uploadHours(Bundle extras) {
+		Log.i(TAG, "saving hours");
+		GrantData     data = (GrantData) extras.getSerializable(CalendarEditActivity.TAG_REQUEST_DETAILS);
+		int[]     grantids =             extras.getIntArray    (CalendarEditActivity.TAG_REQUEST_GRANTS);
+		DBAdapter db = new DBAdapter(this);
+		db.open();
+		Map<String, double[]> hours = db.getTimes(data, getGrantStrings(grantids));
+		try {
+			JSONObject jsonHours = new JSONObject(hours);
+			Log.i(TAG, jsonHours.toString(2));
+			List<NameValuePair> params = new ArrayList<NameValuePair>();
+			params.add(new BasicNameValuePair("q", "add"));
+			params.add(new BasicNameValuePair("employee", String.valueOf(data.employeeid)));
+			params.add(new BasicNameValuePair("year", String.valueOf(data.year)));
+			params.add(new BasicNameValuePair("month", String.valueOf(data.month)));
+			params.add(new BasicNameValuePair("hours", jsonHours.toString()));
+			JSONObject result = JSONParser.makeHttpRequest(requestURL, "GET", params);
+			return result.getBoolean("success") ? Activity.RESULT_OK : Activity.RESULT_CANCELED;
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return Activity.RESULT_CANCELED;
+	}
+	
+	private int saveHours(Bundle extras) {
+		Log.i(TAG, "saving hours");
+		GrantData     data = (GrantData) extras.getSerializable(CalendarEditActivity.TAG_REQUEST_DETAILS);
+		Bundle hourBundle  = extras.getBundle("hours");
+		DBAdapter db = new DBAdapter(this);
+		db.open();
+		for (String key: hourBundle.keySet()) {
+			db.saveEntry(data, key, hourBundle.getDoubleArray(key));
+		}
+		db.close();
+		return Activity.RESULT_OK;
+	}
+
 	private Bundle getViewRequest(Bundle extras) {
 		Log.i(TAG, "handling viewrequest");
 		GrantData     data = (GrantData) extras.getSerializable(CalendarEditActivity.TAG_REQUEST_DETAILS);
@@ -106,19 +160,14 @@ public class GrantService extends IntentService {
 		DBAdapter db = new DBAdapter(this);
 		db.open();
 		
-		String[] grantStrings = new String[grantids.length + 2];
-		for (int i = 0; i < grantids.length; i++) {
-			grantStrings[i] = String.valueOf(grantids[i]);
-		}
-		grantStrings[grantids.length]   = "non-grant";
-		grantStrings[grantids.length+1] = "leave";
-		
+		String[] grantStrings = getGrantStrings(grantids);
 		Map<String, double[]> allHours = db.getTimes(data, grantStrings);
 		
-		if (!allHours.keySet().containsAll(Arrays.asList(grantStrings))) {
-			// TODO: don't retrieve unneeded values
-			// this is actually pretty important, as CalendarEdit and DetailEdit are going to be stashing
-			// data here before uploading, and we don't want to overwrite any changes with old data
+		if (allHours.size() < grantStrings.length) {
+			Set<String> missingKeys = new HashSet<String>(Arrays.asList(grantStrings));
+			missingKeys.removeAll(allHours.keySet());
+			missingKeys.remove("non-grant");
+			missingKeys.remove("leave");
 			Log.i(TAG, "retrieving values");
 			List<NameValuePair> params = new ArrayList<NameValuePair>();
 			params.add(new BasicNameValuePair("q", "viewrequest"));
@@ -216,6 +265,14 @@ public class GrantService extends IntentService {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public static abstract class WeakrefHandler<T> extends Handler {
+		WeakReference<T> parent;
+		public WeakrefHandler<T> setParent(T parent) {
+			this.parent = new WeakReference<T>(parent);
+			return this;
+		}
 	}
 	
 	public static class GrantData implements Serializable {
