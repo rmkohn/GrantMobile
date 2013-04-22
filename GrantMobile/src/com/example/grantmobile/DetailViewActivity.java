@@ -14,46 +14,22 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+@SuppressLint("HandlerLeak")
 public class DetailViewActivity extends Activity {
 	// these two named parameter are for the Intent interface to this activity (both reference Strings)
 	public static final String TAG_REQUEST_ID = "RequestId"; // required, no default!!!!
 	public static final String TAG_DAY_OF_MONTH = "DayOfMonth"; // optional, default is first day of month
 
-	private static final String TAG = "detailview";
-	private static String requestURL = "http://mid-state.net/mobileclass2/android";
-	
 	JSONParser jParser = new JSONParser();
 	ArrayList<String> grantHours; // grant hour array 
 	ArrayList<String> nonGrantHours; // non-grant hour array
 	ArrayList<String> leaveHours;  // leave hour array
 	HashMap<String,String> map;
-	
-	private static final String TAG_SUCCESS = "success";  // "true" is good
-	private static final String TAG_MESSAGE = "message";
-
-	private static final String TAG_HOURS = "hours"; 
-	private static final String TAG_GRANT = "grant";
-	private static final String TAG_NON_GRANT = "non-grant";
-	private static final String TAG_LEAVE = "leave";
-	
-	private static final String TAG_MONTH = "month";
-	private static final String TAG_YEAR = "year";
-	
-	private static final String TAG_EMPLOYEE = "employee";
-	private static final String TAG_FIRST_NAME = "firstname";
-	private static final String TAG_LAST_NAME = "lastname";
-	private static final String TAG_EMPLOYEE_ID = "id";
-	
-	private static final String TAG_GRANT_ID = "ID";
-	private static final String TAG_STATE_CATALOG_NUM = "stateCatalogNum";
-	private static final String TAG_GRANT_NUMBER = "grantNumber";
-	private static final String TAG_GRANT_TITLE = "grantTitle";
 
 	JSONObject json = null; // entire json object
 
@@ -99,7 +75,7 @@ public class DetailViewActivity extends Activity {
 		Intent intent = getIntent();
 		String str = intent.getStringExtra(TAG_DAY_OF_MONTH);
 		if (str==null) {
-			domCurrent = 1;
+			domCurrent = 1; // default is first day of month
 		} else {
 			domCurrent = Integer.valueOf(str);
 		}
@@ -152,7 +128,6 @@ public class DetailViewActivity extends Activity {
         });
         
 		// start access of grant data, updateView() below will access the data when ready
-//		new GetGrantData().execute();
 	    intent = new Intent(context,GrantService.class);
 	    // Create a new Messenger for the communication back
 	    Messenger messenger = new Messenger(handler);
@@ -167,18 +142,18 @@ public class DetailViewActivity extends Activity {
 		// figure out what first day-of-week is for this month (dowStart)
     	Calendar cal = Calendar.getInstance();
     	cal.set(Calendar.DATE,1);
-    	cal.set(Calendar.MONTH, Integer.valueOf(map.get(TAG_MONTH)));
-    	cal.set(Calendar.YEAR, Integer.valueOf(map.get(TAG_YEAR)));
+    	cal.set(Calendar.MONTH, Integer.valueOf(map.get(GrantService.TAG_MONTH)));
+    	cal.set(Calendar.YEAR, Integer.valueOf(map.get(GrantService.TAG_YEAR)));
     	cal.set(Calendar.DAY_OF_MONTH, 1); 	
         dowStart = (cal.get(Calendar.DAY_OF_WEEK)-Calendar.SUNDAY)%7;
         
-		grantNameView.setText(map.get(TAG_GRANT_TITLE));
-		grantIdView.setText(map.get(TAG_GRANT_ID));
-		employeeNameView.setText(map.get(TAG_FIRST_NAME)+ " " + map.get(TAG_LAST_NAME));
-		catalogView.setText(map.get(TAG_STATE_CATALOG_NUM));
+		grantNameView.setText(map.get(GrantService.TAG_GRANT_TITLE));
+		grantIdView.setText(map.get(GrantService.TAG_GRANT_ID));
+		employeeNameView.setText(map.get(GrantService.TAG_FIRST_NAME)+ " " + map.get(GrantService.TAG_LAST_NAME));
+		catalogView.setText(map.get(GrantService.TAG_STATE_CATALOG_NUM));
     	
-		moy = Integer.parseInt(map.get(TAG_MONTH));
-    	dateView.setText(MOY[moy]+" "+domString+", "+map.get(TAG_YEAR));
+		moy = Integer.parseInt(map.get(GrantService.TAG_MONTH));
+    	dateView.setText(MOY[moy]+" "+domString+", "+map.get(GrantService.TAG_YEAR));
     	dayView.setText(DOW[(domCurrent+dowStart-1)%7]);
     	grantHoursView.setText(grantHours.get(domCurrent-1));
     	nonGrantHoursView.setText(nonGrantHours.get(domCurrent-1));
@@ -192,24 +167,22 @@ public class DetailViewActivity extends Activity {
     	monthTotalHoursView.setText(tgh.toString());
 	}
 	
-	@SuppressLint("HandlerLeak")
+    // handle response from GrantService
 	private Handler handler = new Handler() {
 		public void handleMessage(Message message) {
 			if (message.arg1 == RESULT_OK) {
-//				Toast.makeText(DetailViewActivity.this,
-//					message.getData().toString(), Toast.LENGTH_LONG)
-//		            .show();
-				grantHours = message.getData().getStringArrayList(TAG_GRANT);
-				nonGrantHours = message.getData().getStringArrayList(TAG_NON_GRANT);
-				leaveHours = message.getData().getStringArrayList(TAG_LEAVE);
-				map.put(TAG_GRANT_TITLE,message.getData().getString(TAG_GRANT_TITLE));
-				map.put(TAG_GRANT_ID,message.getData().getString(TAG_GRANT_ID));
-				map.put(TAG_STATE_CATALOG_NUM,message.getData().getString(TAG_STATE_CATALOG_NUM));		    	
-				map.put(TAG_FIRST_NAME,message.getData().getString(TAG_FIRST_NAME));
-				map.put(TAG_LAST_NAME,message.getData().getString(TAG_LAST_NAME));
-				map.put(TAG_MONTH,message.getData().getString(TAG_MONTH));
-				map.put(TAG_YEAR,message.getData().getString(TAG_YEAR));
-				moy = Integer.parseInt(message.getData().getString(TAG_MONTH));
+				// move bundle data into local variables...
+				grantHours = message.getData().getStringArrayList(GrantService.TAG_GRANT);
+				nonGrantHours = message.getData().getStringArrayList(GrantService.TAG_NON_GRANT);
+				leaveHours = message.getData().getStringArrayList(GrantService.TAG_LEAVE);
+				map.put(GrantService.TAG_GRANT_TITLE,message.getData().getString(GrantService.TAG_GRANT_TITLE));
+				map.put(GrantService.TAG_GRANT_ID,message.getData().getString(GrantService.TAG_GRANT_ID));
+				map.put(GrantService.TAG_STATE_CATALOG_NUM,message.getData().getString(GrantService.TAG_STATE_CATALOG_NUM));		    	
+				map.put(GrantService.TAG_FIRST_NAME,message.getData().getString(GrantService.TAG_FIRST_NAME));
+				map.put(GrantService.TAG_LAST_NAME,message.getData().getString(GrantService.TAG_LAST_NAME));
+				map.put(GrantService.TAG_MONTH,message.getData().getString(GrantService.TAG_MONTH));
+				map.put(GrantService.TAG_YEAR,message.getData().getString(GrantService.TAG_YEAR));
+				moy = Integer.parseInt(message.getData().getString(GrantService.TAG_MONTH));
 				updateView();
 			} else {
 				Toast.makeText(DetailViewActivity.this, "Download failed.",

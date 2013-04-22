@@ -20,26 +20,26 @@ import android.util.Log;
 
 public class GrantService extends IntentService {
 	
-	private static final String TAG_SUCCESS = "success";  // "true" is good
-	private static final String TAG_MESSAGE = "message";
+	public static final String TAG_SUCCESS = "success";  // "true" is good
+	public static final String TAG_MESSAGE = "message";
 
-	private static final String TAG_HOURS = "hours"; 
-	private static final String TAG_GRANT = "grant";
-	private static final String TAG_NON_GRANT = "non-grant";
-	private static final String TAG_LEAVE = "leave";
+	public static final String TAG_HOURS = "hours"; 
+	public static final String TAG_GRANT = "grant";
+	public static final String TAG_NON_GRANT = "non-grant";
+	public static final String TAG_LEAVE = "leave";
 	
-	private static final String TAG_MONTH = "month";
-	private static final String TAG_YEAR = "year";
+	public static final String TAG_MONTH = "month";
+	public static final String TAG_YEAR = "year";
 	
-	private static final String TAG_EMPLOYEE = "employee";
-	private static final String TAG_FIRST_NAME = "firstname";
-	private static final String TAG_LAST_NAME = "lastname";
-	private static final String TAG_EMPLOYEE_ID = "id";
+	public static final String TAG_EMPLOYEE = "employee";
+	public static final String TAG_FIRST_NAME = "firstname";
+	public static final String TAG_LAST_NAME = "lastname";
+	public static final String TAG_EMPLOYEE_ID = "id";
 	
-	private static final String TAG_GRANT_ID = "ID";
-	private static final String TAG_STATE_CATALOG_NUM = "stateCatalogNum";
-	private static final String TAG_GRANT_NUMBER = "grantNumber";
-	private static final String TAG_GRANT_TITLE = "grantTitle";
+	public static final String TAG_GRANT_ID = "ID";
+	public static final String TAG_STATE_CATALOG_NUM = "stateCatalogNum";
+	public static final String TAG_GRANT_NUMBER = "grantNumber";
+	public static final String TAG_GRANT_TITLE = "grantTitle";
 	
 	private static String requestURL = "http://mid-state.net/mobileclass2/android";
 	private static final String TAG = "grantservice";
