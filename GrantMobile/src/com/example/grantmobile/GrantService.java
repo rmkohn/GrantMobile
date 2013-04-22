@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -17,7 +16,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import android.app.Activity;
 import android.app.IntentService;
@@ -34,26 +32,27 @@ import android.util.Log;
 import android.widget.Toast;
 
 public class GrantService extends IntentService {
-	private static final String TAG_SUCCESS = "success";  // "true" is good
-	private static final String TAG_MESSAGE = "message";
+	
+	public static final String TAG_SUCCESS = "success";  // "true" is good
+	public static final String TAG_MESSAGE = "message";
 
-	private static final String TAG_HOURS = "hours"; 
-	private static final String TAG_GRANT = "grant";
-	private static final String TAG_NON_GRANT = "non-grant";
-	private static final String TAG_LEAVE = "leave";
+	public static final String TAG_HOURS = "hours"; 
+	public static final String TAG_GRANT = "grant";
+	public static final String TAG_NON_GRANT = "non-grant";
+	public static final String TAG_LEAVE = "leave";
 	
-	private static final String TAG_MONTH = "month";
-	private static final String TAG_YEAR = "year";
+	public static final String TAG_MONTH = "month";
+	public static final String TAG_YEAR = "year";
 	
-	private static final String TAG_EMPLOYEE = "employee";
-	private static final String TAG_FIRST_NAME = "firstname";
-	private static final String TAG_LAST_NAME = "lastname";
-	private static final String TAG_EMPLOYEE_ID = "id";
+	public static final String TAG_EMPLOYEE = "employee";
+	public static final String TAG_FIRST_NAME = "firstname";
+	public static final String TAG_LAST_NAME = "lastname";
+	public static final String TAG_EMPLOYEE_ID = "id";
 	
-	private static final String TAG_GRANT_ID = "ID";
-	private static final String TAG_STATE_CATALOG_NUM = "stateCatalogNum";
-	private static final String TAG_GRANT_NUMBER = "grantNumber";
-	private static final String TAG_GRANT_TITLE = "grantTitle";
+	public static final String TAG_GRANT_ID = "ID";
+	public static final String TAG_STATE_CATALOG_NUM = "stateCatalogNum";
+	public static final String TAG_GRANT_NUMBER = "grantNumber";
+	public static final String TAG_GRANT_TITLE = "grantTitle";
 	
 	private static String requestURL = "http://mid-state.net/mobileclass2/android";
 	private static final String TAG = "grantservice";
@@ -77,6 +76,7 @@ public class GrantService extends IntentService {
 	ArrayList<String> grantHours; // grant hour array 
 	ArrayList<String> nonGrantHours; // non-grant hour array
 	ArrayList<String> leaveHours;  // leave hour array
+	HashMap<String,String> map;
 	JSONObject json = null; // entire json object
 	DBAdapter db;
 	GrantBinder binder;
@@ -88,6 +88,8 @@ public class GrantService extends IntentService {
 		grantHours = new ArrayList<String>(); // grant hour array 
 		nonGrantHours = new ArrayList<String>(); // non-grant hour array
 		leaveHours = new ArrayList<String>();  // leave hour array
+		map = new HashMap<String,String>();
+		// TODO Auto-generated constructor stub
 	}
 	
 	@Override
