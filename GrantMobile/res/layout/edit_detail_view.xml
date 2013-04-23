@@ -6,7 +6,6 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="0.42"
         android:background="#ABABAB" >
 
         <TextView
@@ -17,7 +16,7 @@
             android:layout_alignBottom="@+id/textView5"
             android:layout_alignLeft="@+id/grantIdView"
             android:text="employee name"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
             android:id="@+id/catalogView"
@@ -27,7 +26,7 @@
             android:layout_alignBottom="@+id/textView13"
             android:layout_alignLeft="@+id/employeeNameView"
             android:text="catalog number"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
             android:id="@+id/textView3"
@@ -36,25 +35,7 @@
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/textView1"
             android:text="@string/grantIdLabel"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <ImageView
-            android:id="@+id/imageView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="14dp"
-            android:layout_toRightOf="@+id/textView1"
-            android:src="@drawable/mstc_logo" />
-
-        <TextView
-            android:id="@+id/textView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:text="@string/grantNameLabel"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
             android:id="@+id/textView5"
@@ -63,7 +44,7 @@
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/textView13"
             android:text="@string/employeeNameLabel"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
             android:id="@+id/textView13"
@@ -72,33 +53,51 @@
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/textView3"
             android:text="@string/catalogLabel"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/imageView1"
+            android:layout_marginTop="26dp"
+            android:text="@string/grantNameLabel"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="28dp"
+            android:src="@drawable/grantappicon" />
 
         <TextView
             android:id="@+id/grantIdView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_above="@+id/catalogView"
             android:layout_alignLeft="@+id/grantNameView"
-            android:layout_below="@+id/grantNameView"
             android:text="grant name"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
             android:id="@+id/grantNameView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/textView3"
+            android:layout_above="@+id/grantIdView"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="20dp"
+            android:layout_marginRight="77dp"
             android:text="waiting for data..."
-            android:textAppearance="?android:attr/textAppearanceSmall" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="124dp"
-        android:layout_weight="0.37" >
+        android:layout_height="wrap_content" >
 
         <TextView
             android:id="@+id/textView10"
@@ -107,9 +106,9 @@
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/textView11"
             android:text="@string/leaveHoursLabel"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-        <EditText
+        <TextView
             android:id="@+id/leaveHoursView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -117,7 +116,7 @@
             android:layout_below="@+id/nonGrantHoursView"
             android:gravity="right"
             android:text="leave hours"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
             android:id="@+id/textView11"
@@ -126,9 +125,9 @@
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/textView7"
             android:text="@string/nonGrantHoursLabel"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-        <EditText
+        <TextView
             android:id="@+id/nonGrantHoursView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -136,7 +135,7 @@
             android:layout_alignLeft="@+id/grantHoursView"
             android:gravity="right"
             android:text="non-grant hours"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
             android:id="@+id/textView15"
@@ -145,7 +144,7 @@
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/textView2"
             android:text="@string/monthTotalLabel"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
             android:id="@+id/dayTotalHoursView"
@@ -156,7 +155,7 @@
             android:layout_alignLeft="@+id/leaveHoursView"
             android:gravity="right"
             android:text="total day hours"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
             android:id="@+id/monthTotalHoursView"
@@ -167,9 +166,9 @@
             android:layout_alignLeft="@+id/dayTotalHoursView"
             android:gravity="right"
             android:text="monthly hours"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-        <EditText
+        <TextView
             android:id="@+id/grantHoursView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -178,7 +177,7 @@
             android:layout_marginTop="21dp"
             android:gravity="right"
             android:text="grant hours"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
             android:id="@+id/textView7"
@@ -188,7 +187,7 @@
             android:layout_alignBottom="@+id/grantHoursView"
             android:layout_alignParentLeft="true"
             android:text="@string/grantHoursLabel"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
             android:id="@+id/dayOfWeekView"
@@ -197,7 +196,7 @@
             android:layout_above="@+id/textView7"
             android:layout_alignLeft="@+id/grantHoursView"
             android:text="day of week"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
             android:id="@+id/textView4"
@@ -206,7 +205,7 @@
             android:layout_above="@+id/textView7"
             android:layout_alignParentLeft="true"
             android:text="@string/dayOfWeekLabel"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
             android:id="@+id/textView2"
@@ -216,7 +215,7 @@
             android:layout_below="@+id/textView10"
             android:layout_marginTop="14dp"
             android:text="@string/dayTotalLabel"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
             android:id="@+id/textView19"
@@ -224,9 +223,9 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:layout_marginTop="17dp"
+            android:layout_marginTop="22dp"
             android:text="@string/dateLabel"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
             android:id="@+id/dateView"
@@ -234,26 +233,17 @@
             android:layout_height="wrap_content"
             android:layout_alignBaseline="@+id/textView19"
             android:layout_alignBottom="@+id/textView19"
-            android:layout_marginLeft="24dp"
-            android:layout_toRightOf="@+id/textView15"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="126dp"
             android:text="date"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="66dp"
+        android:layout_height="wrap_content"
         android:background="#ABABAB" >
-
-        <Button
-            android:id="@+id/nextBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="32dp"
-            android:text="Next" />
 
         <Button
             android:id="@+id/returnBtn"
@@ -268,9 +258,42 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
+            android:layout_alignParentTop="true"
             android:layout_marginLeft="25dp"
             android:text="Back" />
+
+        <Button
+            android:id="@+id/nextBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="35dp"
+            android:text="Next" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <ImageView
+            android:id="@+id/imageView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textView6"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/sean" />
+
+        <TextView
+            android:id="@+id/textView6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="22dp"
+            android:text="Fearless Leader..."
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
     </RelativeLayout>
 
