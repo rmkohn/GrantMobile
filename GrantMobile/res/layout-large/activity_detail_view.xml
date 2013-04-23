@@ -72,7 +72,7 @@
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="28dp"
-            android:src="@drawable/mstc_logo" />
+            android:src="@drawable/grantappicon" />
 
         <TextView
             android:id="@+id/grantIdView"
