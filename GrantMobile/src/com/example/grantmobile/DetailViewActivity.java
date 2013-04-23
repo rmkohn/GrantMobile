@@ -22,6 +22,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+@SuppressLint("HandlerLeak")
 public class DetailViewActivity extends FragmentActivity {
 	// these two named parameter are for the Intent interface to this activity (both reference Strings)
 	public static final String TAG_REQUEST_ID = "RequestId"; // required, no default!!!!
@@ -132,7 +133,7 @@ public class DetailViewActivity extends FragmentActivity {
 		// start access of grant data, updateView() below will access the data when ready
 	    intent = new Intent(context,GrantService.class);
 	    // Create a new Messenger for the communication back
-	    Messenger messenger = new Messenger(new DetailHandler(this));
+	    Messenger messenger = new Messenger(handler);
 	    intent.putExtra("MESSENGER", messenger); // pass the callback
 	    intent.putExtra(DetailViewActivity.TAG_REQUEST_ID, requestId); // pass the parameter
 	    startService(intent);
@@ -170,38 +171,70 @@ public class DetailViewActivity extends FragmentActivity {
 	}
 	
     // handle response from GrantService
-	public static class DetailHandler extends Handler {
-		WeakReference<DetailViewActivity> parent;
-		public DetailHandler(DetailViewActivity parent) {
-			super();
-			this.parent = new WeakReference<DetailViewActivity>(parent);
-		}
-
-		@Override
+	private Handler handler = new Handler() {
 		public void handleMessage(Message message) {
-			DetailViewActivity a = parent.get();
-			if (a == null)
-			{
-				return;
-			}
 			if (message.arg1 == RESULT_OK) {
 				// move bundle data into local variables...
-				a.grantHours = message.getData().getStringArrayList(GrantService.TAG_GRANT);
-				a.nonGrantHours = message.getData().getStringArrayList(GrantService.TAG_NON_GRANT);
-				a.leaveHours = message.getData().getStringArrayList(GrantService.TAG_LEAVE);
-				a.map.put(GrantService.TAG_GRANT_TITLE,message.getData().getString(GrantService.TAG_GRANT_TITLE));
-				a.map.put(GrantService.TAG_GRANT_ID,message.getData().getString(GrantService.TAG_GRANT_ID));
-				a.map.put(GrantService.TAG_STATE_CATALOG_NUM,message.getData().getString(GrantService.TAG_STATE_CATALOG_NUM));		    	
-				a.map.put(GrantService.TAG_FIRST_NAME,message.getData().getString(GrantService.TAG_FIRST_NAME));
-				a.map.put(GrantService.TAG_LAST_NAME,message.getData().getString(GrantService.TAG_LAST_NAME));
-				a.map.put(GrantService.TAG_MONTH,message.getData().getString(GrantService.TAG_MONTH));
-				a.map.put(GrantService.TAG_YEAR,message.getData().getString(GrantService.TAG_YEAR));
-				a.moy = Integer.parseInt(message.getData().getString(GrantService.TAG_MONTH));
-				a.updateView();
+				grantHours = message.getData().getStringArrayList(GrantService.TAG_GRANT);
+				nonGrantHours = message.getData().getStringArrayList(GrantService.TAG_NON_GRANT);
+				leaveHours = message.getData().getStringArrayList(GrantService.TAG_LEAVE);
+				map.put(GrantService.TAG_GRANT_TITLE,message.getData().getString(GrantService.TAG_GRANT_TITLE));
+				map.put(GrantService.TAG_GRANT_ID,message.getData().getString(GrantService.TAG_GRANT_ID));
+				map.put(GrantService.TAG_STATE_CATALOG_NUM,message.getData().getString(GrantService.TAG_STATE_CATALOG_NUM));		    	
+				map.put(GrantService.TAG_FIRST_NAME,message.getData().getString(GrantService.TAG_FIRST_NAME));
+				map.put(GrantService.TAG_LAST_NAME,message.getData().getString(GrantService.TAG_LAST_NAME));
+				map.put(GrantService.TAG_MONTH,message.getData().getString(GrantService.TAG_MONTH));
+				map.put(GrantService.TAG_YEAR,message.getData().getString(GrantService.TAG_YEAR));
+				moy = Integer.parseInt(message.getData().getString(GrantService.TAG_MONTH));
+				updateView();
 			} else {
-				Toast.makeText(a, "Download failed.",
-						Toast.LENGTH_LONG).show();
+				Toast.makeText(DetailViewActivity.this, "Download failed.",
+		            Toast.LENGTH_LONG).show();
 			}
-		}
+	    };
+	};
+	
+	
+	/**
+	 * This procedure initializes the options menu.
+	 */
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		// Inflate the menu
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
+	
+    /**
+     * This procedure handles all of the options menu selection events.
+     */
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	
+		// Variables
+		
+		// The id of the menu item chosen
+		int itemId = 0;	
+		
+		// Determine id of item chosen, and respond accordingly
+		itemId = item.getItemId();
+		
+		switch (itemId) {
+		case (R.id.mnuDetail) :
+			Intent intent = new Intent(this, DetailViewActivity.class);
+			startActivity(intent);
+			break;
+		case (R.id.mnuDialog) :
+			//show dialog box
+			SubmitDialog dialog = new SubmitDialog();
+			FragmentManager manager = getSupportFragmentManager();
+			dialog.setUserID(732);
+			dialog.show(manager, "");
+			break;
+		}// end switch
+		
+		return true;
+		
 	}
 }
