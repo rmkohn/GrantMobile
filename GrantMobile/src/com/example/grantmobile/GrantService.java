@@ -76,6 +76,7 @@ public class GrantService extends IntentService {
 	ArrayList<String> nonGrantHours; // non-grant hour array
 	ArrayList<String> leaveHours;  // leave hour array
 	JSONObject json = null; // entire json object
+	static DBAdapter db;
 
 	
 	public GrantService() {
@@ -84,7 +85,6 @@ public class GrantService extends IntentService {
 		grantHours = new ArrayList<String>(); // grant hour array 
 		nonGrantHours = new ArrayList<String>(); // non-grant hour array
 		leaveHours = new ArrayList<String>();  // leave hour array
-		// TODO Auto-generated constructor stub
 	}
 	
 	@Override
@@ -127,10 +127,8 @@ public class GrantService extends IntentService {
 		Log.i(TAG, "saving hours");
 		GrantData        data = (GrantData) extras.getSerializable(GrantService.TAG_REQUEST_DETAILS);
 		String[] grantStrings =             extras.getStringArray (GrantService.TAG_REQUEST_GRANTS);
-		DBAdapter db = new DBAdapter(this);
-		db.open();
+		DBAdapter db = getDB();
 		Map<String, double[]> hours = db.getTimes(data, grantStrings);
-		db.close();
 		try {
 			// this is seriously the only way to load variables into the json object
 			// the map constructor for JSONObject and collection constructor for JSONArray don't work
@@ -163,12 +161,10 @@ public class GrantService extends IntentService {
 		Log.i(TAG, "saving hours");
 		GrantData     data = (GrantData) extras.getSerializable(GrantService.TAG_REQUEST_DETAILS);
 		Bundle hourBundle  = extras.getBundle("hours");
-		DBAdapter db = new DBAdapter(this);
-		db.open();
+		DBAdapter db = getDB();
 		for (String key: hourBundle.keySet()) {
 			db.saveEntry(data, key, hourBundle.getDoubleArray(key));
 		}
-		db.close();
 		return Activity.RESULT_OK;
 	}
 	
@@ -176,10 +172,8 @@ public class GrantService extends IntentService {
 		Log.i(TAG, "deleting hours");
 		GrantData        data = (GrantData) extras.getSerializable(GrantService.TAG_REQUEST_DETAILS);
 		String[] grantStrings =             extras.getStringArray (GrantService.TAG_REQUEST_GRANTS);
-		DBAdapter db = new DBAdapter(this);
-		db.open();
+		DBAdapter db = getDB();
 		int deletedCount = db.deleteEntries(data, grantStrings);
-		db.close();
 		return deletedCount == grantStrings.length ? Activity.RESULT_OK : Activity.RESULT_CANCELED;
 	}
 
@@ -187,8 +181,7 @@ public class GrantService extends IntentService {
 		Log.i(TAG, "handling viewrequest");
 		GrantData        data = (GrantData) extras.getSerializable(GrantService.TAG_REQUEST_DETAILS);
 		String[] grantStrings =             extras.getStringArray (GrantService.TAG_REQUEST_GRANTS);
-		DBAdapter db = new DBAdapter(this);
-		db.open();
+		DBAdapter db = getDB();
 		
 		Map<String, double[]> allHours = db.getTimes(data, grantStrings);
 		
@@ -203,7 +196,7 @@ public class GrantService extends IntentService {
 			params.add(new BasicNameValuePair("employee", String.valueOf(data.employeeid)));
 			params.add(new BasicNameValuePair("year", String.valueOf(data.year)));
 			params.add(new BasicNameValuePair("month", String.valueOf(data.month)));
-			params.add(new BasicNameValuePair("grant", DBAdapter.mkString(missingKeys, ",", "", "")));
+			params.add(new BasicNameValuePair("grant", db.mkString(missingKeys, ",", "", "")));
 			Log.i(TAG, "making request with params: " + params);
 			json = JSONParser.makeHttpRequest(requestURL, "GET", params);
 			try {
@@ -224,7 +217,6 @@ public class GrantService extends IntentService {
 				}
 			} catch (JSONException e) {
 				e.printStackTrace();
-				db.close();
 				return null;
 			}
 		} else {
@@ -234,7 +226,6 @@ public class GrantService extends IntentService {
 		for (String s: grantStrings) {
 			result.putDoubleArray(s, allHours.get(s));
 		}
-		db.close();
 		return result;
 	}
 		
@@ -291,6 +282,12 @@ public class GrantService extends IntentService {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	private DBAdapter getDB() {
+		if (db == null)
+			db = new DBAdapter();
+		return db;
 	}
 	
 	public static ComponentName getHours(Context context, Handler callback, GrantData details, String[] grants) {
