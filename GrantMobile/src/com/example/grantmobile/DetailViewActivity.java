@@ -11,16 +11,19 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 @SuppressLint("HandlerLeak")
-public class DetailViewActivity extends Activity {
+public class DetailViewActivity extends FragmentActivity {
 	// these two named parameter are for the Intent interface to this activity (both reference Strings)
 	public static final String TAG_REQUEST_ID = "RequestId"; // required, no default!!!!
 	public static final String TAG_DAY_OF_MONTH = "DayOfMonth"; // optional, default is first day of month
@@ -190,4 +193,48 @@ public class DetailViewActivity extends Activity {
 			}
 	    };
 	};
+	
+	
+	/**
+	 * This procedure initializes the options menu.
+	 */
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		// Inflate the menu
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
+	
+    /**
+     * This procedure handles all of the options menu selection events.
+     */
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	
+		// Variables
+		
+		// The id of the menu item chosen
+		int itemId = 0;	
+		
+		// Determine id of item chosen, and respond accordingly
+		itemId = item.getItemId();
+		
+		switch (itemId) {
+		case (R.id.mnuDetail) :
+			Intent intent = new Intent(this, DetailViewActivity.class);
+			startActivity(intent);
+			break;
+		case (R.id.mnuDialog) :
+			//show dialog box
+			SubmitDialog dialog = new SubmitDialog();
+			FragmentManager manager = getSupportFragmentManager();
+			dialog.setUserID(732);
+			dialog.show(manager, "");
+			break;
+		}// end switch
+		
+		return true;
+		
+	}
 }
