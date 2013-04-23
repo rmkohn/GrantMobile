@@ -1,27 +1,15 @@
 package com.example.grantmobile;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
-
-import org.json.JSONObject;
 
 import com.example.grantmobile.GrantService.GrantData;
 import com.example.grantmobile.GrantService.WeakrefHandler;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Message;
-import android.os.Messenger;
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.widget.Button;

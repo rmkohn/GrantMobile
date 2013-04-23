@@ -128,11 +128,11 @@ public class GrantService extends IntentService {
 	    }
 	}
 	
+	// handle upload intent, upload hours to the server
 	private int uploadHours(Bundle extras) {
 		Log.i(TAG, "saving hours");
 		GrantData        data = (GrantData) extras.getSerializable(GrantService.TAG_REQUEST_DETAILS);
 		String[] grantStrings =             extras.getStringArray (GrantService.TAG_REQUEST_GRANTS);
-		DBAdapter db = getDB();
 		Map<String, double[]> hours = db.getTimes(data, grantStrings);
 		try {
 			// this is seriously the only way to load variables into the json object
@@ -162,39 +162,41 @@ public class GrantService extends IntentService {
 		return Activity.RESULT_CANCELED;
 	}
 	
+	// handle save hours intent, save entries into the database
 	private int saveHours(Bundle extras) {
 		Log.i(TAG, "saving hours");
 		GrantData     data = (GrantData) extras.getSerializable(GrantService.TAG_REQUEST_DETAILS);
 		Bundle hourBundle  = extras.getBundle("hours");
-		DBAdapter db = getDB();
 		for (String key: hourBundle.keySet()) {
 			db.saveEntry(data, key, hourBundle.getDoubleArray(key));
 		}
 		return Activity.RESULT_OK;
 	}
 	
+	// handle delete hours intent, remove entries from the database
 	private int deleteHours(Bundle extras) {
 		Log.i(TAG, "deleting hours");
 		GrantData        data = (GrantData) extras.getSerializable(GrantService.TAG_REQUEST_DETAILS);
 		String[] grantStrings =             extras.getStringArray (GrantService.TAG_REQUEST_GRANTS);
-		DBAdapter db = getDB();
 		int deletedCount = db.deleteEntries(data, grantStrings);
 		return deletedCount == grantStrings.length ? Activity.RESULT_OK : Activity.RESULT_CANCELED;
 	}
 
+	// retrieve hours from database/server using a viewrequest command
+	// viewrequest returns the same data as the "hours" portion of an email command but it can return
+	// hours for multiple grants, and works for unsent grant requests
 	private Bundle getViewRequest(Bundle extras) {
 		Log.i(TAG, "handling viewrequest");
 		GrantData        data = (GrantData) extras.getSerializable(GrantService.TAG_REQUEST_DETAILS);
 		String[] grantStrings =             extras.getStringArray (GrantService.TAG_REQUEST_GRANTS);
-		DBAdapter db = getDB();
 		
+		// see if the db has our entries
 		Map<String, double[]> allHours = db.getTimes(data, grantStrings);
 		
 		if (allHours.size() < grantStrings.length) {
+			// not enough entries? okay, fetch the ones we're missing
 			Set<String> missingKeys = new HashSet<String>(Arrays.asList(grantStrings));
 			missingKeys.removeAll(allHours.keySet());
-//			missingKeys.remove("non-grant");
-//			missingKeys.remove("leave");
 			Log.i(TAG, "retrieving values");
 			List<NameValuePair> params = new ArrayList<NameValuePair>();
 			params.add(new BasicNameValuePair("q", "viewrequest"));
@@ -206,7 +208,9 @@ public class GrantService extends IntentService {
 			json = JSONParser.makeHttpRequest(requestURL, "GET", params);
 			try {
 				if (json.getBoolean("success")) {
+					// load doubles from json
 					JSONObject message = json.getJSONObject("message");
+					// (I don't know why this is unchecked)
 					@SuppressWarnings("unchecked")
 					Iterator<String> keys = message.keys();
 					while(keys.hasNext()) {
@@ -216,6 +220,7 @@ public class GrantService extends IntentService {
 						for (int i = 0; i < hours.length; i++) {
 							hours[i] = jsonHours.getDouble(i);
 						}
+						// save to our returned map, and to the db
 						allHours.put(key, hours);
 						db.saveEntry(data, key, hours);
 					}
@@ -289,10 +294,6 @@ public class GrantService extends IntentService {
 		return null;
 	}
 	
-	private DBAdapter getDB() {
-		return db;
-	}
-	
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -313,30 +314,44 @@ public class GrantService extends IntentService {
 		return binder;
 	}
 
+	/** the following static methods fill out an Intent with the appropriate extras for a particular command
+	 *  they're not necessary in any way, just slightly more convenient
+	 */
+	
+	// retrieve hours from database/server, and save any download hours to database
+	// to get updated hours from the server, you need to call deleteHours() first - there's no method to
+	// do both yet, sorry
 	public static ComponentName getHours(Context context, Handler callback, GrantData details, String[] grants) {
 	    Intent intent = getCommonIntent(context, callback, details, TAG_VIEWREQUEST_TYPE);
 	    intent.putExtra(TAG_REQUEST_GRANTS, grants);
 	    return context.startService(intent);
 	}
 	
+	/**
+	 * Save hours into database (only!)
+	 * @param hours String -> double[] map of hours
+	 */
 	public static ComponentName saveHours(Context context, Handler callback, GrantData details, Bundle hours) {
 	    Intent intent = getCommonIntent(context, callback, details, TAG_SAVEREQUEST_TYPE);
 	    intent.putExtra("hours", hours);
 	    return context.startService(intent);
 	}
 	
+	// upload hours from database to server (they must be saved to the database first)
 	public static ComponentName uploadHours(Context context, Handler callback, GrantData details, String[] grants) {
 	    Intent intent = getCommonIntent(context, callback, details, TAG_UPLOAD_TYPE);
 	    intent.putExtra(TAG_REQUEST_GRANTS, grants);
 	    return context.startService(intent);
 	}
 	
+	// delete hours from database
 	public static ComponentName deleteHours(Context context, Handler callback, GrantData details, String[] grants) {
 	    Intent intent = getCommonIntent(context, callback, details, TAG_DELETE_TYPE);
 	    intent.putExtra(TAG_REQUEST_GRANTS, grants);
 	    return context.startService(intent);
 	}
 	
+	// helper method, set some details used in common by the above methods
 	private static Intent getCommonIntent(Context context, Handler callback, GrantData details, String requestType) {
 	    Intent intent = new Intent(context, GrantService.class);
 	    intent.putExtra(TAG_REQUEST_DETAILS, details);
@@ -352,6 +367,8 @@ public class GrantService extends IntentService {
 		}
 	}
 	
+	// helper class to make lint stop whining about leaked references
+	// extend as MyRefHandler<MyActivity> and create with new MyRefHandler().setParent(this)
 	public static abstract class WeakrefHandler<T> extends Handler {
 		WeakReference<T> parent;
 		public WeakrefHandler<T> setParent(T parent) {
@@ -360,6 +377,7 @@ public class GrantService extends IntentService {
 		}
 	}
 	
+	// simple handler to pop up a Toast on success/failure
 	public static class ToastHandler extends WeakrefHandler<Context> {
 		String successMessage, failureMessage;
 		public ToastHandler(String successMessage, String failureMessage) {
@@ -372,6 +390,9 @@ public class GrantService extends IntentService {
 		}
 	}
 	
+	// class to hold the time/employee details needed to specify a grant's hours
+	// supposed to be the basis for a HashMap key-value store, but that didn't work out
+	// TODO: give it a more meaningful (or meaningful at all) name
 	public static class GrantData implements Serializable {
 		/**
 		 * 

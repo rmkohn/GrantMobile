@@ -30,6 +30,7 @@ public class DBAdapter {
     	return entry;
     }
     
+    // save new/updated grant hours into database
     public boolean saveEntry(GrantData data, String grant, double[] time) {
     	Log.i("DBAdapter", "saving " + grant);
     	Map<String, double[]> entry = getCacheEntry(data);
@@ -37,6 +38,7 @@ public class DBAdapter {
     	return true;
     }
     
+    // get a map of grant ids to hours for the supplied year/month/employee and grants
     public Map<String, double[]> getTimes(GrantData data, String[] grants) {
     	Map<String, double[]> entry = getCacheEntry(data);
     	Map<String, double[]> ret = new HashMap<String, double[]>(entry);
@@ -48,6 +50,7 @@ public class DBAdapter {
 	}
     
     
+    // remove all entries matching the provided keys
     public int deleteEntries(GrantData data, String[] grants) {
     	Map<String, double[]> entry = getCacheEntry(data);
     	int count = 0;
@@ -58,14 +61,17 @@ public class DBAdapter {
     	return count;
     }
     
+    // turn array into ("elem1","elem2",...)
     public static String getArrayQueryString(String[] array) {
     	return mkString(array, "\", \"", "(\"", "\")");
     }
 
+    // turn arrays into strings
     public static String mkString(Object[] array, String sep, String start, String end) {
     	return mkString(Arrays.asList(array), sep, start, end);
     }
 
+    // turn collections into strings
     public static String mkString(Collection<?> array, String sep, String start, String end) {
     	if (array.isEmpty())
     		return start + end;
