@@ -1,6 +1,5 @@
 package com.example.grantmobile;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -12,16 +11,18 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class DetailViewActivity extends Activity {
+public class DetailViewActivity extends FragmentActivity {
 	// these two named parameter are for the Intent interface to this activity (both reference Strings)
 	public static final String TAG_REQUEST_ID = "RequestId"; // required, no default!!!!
 	public static final String TAG_DAY_OF_MONTH = "DayOfMonth"; // optional, default is first day of month
@@ -129,7 +130,6 @@ public class DetailViewActivity extends Activity {
         });
         
 		// start access of grant data, updateView() below will access the data when ready
-//		new GetGrantData().execute();
 	    intent = new Intent(context,GrantService.class);
 	    // Create a new Messenger for the communication back
 	    Messenger messenger = new Messenger(new DetailHandler(this));
@@ -169,7 +169,7 @@ public class DetailViewActivity extends Activity {
     	monthTotalHoursView.setText(tgh.toString());
 	}
 	
-//	private Handler handler = new Handler() {
+    // handle response from GrantService
 	public static class DetailHandler extends Handler {
 		WeakReference<DetailViewActivity> parent;
 		public DetailHandler(DetailViewActivity parent) {
@@ -185,9 +185,7 @@ public class DetailViewActivity extends Activity {
 				return;
 			}
 			if (message.arg1 == RESULT_OK) {
-				//				Toast.makeText(DetailViewActivity.this,
-				//					message.getData().toString(), Toast.LENGTH_LONG)
-				//		            .show();
+				// move bundle data into local variables...
 				a.grantHours = message.getData().getStringArrayList(GrantService.TAG_GRANT);
 				a.nonGrantHours = message.getData().getStringArrayList(GrantService.TAG_NON_GRANT);
 				a.leaveHours = message.getData().getStringArrayList(GrantService.TAG_LEAVE);
