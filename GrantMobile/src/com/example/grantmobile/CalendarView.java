@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
+import java.util.ResourceBundle.Control;
 
 import org.json.JSONArray;
 
@@ -19,6 +20,7 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 public class CalendarView extends View {
 	
@@ -46,9 +48,11 @@ public class CalendarView extends View {
 	// Footer foreground color 
 	private static final int footerForegroundColor = Color.WHITE;
 	// Enlarged square background color
-	private static final int enlargedBackgroundColor = Color.BLUE;
+	private static final int enlargedBackgroundColor = Color.WHITE;
 	// Enlarged square foreground color 
-	private static final int enlargedForegroundColor = Color.YELLOW;
+	private static final int enlargedForegroundColor = Color.BLACK;
+	// Enlarged square border color
+	private static final int enlargedBorderColor = Color.BLACK;
 	// Calendar initial horizontal margin
 	private static final int calendarMarginX = 10;
 	// Calendar initial vertical margin
@@ -85,6 +89,8 @@ public class CalendarView extends View {
 	String grant = "";			
 	// Message for top of the calendar
 	String headerMessage = "";
+	// Date for top of the calendar
+	String headerDate = "";
 	// Message for bottom of the calendar
 	String footerMessage = "";
 	// Total grant hours for a month
@@ -156,7 +162,7 @@ public class CalendarView extends View {
 	    // The current display for the current calendar square
 	    String thisDisplay = "";
 	    // The optimal font size for the current text planned to be displayed
-	    int optimalFontSize;
+	    int fontSize;
 	    // Odd or even flag
 	    Boolean oddFlag = true;
 
@@ -175,11 +181,13 @@ public class CalendarView extends View {
 	    canvas.drawRect(curRect, paint);
 	    paint.setColor(headerForegroundColor);
 	    
-	    // Draw header texts with optimal font sizes
-	    optimalFontSize = 14;
-	    paint.setTextSize(optimalFontSize);
+	    // Draw header text
+	    fontSize = 32;
+	    paint.setTextSize(fontSize);
 	    canvas.drawText(headerMessage, calendarMarginX + 10,
-	            calendarMarginY + 10, paint);
+	            calendarMarginY + 40, paint);
+	    canvas.drawText(headerDate, calendarMarginX + 10,
+	            calendarMarginY + 75, paint);
 
 	    // Draw inner calendar squares
 	    paint.setStyle(Style.FILL_AND_STROKE);
@@ -218,9 +226,9 @@ public class CalendarView extends View {
 	        thisDisplay =
 	                calendar.get(currentCalendarSquareIndex).displayString;
 	        
-	        // Determine optimal font size
-	        optimalFontSize = 14;
-		    paint.setTextSize(optimalFontSize);
+	        // Set font size
+	        fontSize = 34;
+		    paint.setTextSize(fontSize);
 
 	        // Show display
 		        paint.setColor(dailyForegroundColor);
@@ -228,7 +236,7 @@ public class CalendarView extends View {
 	                calendar.get(currentCalendarSquareIndex).positionX
 	                + 10,
 	                calendar.get(currentCalendarSquareIndex).positionY
-	                + 15,
+	                + 28,
 	                paint);
 
 	    }// end for
@@ -251,16 +259,18 @@ public class CalendarView extends View {
 	    // Draw footer text
 	    paint.setColor(footerForegroundColor);
 
-	    optimalFontSize = 14;
-	    paint.setTextSize(optimalFontSize);
+	    fontSize = 30;
+	    paint.setTextSize(fontSize);
 	    
 	    canvas.drawText(footerMessage, calendarMarginX + 10,
-	            footerY + 10, paint);
+	            footerY + 32, paint);
 
 	    // Draw enlarged square and details if applicable
 	    if (enlargedSquare.positionX != 0) {
 	    	
+	    	// Draw square with border    	
 	    	paint.setColor(enlargedBackgroundColor);
+	    	paint.setStyle(Style.FILL_AND_STROKE);
 	    	curRect.set(
     			enlargedSquare.positionX,
     			enlargedSquare.positionY,
@@ -269,12 +279,64 @@ public class CalendarView extends View {
     			);
 	    	canvas.drawRect(curRect, paint);
 	    	
+	    	paint.setStyle(Style.STROKE);
+	    	paint.setColor(enlargedBorderColor);
+	    	canvas.drawRect(curRect, paint);
+	    	
+	    	// Draw text
+	    	
+	    	// Determine size
+		    fontSize = 26;
+		    paint.setTextSize(fontSize);
+	    	
+	    	// Info header
 	    	paint.setColor(enlargedForegroundColor);
+	    	paint.setStyle(Style.FILL);
 	    	canvas.drawText(enlargedSquare.displayString,
 	    		enlargedSquare.positionX + 10,
-	    		enlargedSquare.positionY + 10,
+	    		enlargedSquare.positionY + 30,
 	    		paint
 	    		);
+	    	
+	    	// Grant Hours
+	    	canvas.drawText(
+	    			String.valueOf(
+	    					"GRANT: " + enlargedSquare.grantHours
+	    			),
+		    		enlargedSquare.positionX + (int)(calendarSquareSizeW*0.25) + 10,
+		    		enlargedSquare.positionY + (int)(calendarSquareSizeH*1) + 10,
+		    		paint
+		    		);
+	    	
+	    	// Non-grant Hours
+	    	canvas.drawText(
+	    			String.valueOf(
+	    					"NON-GRANT: " + enlargedSquare.nonGrantHours
+	    			),
+		    		enlargedSquare.positionX + (int)(calendarSquareSizeW*0.25) + 10,
+		    		enlargedSquare.positionY + (int)(calendarSquareSizeH*1.5) + 10,
+		    		paint
+		    		);
+	    	
+	    	// Leave Hours
+	    	canvas.drawText(
+	    			String.valueOf(
+	    					"LEAVE: " + enlargedSquare.leave
+	    			),
+		    		enlargedSquare.positionX + (int)(calendarSquareSizeW*0.25) + 10,
+		    		enlargedSquare.positionY + (int)(calendarSquareSizeH*2) + 10,
+		    		paint
+		    		);
+	    	
+	    	// Total Hours
+	    	canvas.drawText(
+	    			String.valueOf(
+	    					"TOTAL: " + enlargedSquare.totalHours()
+	    			),
+		    		enlargedSquare.positionX + (int)(calendarSquareSizeW*0.25) + 10,
+		    		enlargedSquare.positionY + (int)(calendarSquareSizeH*2.5) + 10,
+		    		paint
+		    		);
 	    	
 	    }// end if
 
@@ -308,7 +370,7 @@ public class CalendarView extends View {
 	 */
 	private void initHeaderMessage()
 	{	
-		// load sample data
+		// Load sample data
 		initHeaderMessage(1, 2000, "Loading", "Loading");
 	}
 	
@@ -318,10 +380,7 @@ public class CalendarView extends View {
 	public void initHeaderMessage(int month, int headerYear, String grantName, String grantCatalogNum)
 	{	
 		// Variables
-		
-		// Long date message on the top of the calendar
-		String headerLongDate = "";
-		
+
 		// Load month, year, and grant name
 		// (Using provided data)
 		monthNumber = month;
@@ -332,10 +391,10 @@ public class CalendarView extends View {
 		getMonthDetails();
 	
 		// Determine long date
-		headerLongDate = monthName + ", " + year;
+		headerDate = monthName + ", " + year;
 				
 		// Determine header message
-		headerMessage = grant.trim() + " |:| " + headerLongDate;
+		headerMessage = grant.trim();
 	}
 	
 	/**
@@ -632,6 +691,9 @@ public class CalendarView extends View {
 		footerMessage = "Total Hours This Month: " +
 			String.valueOf(monthTotalHours);
 		
+		// Clear enlarged square
+		enlargedSquare = new CalendarSquare();
+		
 		// Refresh screen
         invalidate();
 	}
@@ -720,11 +782,20 @@ public class CalendarView extends View {
 		            		enlargedSquare.positionX -= calendarSquareSizeW;
 		            	}// end if
 		            	
-		            	enlargedSquare.displayString =
-	            			enlargedSquare.grantHours + "|" +
-	            			enlargedSquare.nonGrantHours + "|" +
-	            			enlargedSquare.leave + "|" +
-	            			enlargedSquare.totalHours();
+		            	// Set display string
+		            	
+		            	// If not weekly total, use date
+		            	if (enlargedSquare.dailyNumber != 0) {
+		            		enlargedSquare.displayString = 
+		            			monthNumber + "/" + enlargedSquare.dailyNumber + "/" + year + ":";
+		            		
+		            	} else {
+		            		// If weekly total, use week range
+		            		enlargedSquare.displayString = "WEEK " +
+		            			String.valueOf((int)(enlargedSquareIndex / (DAYSINAWEEK + 1))) + 
+		            			":";
+		            		
+		            	}// end if
 		            	
 	            	} else {
 	            		// If out of range, hide square
