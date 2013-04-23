@@ -14,7 +14,7 @@ import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
-public abstract class BaseCalendarActivity extends FragmentActivity {
+public abstract class BaseCalendarActivity extends GrantServiceBindingActivity {
 	
 	protected static final String TAG_REQUEST_ID = "RequestId"; // required, no default!!!!
 	protected static final String TAG_DAY_OF_MONTH = "DayOfMonth"; // optional, default = first day of month	

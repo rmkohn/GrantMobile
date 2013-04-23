@@ -24,8 +24,10 @@ import android.app.IntentService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.util.Log;
@@ -76,7 +78,8 @@ public class GrantService extends IntentService {
 	ArrayList<String> nonGrantHours; // non-grant hour array
 	ArrayList<String> leaveHours;  // leave hour array
 	JSONObject json = null; // entire json object
-	static DBAdapter db;
+	DBAdapter db;
+	GrantBinder binder;
 
 	
 	public GrantService() {
@@ -196,7 +199,7 @@ public class GrantService extends IntentService {
 			params.add(new BasicNameValuePair("employee", String.valueOf(data.employeeid)));
 			params.add(new BasicNameValuePair("year", String.valueOf(data.year)));
 			params.add(new BasicNameValuePair("month", String.valueOf(data.month)));
-			params.add(new BasicNameValuePair("grant", db.mkString(missingKeys, ",", "", "")));
+			params.add(new BasicNameValuePair("grant", DBAdapter.mkString(missingKeys, ",", "", "")));
 			Log.i(TAG, "making request with params: " + params);
 			json = JSONParser.makeHttpRequest(requestURL, "GET", params);
 			try {
@@ -285,11 +288,29 @@ public class GrantService extends IntentService {
 	}
 	
 	private DBAdapter getDB() {
-		if (db == null)
-			db = new DBAdapter();
 		return db;
 	}
 	
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		db = new DBAdapter();
+		binder = new GrantBinder();
+		Log.w(TAG, "newly created");
+	}
+
+	@Override
+	public void onDestroy() {
+		// TODO save to permanent storage (server or database)
+		super.onDestroy();
+		Log.w(TAG, "grant service shut down");
+	}
+
+	@Override
+	public IBinder onBind(Intent intent) {
+		return binder;
+	}
+
 	public static ComponentName getHours(Context context, Handler callback, GrantData details, String[] grants) {
 	    Intent intent = getCommonIntent(context, callback, details, TAG_VIEWREQUEST_TYPE);
 	    intent.putExtra(TAG_REQUEST_GRANTS, grants);
@@ -321,6 +342,12 @@ public class GrantService extends IntentService {
 		if (callback != null)
 			intent.putExtra("MESSENGER", new Messenger(callback));
 		return intent;
+	}
+	
+	public class GrantBinder extends Binder {
+		GrantService getService() {
+			return GrantService.this;
+		}
 	}
 	
 	public static abstract class WeakrefHandler<T> extends Handler {
@@ -361,10 +388,21 @@ public class GrantService extends IntentService {
 			result += 31 * result + month;
 			return result;
 		}
+		@Override public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (!(o instanceof GrantData))
+				return false;
+			GrantData other = (GrantData) o;
+			return employeeid == other.employeeid && year == other.year && month == other.month;
+		}
 		public GrantData(int year, int month, int employeeid) {
 			this.year = year;
 			this.month = month;
 			this.employeeid = employeeid;
+		}
+		@Override public String toString() {
+			return String.format("GrantData(%d, %d, %d)", year, month, employeeid);
 		}
 	}
 	

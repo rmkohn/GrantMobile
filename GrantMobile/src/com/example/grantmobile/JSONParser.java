@@ -148,12 +148,12 @@ public class JSONParser {
 					return makeHttpRequest(url, method, RequestBuilder.this.params);
 				}
 				protected void onPostExecute(JSONObject result) {
-				    try {
-                        Log.i("JSONParser", result == null ? "null" : result.toString(2));
-                    } catch (JSONException e1) {
-                        // TODO Auto-generated catch block
-                        e1.printStackTrace();
-                    }
+//				    try {
+//                        Log.i("JSONParser", result == null ? "null" : result.toString(2));
+//                    } catch (JSONException e1) {
+//                        // TODO Auto-generated catch block
+//                        e1.printStackTrace();
+//                    }
 				    handler.onPostExecute();
 					try {
 				    	if (result.getBoolean("success"))
