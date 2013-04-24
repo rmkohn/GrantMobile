@@ -170,6 +170,12 @@ public class JSONParser {
 						handler.onError(e);
 					}
 				}
+				@Override
+				protected void onCancelled() {
+					super.onCancelled();
+					handler.onCancelled();
+				}
+				
 			}.execute();
 		}
 		
@@ -179,6 +185,7 @@ public class JSONParser {
         public void onSuccess(Object result) throws JSONException, IOException;
         public void onFailure(String errorMessage);
         public void onError(Exception e);
+        public void onCancelled();
 	}
 	
 	public static class SimpleResultHandler implements ResultHandler {
@@ -186,6 +193,7 @@ public class JSONParser {
         public void onSuccess(Object result) throws JSONException, IOException { }
         public void onFailure(String errorMessage) { Log.w("GrantMobile", errorMessage); }
         public void onError(Exception e) { e.printStackTrace(); }
+        public void onCancelled() { }
 	}
 	
 	

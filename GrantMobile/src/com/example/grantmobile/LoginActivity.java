@@ -12,6 +12,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
@@ -110,6 +111,7 @@ public class LoginActivity extends Activity {
 		if (mAuthTask != null) {
 			return;
 		}
+		Log.i("loginactivity", "attemptlogin");
 
 		// Reset errors.
 		mEmailView.setError(null);
@@ -159,7 +161,7 @@ public class LoginActivity extends Activity {
 			// perform the user login attempt.
 			mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
 			showProgress(true);
-		    new JSONParser.RequestBuilder("http://mid-state.net/mobileclass2/android")
+		    mAuthTask = new JSONParser.RequestBuilder("http://mid-state.net/mobileclass2/android")
 		    .addParam("q", "login")
 		    .addParam("id", mEmployeeId)
 		    .addParam("pass", mPassword)
@@ -174,6 +176,7 @@ public class LoginActivity extends Activity {
 		        	String name = result.getString("firstname") + " " + result.getString("lastname");
 		        	int id = result.getInt("id");
 		            Toast.makeText(LoginActivity.this, "Logged in as " + name, Toast.LENGTH_LONG).show();
+		            Log.i("loginactivity", "logged in successfully");
 		            continueAsUser(id);
 		        }
 		        public void onFailure(String message) {
@@ -181,7 +184,7 @@ public class LoginActivity extends Activity {
 						.setError(getString(R.string.error_incorrect_password));
     				mPasswordView.requestFocus();
 		        }
-		        protected void onCancelled() {
+		        public void onCancelled() {
 		            mAuthTask = null;
 		            showProgress(false);
 		        }
