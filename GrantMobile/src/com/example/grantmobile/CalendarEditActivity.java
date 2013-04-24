@@ -2,6 +2,7 @@ package com.example.grantmobile;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -68,8 +69,17 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	
 	private void loadCalendar() {
 		Log.i("calendareditactivity", "loadcalendar");
-		GrantService.GrantData data = new GrantService.GrantData(getYear(), getMonth()-1, userid);
-		GrantService.getHours(this, new CalendarEditHandler().setParent(this), data, getGrantStrings());
+		final GrantService.GrantData data = new GrantService.GrantData(getYear(), getMonth()-1, userid);
+//		GrantService.getHours(this, new CalendarEditHandler().setParent(this), data, getGrantStrings());
+		new AsyncTask<Void, Void, Bundle>() {
+			protected Bundle doInBackground(Void... params) {
+				return getService().getViewRequest(data, getGrantStrings());
+			}
+			protected void onPostExecute(Bundle result) {
+				super.onPostExecute(result);
+				assignNewData(result);
+			}
+		}.execute((Void[])null);
 	}
 
 	private String[] getGrantStrings() {
@@ -115,22 +125,31 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 				return;
 			if (msg.arg1 == Activity.RESULT_OK) {
 				Bundle data = msg.getData();
-				SparseArray<double[]> granthours = new SparseArray<double[]>();
-				for (int i: a.grantids) {
-					granthours.append(i, data.getDoubleArray(String.valueOf(i)));
-				}
-				a.granthours    = granthours;
-				a.nongranthours = data.getDoubleArray("non-grant");
-				a.leavehours    = data.getDoubleArray("leave");
-				
-				a.updateCalendar();
+				a.assignNewData(data);
 			}
 		}
+	}
+	
+	public void assignNewData(Bundle data) {
+		SparseArray<double[]> granthours = new SparseArray<double[]>();
+		for (int i: grantids) {
+			granthours.append(i, data.getDoubleArray(String.valueOf(i)));
+		}
+		this.granthours    = granthours;
+		this.nongranthours = data.getDoubleArray("non-grant");
+		this.leavehours    = data.getDoubleArray("leave");
+		this.updateCalendar();
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
+		if (getService() != null)
+			loadCalendar();
+	}
+	
+	@Override
+	protected void onBound() {
 		loadCalendar();
 	}
 	

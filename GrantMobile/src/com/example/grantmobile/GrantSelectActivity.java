@@ -26,7 +26,11 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.os.Build;
 
-public class GrantSelectActivity extends Activity {
+// this activity gets reopened for a split-second when CalendarEditView rotates
+// that split-second is enough to shut down GrantService if the foreground activity (this)
+// doesn't also use it.
+// (this may all be an emulator artifact; its timescale and memory management are a tiny bit wonky)
+public class GrantSelectActivity extends GrantServiceBindingActivity {
 	public static final String TAG_INTENT_GRANT_NAMES = "grantnames";
 
 	public static final String TAG_INTENT_GRANT_IDS = "grantids";

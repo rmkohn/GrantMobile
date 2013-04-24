@@ -96,6 +96,8 @@ public class GrantService extends IntentService {
 	protected void onHandleIntent(Intent intent) {
 		Log.i(TAG, "handling intent");
 	    Bundle extras = intent.getExtras();
+	    if (extras == null)
+	    	return;
     	Messenger messenger = (Messenger) extras.get("MESSENGER");
     	Message msg = Message.obtain();
     	int result = Activity.RESULT_CANCELED;
@@ -167,6 +169,9 @@ public class GrantService extends IntentService {
 		Log.i(TAG, "saving hours");
 		GrantData     data = (GrantData) extras.getSerializable(GrantService.TAG_REQUEST_DETAILS);
 		Bundle hourBundle  = extras.getBundle("hours");
+		return saveHours(data, hourBundle);
+	}
+	public int saveHours(GrantData data, Bundle hourBundle) {
 		for (String key: hourBundle.keySet()) {
 			db.saveEntry(data, key, hourBundle.getDoubleArray(key));
 		}
@@ -178,6 +183,9 @@ public class GrantService extends IntentService {
 		Log.i(TAG, "deleting hours");
 		GrantData        data = (GrantData) extras.getSerializable(GrantService.TAG_REQUEST_DETAILS);
 		String[] grantStrings =             extras.getStringArray (GrantService.TAG_REQUEST_GRANTS);
+		return deleteHours(data, grantStrings);
+	}
+	public int deleteHours(GrantData data, String[] grantStrings) {
 		int deletedCount = db.deleteEntries(data, grantStrings);
 		return deletedCount == grantStrings.length ? Activity.RESULT_OK : Activity.RESULT_CANCELED;
 	}
@@ -189,7 +197,9 @@ public class GrantService extends IntentService {
 		Log.i(TAG, "handling viewrequest");
 		GrantData        data = (GrantData) extras.getSerializable(GrantService.TAG_REQUEST_DETAILS);
 		String[] grantStrings =             extras.getStringArray (GrantService.TAG_REQUEST_GRANTS);
-		
+		return getViewRequest(data, grantStrings);
+	}
+	public Bundle getViewRequest(GrantData data, String[] grantStrings) {
 		// see if the db has our entries
 		Map<String, double[]> allHours = db.getTimes(data, grantStrings);
 		
