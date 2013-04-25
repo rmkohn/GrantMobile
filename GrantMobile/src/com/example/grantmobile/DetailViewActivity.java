@@ -4,15 +4,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
-
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.os.Messenger;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
@@ -22,13 +19,34 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-@SuppressLint("HandlerLeak")
 public class DetailViewActivity extends FragmentActivity {
 	// these two named parameter are for the Intent interface to this activity (both reference Strings)
 	public static final String TAG_REQUEST_ID = "RequestId"; // required, no default!!!!
 	public static final String TAG_DAY_OF_MONTH = "DayOfMonth"; // optional, default is first day of month
-
-	JSONParser jParser = new JSONParser();
+	public static final String requestURL = "http://mid-state.net/mobileclass2/android";
+	
+	public static final String TAG_SUCCESS = "success";  // "true" is good
+	public static final String TAG_MESSAGE = "message";
+	
+	public static final String TAG_HOURS = "hours"; 
+	public static final String TAG_GRANT = "grant";
+	public static final String TAG_NON_GRANT = "non-grant";
+	public static final String TAG_LEAVE = "leave";
+	
+	public static final String TAG_MONTH = "month";
+	public static final String TAG_YEAR = "year";
+	
+	public static final String TAG_SUPERVISOR = "supervisor";
+	public static final String TAG_EMPLOYEE = "employee";
+	public static final String TAG_FIRST_NAME = "firstname";
+	public static final String TAG_LAST_NAME = "lastname";
+	public static final String TAG_EMPLOYEE_ID = "id";
+	
+	public static final String TAG_GRANT_ID = "ID";
+	public static final String TAG_STATE_CATALOG_NUM = "stateCatalogNum";
+	public static final String TAG_GRANT_NUMBER = "grantNumber";
+	public static final String TAG_GRANT_TITLE = "grantTitle";
+	
 	ArrayList<String> grantHours; // grant hour array 
 	ArrayList<String> nonGrantHours; // non-grant hour array
 	ArrayList<String> leaveHours;  // leave hour array
@@ -47,19 +65,9 @@ public class DetailViewActivity extends FragmentActivity {
 	Integer moy;
 	public static String requestId;
 	
-	TextView grantNameView;
-	TextView grantIdView;
-	TextView employeeNameView;
-	TextView catalogView;
-		
-	TextView dateView;
-	TextView dayView;
-	TextView grantHoursView;
-	TextView nonGrantHoursView;
-	TextView leaveHoursView;
-	
-	TextView dayTotalHoursView;
-	TextView monthTotalHoursView;
+	TextView grantNameView, grantIdView, employeeNameView, catalogView;		
+	TextView dateView, dayView, grantHoursView, nonGrantHoursView, leaveHoursView;
+	TextView dayTotalHoursView, monthTotalHoursView;
 	
 	Context context;
 	
@@ -131,12 +139,11 @@ public class DetailViewActivity extends FragmentActivity {
         });
         
 		// start access of grant data, updateView() below will access the data when ready
-	    intent = new Intent(context,GrantService.class);
-	    // Create a new Messenger for the communication back
-	    Messenger messenger = new Messenger(handler);
-	    intent.putExtra("MESSENGER", messenger); // pass the callback
-	    intent.putExtra(DetailViewActivity.TAG_REQUEST_ID, requestId); // pass the parameter
-	    startService(intent);
+		new JSONParser.RequestBuilder(requestURL)
+		.setUrl(requestURL)
+		.addParam("q", "email")
+		.addParam("id", String.valueOf(requestId))
+		.makeRequest(new JSONResultHandler());
 	}
         
     private void updateView() {
@@ -145,18 +152,18 @@ public class DetailViewActivity extends FragmentActivity {
 		// figure out what first day-of-week is for this month (dowStart)
     	Calendar cal = Calendar.getInstance();
     	cal.set(Calendar.DATE,1);
-    	cal.set(Calendar.MONTH, Integer.valueOf(map.get(GrantService.TAG_MONTH)));
-    	cal.set(Calendar.YEAR, Integer.valueOf(map.get(GrantService.TAG_YEAR)));
+    	cal.set(Calendar.MONTH, Integer.valueOf(map.get(TAG_MONTH)));
+    	cal.set(Calendar.YEAR, Integer.valueOf(map.get(TAG_YEAR)));
     	cal.set(Calendar.DAY_OF_MONTH, 1); 	
         dowStart = (cal.get(Calendar.DAY_OF_WEEK)-Calendar.SUNDAY)%7;
         
-		grantNameView.setText(map.get(GrantService.TAG_GRANT_TITLE));
-		grantIdView.setText(map.get(GrantService.TAG_GRANT_ID));
-		employeeNameView.setText(map.get(GrantService.TAG_FIRST_NAME)+ " " + map.get(GrantService.TAG_LAST_NAME));
-		catalogView.setText(map.get(GrantService.TAG_STATE_CATALOG_NUM));
+		grantNameView.setText(map.get(TAG_GRANT_TITLE));
+		grantIdView.setText(map.get(TAG_GRANT_ID));
+		employeeNameView.setText(map.get(TAG_FIRST_NAME)+ " " + map.get(TAG_LAST_NAME));
+		catalogView.setText(map.get(TAG_STATE_CATALOG_NUM));
     	
-		moy = Integer.parseInt(map.get(GrantService.TAG_MONTH));
-    	dateView.setText(MOY[moy]+" "+domString+", "+map.get(GrantService.TAG_YEAR));
+		moy = Integer.parseInt(map.get(TAG_MONTH));
+    	dateView.setText(MOY[moy]+" "+domString+", "+map.get(TAG_YEAR));
     	dayView.setText(DOW[(domCurrent+dowStart-1)%7]);
     	grantHoursView.setText(grantHours.get(domCurrent-1));
     	nonGrantHoursView.setText(nonGrantHours.get(domCurrent-1));
@@ -170,30 +177,61 @@ public class DetailViewActivity extends FragmentActivity {
     	monthTotalHoursView.setText(tgh.toString());
 	}
 	
-    // handle response from GrantService
-	private Handler handler = new Handler() {
-		public void handleMessage(Message message) {
-			if (message.arg1 == RESULT_OK) {
-				// move bundle data into local variables...
-				grantHours = message.getData().getStringArrayList(GrantService.TAG_GRANT);
-				nonGrantHours = message.getData().getStringArrayList(GrantService.TAG_NON_GRANT);
-				leaveHours = message.getData().getStringArrayList(GrantService.TAG_LEAVE);
-				map.put(GrantService.TAG_GRANT_TITLE,message.getData().getString(GrantService.TAG_GRANT_TITLE));
-				map.put(GrantService.TAG_GRANT_ID,message.getData().getString(GrantService.TAG_GRANT_ID));
-				map.put(GrantService.TAG_STATE_CATALOG_NUM,message.getData().getString(GrantService.TAG_STATE_CATALOG_NUM));		    	
-				map.put(GrantService.TAG_FIRST_NAME,message.getData().getString(GrantService.TAG_FIRST_NAME));
-				map.put(GrantService.TAG_LAST_NAME,message.getData().getString(GrantService.TAG_LAST_NAME));
-				map.put(GrantService.TAG_MONTH,message.getData().getString(GrantService.TAG_MONTH));
-				map.put(GrantService.TAG_YEAR,message.getData().getString(GrantService.TAG_YEAR));
-				moy = Integer.parseInt(message.getData().getString(GrantService.TAG_MONTH));
+    class JSONResultHandler extends JSONParser.SimpleResultHandler {
+		@Override
+		public void onSuccess(Object oResult) {
+			try {
+				Toast.makeText(context, "invoked JSON parser", Toast.LENGTH_LONG).show();
+				JSONObject json = (JSONObject) oResult;
+				JSONArray jsa = null; // json array
+				JSONObject jso = null; // misc., message & hours object
+//				Toast.makeText(context, json.toString(), Toast.LENGTH_LONG).show();
+				
+				// get time arrays
+    			jso = json.getJSONObject(TAG_HOURS);
+    			jsa = jso.getJSONArray(TAG_GRANT);
+    			for (int i = 0; i < jsa.length(); i++) {
+    				grantHours.add((Integer.valueOf(jsa.getInt(i))).toString());  // these are the grant hours for each day of month
+    			}
+    			jsa = jso.getJSONArray(TAG_NON_GRANT);
+    			for (int i = 0; i < jsa.length(); i++){
+    				nonGrantHours.add((Integer.valueOf(jsa.getInt(i))).toString());  // these are the non-grant hours for each day of month
+    			}
+    			jsa = jso.getJSONArray(TAG_LEAVE);
+    			for (int i = 0; i < jsa.length(); i++){
+    				leaveHours.add((Integer.valueOf(jsa.getInt(i))).toString());  // these are the leave hours for each day of month
+    			}
+    			
+				// get date info
+				map.put(TAG_MONTH,json.getString(TAG_MONTH));
+				moy = Integer.parseInt(json.getString(TAG_MONTH));
+				map.put(TAG_YEAR,json.getString(TAG_YEAR));
+				
+    			// get employee info
+				jso = json.getJSONObject(TAG_EMPLOYEE);
+				map.put(TAG_FIRST_NAME,jso.getString(TAG_FIRST_NAME));
+				map.put(TAG_LAST_NAME,jso.getString(TAG_LAST_NAME));
+				map.put(TAG_EMPLOYEE_ID,jso.getString(TAG_EMPLOYEE_ID));
+				
+				// get grant info
+    			jso = json.getJSONObject(TAG_GRANT);	
+				map.put(TAG_GRANT_TITLE,jso.getString(TAG_GRANT_TITLE));
+				Toast.makeText(context, map.get(TAG_GRANT), Toast.LENGTH_LONG).show();
+				map.put(TAG_GRANT_ID,jso.getString(TAG_GRANT_ID));
+				map.put(TAG_STATE_CATALOG_NUM,jso.getString(TAG_STATE_CATALOG_NUM));
+				
 				updateView();
-			} else {
-				Toast.makeText(DetailViewActivity.this, "Download failed.",
-		            Toast.LENGTH_LONG).show();
 			}
-	    };
-	};
-	
+			catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}
+
+		@Override
+		public void onFailure(String errorMessage) {
+			Toast.makeText(DetailViewActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+		}
+	}
 	
 	/**
 	 * This procedure initializes the options menu.
