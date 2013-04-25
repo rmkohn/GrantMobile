@@ -119,7 +119,7 @@ public class CalendarActivity extends FragmentActivity {
 				workMonthId = result.getInt("id");
 				
 				// get that info ready to display, also set year and monthNumber class-level variables
-				calendarView.initHeaderMessage(month, year, grantName, grantNumber);
+				calendarView.initHeaderMessage(month, year, grantName, grantNumber, employeeName);
 				
 				// set up calendar, now that we know what month it is
 				calendarView.initCalendar();

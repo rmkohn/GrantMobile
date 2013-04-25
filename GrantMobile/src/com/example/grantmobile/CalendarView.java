@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
-import java.util.ResourceBundle.Control;
 
 import org.json.JSONArray;
 
@@ -15,7 +14,6 @@ import android.graphics.Paint;
 import android.graphics.Paint.FontMetrics;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -23,7 +21,6 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 
 public class CalendarView extends View {
 	
@@ -130,6 +127,10 @@ public class CalendarView extends View {
     int headerAndFooterWidth;
     // Footer height position
     int footerY;
+    // Employee Name
+    String employee;
+    // Employee HeaderText
+    String headerEmployee;
 	
 	
 	public static interface OnCalSquareTapListener
@@ -195,9 +196,11 @@ public class CalendarView extends View {
 	    fontSize = 20;
 	    paint.setTextSize(fontSize);
 	    canvas.drawText(headerMessage, calendarMarginX + 10,
-	            calendarMarginY + 40, paint);
+	            calendarMarginY + 20, paint);
+	    canvas.drawText(headerEmployee, calendarMarginX + 10,
+	            calendarMarginY + 45, paint);
 	    canvas.drawText(headerDate, calendarMarginX + 10,
-	            calendarMarginY + 75, paint);
+	            calendarMarginY + 70, paint);
 
 	    // Draw inner calendar squares
 	    paint.setStyle(Style.FILL_AND_STROKE);
@@ -425,13 +428,13 @@ public class CalendarView extends View {
 	private void initHeaderMessage()
 	{	
 		// Load sample data
-		initHeaderMessage(1, 2000, "Loading", "Loading");
+		initHeaderMessage(1, 2000, "Loading", "Loading", "Loading");
 	}
 	
 	/**
 	 * This procedure initializes the header message.
 	 */
-	public void initHeaderMessage(int month, int headerYear, String grantName, String grantCatalogNum)
+	public void initHeaderMessage(int month, int headerYear, String grantName, String grantCatalogNum, String employeeName)
 	{	
 		// Variables
 
@@ -440,6 +443,7 @@ public class CalendarView extends View {
 		monthNumber = month;
 		year = headerYear;
 		grant = grantName + " " + grantCatalogNum;
+		employee = employeeName;
 		
 		// Get the month's details
 		getMonthDetails();
@@ -449,6 +453,9 @@ public class CalendarView extends View {
 				
 		// Determine header message
 		headerMessage = grant.trim();
+		
+		//Set name of employee being approved
+		headerEmployee = "Employee Name: " + employee;
 	}
 	
 	/**
