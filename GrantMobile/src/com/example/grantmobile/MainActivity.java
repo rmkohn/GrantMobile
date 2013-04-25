@@ -3,8 +3,11 @@ package com.example.grantmobile;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.view.Menu;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,7 +39,9 @@ public class MainActivity extends Activity
 		 ******************************************************************************************************/
 		if (workMonthId == -1)
 		{
-			Toast.makeText(this, "You have to access this app through the email link", Toast.LENGTH_LONG).show();
+			
+			closeDialog();
+			
 		}//ENDIF
 		
 		else
@@ -87,6 +92,30 @@ public class MainActivity extends Activity
 		
 		getMenuInflater().inflate(R.menu.activity_main, menu);
 		return true;
-	}//END ONCREATEOPTIONSMENU 
+	}//END ONCREATEOPTIONSMENU
+	
+	/**
+	 * This procedure launches the close dialog to inform them that they must run this app through an email or link.
+	 */
+	private void closeDialog() {
+		String message = "You have to access this app through the email link";
+		
+		//Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+		
+		new AlertDialog.Builder(this)
+		.setTitle("MSTC Grant App")
+		.setMessage(message)
+		.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+			
+			public void onClick(DialogInterface dialog, int which) {
+				
+				// Nothing
+				
+			}
+		})
+		.show();
+		
+		finish();
+	}
 
 }//END MAIN ACTIVITY
