@@ -123,6 +123,7 @@ public class CalendarActivity extends FragmentActivity {
 				
 				// set up calendar, now that we know what month it is
 				calendarView.initCalendar();
+				calendarView.setFrag(getSupportFragmentManager());
 				
 				// get time arrays
 				JSONObject hours = result.getJSONObject("hours");

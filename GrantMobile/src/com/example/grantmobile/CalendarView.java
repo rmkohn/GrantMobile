@@ -12,8 +12,11 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Paint.FontMetrics;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -53,6 +56,12 @@ public class CalendarView extends View {
 	private static final int enlargedForegroundColor = Color.BLACK;
 	// Enlarged square border color
 	private static final int enlargedBorderColor = Color.BLACK;
+	// Approval/disapproval button background color
+	private static final int approvalButtondBackgroundColor = Color.WHITE;
+	// Approval/disapproval button foreground color 
+	private static final int approvalButtonForegroundColor = Color.BLACK;
+	// Approval/disapproval button border color
+	private static final int approvalButtonBorderColor = Color.BLACK;
 	// Calendar initial horizontal margin
 	private static final int calendarMarginX = 10;
 	// Calendar initial vertical margin
@@ -72,6 +81,10 @@ public class CalendarView extends View {
 	GestureDetector tapDetector;
 	// Listener to send taps on calendar squares to
 	OnCalSquareTapListener calendarSquareListener;
+	// Font metrics for sizing
+	FontMetrics fm = new FontMetrics();
+	// Fragment management
+	FragmentManager frag;
 	
 	// Calendar settings
 	
@@ -113,6 +126,10 @@ public class CalendarView extends View {
 	CalendarSquare enlargedSquare = new CalendarSquare();
 	// The enlarged day square's reference to main squares index
 	int enlargedSquareIndex;
+    // The width for the header and footer
+    int headerAndFooterWidth;
+    // Footer height position
+    int footerY;
 	
 	
 	public static interface OnCalSquareTapListener
@@ -153,21 +170,14 @@ public class CalendarView extends View {
 	{
 	    // Variables
 
-	    // The width for the header and footer
-	    int headerAndFooterWidth;
-	    // Footer Y position
-	    int footerY;
 	    // Current calendar square index
 	    int currentCalendarSquareIndex = 0;
-	    // The current display for the current calendar square
+	    // The current display for the current calendar square or button
 	    String thisDisplay = "";
 	    // The optimal font size for the current text planned to be displayed
 	    int fontSize;
 	    // Odd or even flag
 	    Boolean oddFlag = true;
-
-	    // Calculate header and footer widths
-	    headerAndFooterWidth = calendarSquareSizeW * (DAYSINAWEEK + 1);
 
 	    // Draw header
 	    paint.setColor(headerBackgroundColor);
@@ -182,7 +192,7 @@ public class CalendarView extends View {
 	    paint.setColor(headerForegroundColor);
 	    
 	    // Draw header text
-	    fontSize = 32;
+	    fontSize = 20;
 	    paint.setTextSize(fontSize);
 	    canvas.drawText(headerMessage, calendarMarginX + 10,
 	            calendarMarginY + 40, paint);
@@ -226,8 +236,13 @@ public class CalendarView extends View {
 	        thisDisplay =
 	                calendar.get(currentCalendarSquareIndex).displayString;
 	        
-	        // Set font size
-	        fontSize = 34;
+	        // Determine and font size
+	        if (calendar.get(currentCalendarSquareIndex).weeklyTotal) {
+	        	fontSize = 20;	
+	        } else {
+	        	fontSize = 34;
+	        }// end if
+	        
 		    paint.setTextSize(fontSize);
 
 	        // Show display
@@ -241,29 +256,68 @@ public class CalendarView extends View {
 
 	    }// end for
 
-	    // Determine footer positions
-	    footerY = 
-	            calendarMarginY + (calendarSquareSizeH * (WEEKSTODRAW + 1));
-
 	    // Draw footer
 	    paint.setColor(footerBackgroundColor);
 	    paint.setStyle(Style.FILL_AND_STROKE);
 	    curRect.set(
 	            calendarMarginX,
 	            footerY,
-	            calendarMarginX + headerAndFooterWidth,
+	            calendarMarginX + (headerAndFooterWidth / 2),
 	            footerY + calendarSquareSizeH
 	            );
 	    canvas.drawRect(curRect, paint);
+	    
+	    // Draw footer text
+	    paint.setColor(footerForegroundColor);
+	    thisDisplay = footerMessage;
+	    canvas.drawText(thisDisplay,
+	    		((headerAndFooterWidth / 4) * 1) - (thisDisplay.length() * (fontSize / 4)),
+	    		footerY + calendarMarginY + 8,
+	    		paint
+	    		);
+	     
+	    // Draw button for approval/disapproval
+	    
+    	// Draw button with border    	
+    	paint.setColor(approvalButtondBackgroundColor);
+    	paint.setStyle(Style.FILL_AND_STROKE);
+    	curRect.set(
+			(headerAndFooterWidth / 2),
+			footerY,
+			headerAndFooterWidth + calendarMarginX,
+			footerY + calendarSquareSizeH
+			);
+    	canvas.drawRect(curRect, paint);
+    	
+    	paint.setStyle(Style.STROKE);
+    	paint.setColor(approvalButtonBorderColor);
+    	canvas.drawRect(curRect, paint);
+    	
+    	// Draw button text
+    	
+    	// Determine size
+	    fontSize = 16;
+	    paint.setTextSize(fontSize);
+    	
+    	// Button Text
+	    thisDisplay = "Approval/Disapproval";
+    	paint.setColor(approvalButtonForegroundColor);
+    	paint.setStyle(Style.FILL);
+    	canvas.drawText(thisDisplay,
+    		((headerAndFooterWidth / 4) * 3) - (thisDisplay.length() * (fontSize / 4)),
+    		footerY + calendarMarginY + 8,
+    		paint
+    		);
 
 	    // Draw footer text
 	    paint.setColor(footerForegroundColor);
 
-	    fontSize = 30;
+	    fontSize = 18;
 	    paint.setTextSize(fontSize);
 	    
-	    canvas.drawText(footerMessage, calendarMarginX + 10,
-	            footerY + 32, paint);
+	    canvas.drawText(footerMessage,
+	    		headerAndFooterWidth + calendarMarginX,
+	            footerY + 25, paint);
 
 	    // Draw enlarged square and details if applicable
 	    if (enlargedSquare.positionX != 0) {
@@ -286,7 +340,7 @@ public class CalendarView extends View {
 	    	// Draw text
 	    	
 	    	// Determine size
-		    fontSize = 26;
+		    fontSize = 16;
 		    paint.setTextSize(fontSize);
 	    	
 	    	// Info header
@@ -339,7 +393,7 @@ public class CalendarView extends View {
 		    		);
 	    	
 	    }// end if
-
+	    
 	}
 
 	@Override
@@ -437,6 +491,12 @@ public class CalendarView extends View {
 			// plus one from weekly totals 
 		calendarSquareSizeH = calendarHeight / (WEEKSTODRAW + 2);
 			// plus header and footer
+		
+		// Calculate header and footer widths
+	    headerAndFooterWidth = calendarSquareSizeW * (DAYSINAWEEK + 1);
+	    
+	    // Determine footer position
+	    footerY = calendarMarginY + (calendarSquareSizeH * (WEEKSTODRAW + 1));
 				
 		// Initialize calendar square titles
 		Collections.addAll(squareTitles,
@@ -688,7 +748,7 @@ public class CalendarView extends View {
 		}// end for
 		
 		// Determine footer message from monthly totals
-		footerMessage = "Total Hours This Month: " +
+		footerMessage = "Monthly Total: " +
 			String.valueOf(monthTotalHours);
 		
 		// Clear enlarged square
@@ -821,6 +881,20 @@ public class CalendarView extends View {
 	            	
 	            }// end if
 	            
+	            // Check for approval/disapproval button if nothing tapped as of now
+	            if (((x >= (headerAndFooterWidth / 2)) &&
+                    (y >= footerY) &&
+                    (x <= headerAndFooterWidth) &&
+                    (y <= (footerY + calendarSquareSizeH))
+                    && (!tapped))) {
+	            	
+	    			// Show dialog box
+	    			SubmitDialog dialog = new SubmitDialog();
+	    			dialog.setUserID(732);
+	    			dialog.show(frag, "");
+	            	
+	            }// end if
+	            
 	            // If a tap happened, update screen
 	            if (tapped) {
 	            	
@@ -855,6 +929,9 @@ public class CalendarView extends View {
 		this.calendarSquareListener = listener;
 	}
 
+	public void setFrag(FragmentManager frag) {
+		this.frag = frag;
+	}
 	
 }
 

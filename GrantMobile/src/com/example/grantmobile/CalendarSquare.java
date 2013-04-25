@@ -122,7 +122,7 @@ public class CalendarSquare {
 		int hours;
 		
 		// Calculate hours
-		hours = (grantHours + nonGrantHours) - leave;
+		hours = grantHours + nonGrantHours + leave;
 		
 		return hours;
 		
