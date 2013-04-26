@@ -36,16 +36,21 @@ public abstract class GrantServiceBindingActivity extends FragmentActivity {
 	protected void onDestroy() {
 		Log.w("grantservice binder", "activity destroyed");
 		super.onDestroy();
+//		GrantService temp = service;
 		unbind();
-		if (isFinishing()) {
-			stopService(new Intent(this, GrantService.class));
-		}
+//		if (isFinishing()) {
+//			Log.w("grantservice binder", "finish() called, stopping the service");
+//			// stopService() stops the service unconditionally, but stopSelf() is okay
+//			temp.stopSelf();
+//		}
 	}
 	
 	private void bind() {
 		if (service == null) {
 			Intent intent = new Intent(this, GrantService.class);
 			bindService(intent, conn, Context.BIND_AUTO_CREATE);
+//			bindService(intent, conn, 0);
+//			startService(new Intent(this, GrantService.class));
 		}
 	}
 	

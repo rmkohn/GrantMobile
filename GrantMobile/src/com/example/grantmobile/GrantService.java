@@ -1,28 +1,25 @@
 package com.example.grantmobile;
 
+import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.example.grantmobile.DetailViewActivity.JSONResultHandler;
+import com.example.grantmobile.JSONParser.ResultHandler;
 
 import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -35,12 +32,14 @@ public class GrantService extends Service {
 	
 	DBAdapter db;
 	GrantBinder binder;
+	Map<String, JSONObject> emailRequestCache;
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		db = new DBAdapter();
 		binder = new GrantBinder();
+		emailRequestCache = new HashMap<String, JSONObject>();
 		Log.w(TAG, "newly created");
 	}
 
@@ -54,6 +53,40 @@ public class GrantService extends Service {
 	@Override
 	public IBinder onBind(Intent intent) {
 		return binder;
+	}
+
+	public void sendEmailRequest(final String requestId, final ResultHandler jsonResultHandler) {
+		JSONObject cached = emailRequestCache.get(requestId);
+		if (cached == null) {
+			new JSONParser.RequestBuilder()
+			.setUrl(requestURL)
+			.addParam("q", "email")
+			.addParam("id", requestId)
+			.makeRequest(new JSONParser.SimpleResultHandler() {
+				public void onSuccess(Object result) throws JSONException, IOException {
+					Log.i(TAG + " sendEmailRequest", "saving " + requestId + " to cache");
+					jsonResultHandler.onSuccess(result);
+					emailRequestCache.put(requestId, (JSONObject) result);
+				}
+				public void onFailure(String errorMessage) {
+					jsonResultHandler.onFailure(errorMessage);
+				}
+				public void onError(Exception e) {
+					jsonResultHandler.onError(e);
+				}
+				public void onPostExecute() {
+					jsonResultHandler.onPostExecute();
+				}
+			});
+		} else {
+			Log.i(TAG + " sendEmailRequest", "got " + requestId + " from cache");
+			try {
+				jsonResultHandler.onSuccess(cached);
+			} catch (Exception e) {
+				// caching is done after onSuccess() completes the first time, so this should not happen
+				throw(new RuntimeException(e));
+			}
+		}
 	}
 	
 	public void uploadHours(final GrantData data, final String[] grantStrings, ServiceCallback<Integer> callback) {
@@ -72,14 +105,14 @@ public class GrantService extends Service {
 						jsonHours.put(key, array);
 					}
 					Log.i(TAG, jsonHours.toString(2));
-					List<NameValuePair> params = new ArrayList<NameValuePair>();
-					params.add(new BasicNameValuePair("q", "updatehours"));
-					params.add(new BasicNameValuePair("employee", String.valueOf(data.employeeid)));
-					params.add(new BasicNameValuePair("year", String.valueOf(data.year)));
-					params.add(new BasicNameValuePair("month", String.valueOf(data.month)));
-					params.add(new BasicNameValuePair("hours", jsonHours.toString()));
-					params.add(new BasicNameValuePair("supervisor", "-1")); // not actually used, due to reasons
-					JSONObject result = JSONParser.makeHttpRequest(requestURL, "GET", params);
+					JSONObject result = new JSONParser.RequestBuilder(requestURL)
+					.addParam("q", "updatehours")
+					.addParam("employee", String.valueOf(data.employeeid))
+					.addParam("year", String.valueOf(data.year))
+					.addParam("month", String.valueOf(data.month))
+					.addParam("hours", jsonHours.toString())
+					.addParam("supervisor", "-1") // not actually used, due to reasons
+					.makeHttpRequest();
 					Log.i(TAG, result.toString());
 					return result.getBoolean("success") ? Activity.RESULT_OK : Activity.RESULT_CANCELED;
 				} catch (JSONException e) {
@@ -101,27 +134,6 @@ public class GrantService extends Service {
 		int deletedCount = db.deleteEntries(data, grantStrings);
 		return deletedCount == grantStrings.length ? Activity.RESULT_OK : Activity.RESULT_CANCELED;
 	}
-
-	public static interface ServiceCallback<T> {
-		public void run(T result);
-	}
-	
-	abstract class AsyncServiceCallback<T> extends AsyncTask<Void, Void, T> {
-		private ServiceCallback<T> callback;
-		public AsyncServiceCallback(ServiceCallback<T> callback) {
-			this.callback = callback;
-		}
-		@Override protected T doInBackground(Void... params) {
-			return doInBackground();
-		}
-		abstract T doInBackground();
-		@Override protected void onPostExecute(T result) {
-			callback.run(result);
-		}
-		public void execute() {
-			super.execute((Void[])null);
-		}
-	}
 	
 	public void getHours(final GrantData data, final String[] grantStrings, ServiceCallback<Map<String, double[]>> callback) {
 		// see if the db has our entries
@@ -135,14 +147,13 @@ public class GrantService extends Service {
 					Set<String> missingKeys = new HashSet<String>(Arrays.asList(grantStrings));
 					missingKeys.removeAll(allHours.keySet());
 					Log.i(TAG, "retrieving values");
-					List<NameValuePair> params = new ArrayList<NameValuePair>();
-					params.add(new BasicNameValuePair("q", "viewrequest"));
-					params.add(new BasicNameValuePair("employee", String.valueOf(data.employeeid)));
-					params.add(new BasicNameValuePair("year", String.valueOf(data.year)));
-					params.add(new BasicNameValuePair("month", String.valueOf(data.month)));
-					params.add(new BasicNameValuePair("grant", DBAdapter.mkString(missingKeys, ",", "", "")));
-					Log.i(TAG, "making request with params: " + params);
-					JSONObject json = JSONParser.makeHttpRequest(requestURL, "GET", params);
+					JSONObject json = new JSONParser.RequestBuilder(requestURL)
+					.addParam("q", "viewrequest")
+					.addParam("employee", String.valueOf(data.employeeid))
+					.addParam("year", String.valueOf(data.year))
+					.addParam("month", String.valueOf(data.month))
+					.addParam("grant", DBAdapter.mkString(missingKeys, ",", "", ""))
+					.makeHttpRequest();
 					try {
 						if (json.getBoolean("success")) {
 							// load doubles from json
@@ -217,13 +228,35 @@ public class GrantService extends Service {
 			return String.format("GrantData(%d, %d, %d)", year, month, employeeid);
 		}
 	}
-
-	public void sendEmailRequest(String requestId, JSONResultHandler jsonResultHandler) {
-		new JSONParser.RequestBuilder()
-		.setUrl(requestURL)
-		.addParam("q", "email")
-		.addParam("id", requestId)
-		.makeRequest(jsonResultHandler);
+	
+	public static interface ServiceCallback<T> {
+		public void run(T result);
 	}
 	
+	public static class ResultHandlerCallback implements ServiceCallback<JSONObject> {
+		private JSONParser.ResultHandler handler;
+		public ResultHandlerCallback(JSONParser.ResultHandler handler) {
+			this.handler = handler;
+		}
+		public void run(JSONObject result) {
+			JSONParser.handleResults(result, handler);
+		}
+	}
+	
+	abstract class AsyncServiceCallback<T> extends AsyncTask<Void, Void, T> {
+		private ServiceCallback<T> callback;
+		public AsyncServiceCallback(ServiceCallback<T> callback) {
+			this.callback = callback;
+		}
+		@Override protected T doInBackground(Void... params) {
+			return doInBackground();
+		}
+		abstract T doInBackground();
+		@Override protected void onPostExecute(T result) {
+			callback.run(result);
+		}
+		public void execute() {
+			super.execute((Void[])null);
+		}
+	}
 }

@@ -52,11 +52,12 @@ public class CalendarActivity extends BaseCalendarActivity {
 		headerView = (TextView) findViewById(R.id.calendarHeader);
 		headerFlipper.setDisplayedChild(headerFlipper.indexOfChild(headerView));
 		
-		int id = getIntent().getIntExtra("workMonthId", -1);
+		workMonthId = getIntent().getIntExtra("workMonthId", -1);
 		
-		fillCalendarData(id);
+		if (isServiceBound())
+			fillCalendarData(workMonthId);
 	}
-
+	
 	/**
 	 * This procedure initializes the options menu.
 	 */
@@ -67,15 +68,13 @@ public class CalendarActivity extends BaseCalendarActivity {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-	
 
+	protected void onBound() {
+		fillCalendarData(workMonthId);
+	}
 	
 	private void fillCalendarData(final int id) {
-		new JSONParser.RequestBuilder(requestURL)
-		.setUrl(requestURL)
-		.addParam("q", "email")
-		.addParam("id", String.valueOf(id))
-		.makeRequest(new CalendarResultHandler());
+		getService().sendEmailRequest(String.valueOf(id), new CalendarResultHandler());
 	}	
 	
     class CalendarResultHandler extends JSONParser.SimpleResultHandler

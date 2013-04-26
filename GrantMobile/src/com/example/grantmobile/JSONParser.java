@@ -145,7 +145,7 @@ public class JSONParser {
 		public AsyncTask<Void, Void, JSONObject> makeRequest(final ResultHandler handler) {
 			return new AsyncTask<Void, Void, JSONObject>() {
 				protected JSONObject doInBackground(Void... params) {
-					return makeHttpRequest(url, method, RequestBuilder.this.params);
+					return makeHttpRequest();
 				}
 				protected void onPostExecute(JSONObject result) {
 //				    try {
@@ -154,21 +154,7 @@ public class JSONParser {
 //                        // TODO Auto-generated catch block
 //                        e1.printStackTrace();
 //                    }
-				    handler.onPostExecute();
-					try {
-				    	if (result.getBoolean("success"))
-				    		handler.onSuccess(result.get("message"));
-						else
-							handler.onFailure(result.getString("message"));
-					} catch (JSONException e) {
-						handler.onError(e);
-					} catch (IOException e) {
-						handler.onError(e);
-					} catch (NullPointerException e) {
-						handler.onError(e);
-					} catch (ClassCastException e) {
-						handler.onError(e);
-					}
+					handleResults(result, handler);
 				}
 				@Override
 				protected void onCancelled() {
@@ -179,7 +165,35 @@ public class JSONParser {
 			}.execute();
 		}
 		
+		public void makeRequestInCurrentThread(final ResultHandler handler) {
+			JSONObject result = makeHttpRequest();
+			handleResults(result, handler);
+		}
+		
+		public JSONObject makeHttpRequest() {
+			return JSONParser.makeHttpRequest(url, method, params);
+		}
+		
 	}
+	
+	public static void handleResults(JSONObject result, ResultHandler handler) {
+		handler.onPostExecute();
+		try {
+			if (result.getBoolean("success"))
+				handler.onSuccess(result.get("message"));
+			else
+				handler.onFailure(result.getString("message"));
+		} catch (JSONException e) {
+			handler.onError(e);
+		} catch (IOException e) {
+			handler.onError(e);
+		} catch (NullPointerException e) {
+			handler.onError(e);
+		} catch (ClassCastException e) {
+			handler.onError(e);
+		}
+	}
+	
 	public static interface ResultHandler {
 	    public void onPostExecute();
         public void onSuccess(Object result) throws JSONException, IOException;
@@ -195,7 +209,5 @@ public class JSONParser {
         public void onError(Exception e) { e.printStackTrace(); }
         public void onCancelled() { }
 	}
-	
-	
 }
 
