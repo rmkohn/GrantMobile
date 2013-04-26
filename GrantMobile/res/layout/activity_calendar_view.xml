@@ -13,8 +13,8 @@
             android:id="@+id/calendarHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Header"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:text="Grant Name 999-999\nEmployee Name: Employee McEmployington\nJanuary, 2099"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
         <Spinner
             android:id="@+id/calendarGrantSwitcher"
             android:layout_width="match_parent"
@@ -22,19 +22,32 @@
 
     </ViewFlipper>
 
-    <TextView
-        android:id="@+id/calendarFooter"
+    <LinearLayout
+        android:id="@+id/calendarFooterLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_alignParentBottom="true">
+    <TextView
+        android:id="@+id/calendarFooter"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
         android:text="Footer"
         android:textAppearance="?android:attr/textAppearanceMedium" />
+    <Button 
+        android:id="@+id/btnApproveDisapprove"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:text="Approval/Disapproval"
+        />
+    </LinearLayout>
 
     <GridView
         android:id="@+id/calendarGrid"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/calendarFooter"
+        android:layout_above="@id/calendarFooterLayout"
         android:layout_below="@id/calendarHeaderFlipper"
         android:gravity="center"
         android:numColumns="8" >

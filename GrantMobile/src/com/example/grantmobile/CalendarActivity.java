@@ -16,6 +16,7 @@ import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
@@ -111,7 +112,7 @@ public class CalendarActivity extends BaseCalendarActivity {
 				workMonthId = result.getInt("id");
 				
 				// get that info ready to display, also set year and monthNumber class-level variables
-				initHeaderMessage(month, year, grantName, grantNumber);
+				initHeaderMessage(month, year, grantName, grantNumber, employeeName);
 				
 				// set up calendar, now that we know what month it is
 				createCalendarArray(year, month);
@@ -170,16 +171,19 @@ public class CalendarActivity extends BaseCalendarActivity {
 			startActivity(intent);
 			break;
 		case (R.id.mnuDialog) :
-			//show dialog box
-			SubmitDialog dialog = new SubmitDialog();
-			FragmentManager manager = getSupportFragmentManager();
-			dialog.setUserID(732);
-			dialog.show(manager, "");
+			openDialog();
 			break;
 		}// end switch
 		
 		return true;
-		
+	}
+	
+	private void openDialog() {
+		//show dialog box
+		SubmitDialog dialog = new SubmitDialog();
+		FragmentManager manager = getSupportFragmentManager();
+		dialog.setUserID(732);
+		dialog.show(manager, "");
 	}
 
 	@Override
@@ -196,19 +200,24 @@ public class CalendarActivity extends BaseCalendarActivity {
 		
 		startActivity(i);
 	}
+	
+	@Override
+	protected void onEmailButtonClicked() {
+		openDialog();
+	}
 		/**
 	 * This procedure initializes the header message with sample data
 	 */
 	private void initHeaderMessage()
 	{	
 		// load sample data
-		initHeaderMessage(1, 2000, "Loading", "Loading");
+		initHeaderMessage(1, 2000, "Loading", "Loading", "Palmer Eldritch");
 	}
 	
 	/**
 	 * This procedure initializes the header message.
 	 */
-	public void initHeaderMessage(int month, int headerYear, String grantName, String grantCatalogNum)
+	public void initHeaderMessage(int month, int headerYear, String grantName, String grantCatalogNum, String employeeName)
 	{
 		// Variables
 		
@@ -225,7 +234,7 @@ public class CalendarActivity extends BaseCalendarActivity {
 		longDate = monthName + ", " + String.valueOf(headerYear);
 				
 		// Determine header message
-		headerView.setText(grant.trim() + " : " + longDate);
+		headerView.setText(grant.trim() + "\n" + "Employee Name: " + employeeName + "\n" + longDate);
 	}
 
 }

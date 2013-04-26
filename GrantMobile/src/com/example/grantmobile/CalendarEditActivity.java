@@ -10,9 +10,11 @@ import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -47,8 +49,6 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 			i.getIntExtra(MonthSelectActivity.TAG_INTENT_MONTH, -1)
 		);
 		
-		grantSpinner.setAdapter(new ArrayAdapter<String>(
-				this, android.R.layout.simple_spinner_dropdown_item, grantnames));
 		populateGrantSpinner();
 		
 		grantSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -57,10 +57,15 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 			}
 			public void onNothingSelected(AdapterView<?> parent) { }
 		});
+		
+		((Button)findViewById(R.id.btnApproveDisapprove)).setText("Send Email");
 	}
 	
 	private void populateGrantSpinner() {
-		grantSpinner.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, grantnames));
+		ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(
+				this, android.R.layout.simple_spinner_item, grantnames);
+		spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		grantSpinner.setAdapter(spinnerAdapter);
 	}
 	
 	private void loadCalendar() {
@@ -109,6 +114,15 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 		}
 	}
 	
+	@Override
+	protected void onEmailButtonClicked() {
+		openEmailDialog();
+	}
+	
+	private void openEmailDialog() {
+		Toast.makeText(this, "Sorry, not implemented yet", Toast.LENGTH_LONG).show();
+	}
+	
 	public void assignNewData(Map<String, double[]> data) {
 		SparseArray<double[]> granthours = new SparseArray<double[]>();
 		for (int i: grantids) {
@@ -149,7 +163,7 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 			loadCalendar();
 			break;
 		case R.id.mnuDialog:
-			Toast.makeText(this, "Sorry, not implemented yet", Toast.LENGTH_LONG).show();
+			openEmailDialog();
 			break;
 		case R.id.mnuUpload:
 			getService().uploadHours(data, grantstrings, new ServiceCallback<Integer>() { 

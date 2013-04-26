@@ -1,5 +1,6 @@
 package com.example.grantmobile;
 
+import com.example.grantmobile.CalendarSquare.DaySquare;
 import com.example.grantmobile.CalendarSquare.ICalendarSquare;
 
 import android.content.Context;
@@ -35,17 +36,40 @@ public class CalendarSquareAdapter extends BaseAdapter {
 	// create a new ImageView for each item referenced by the Adapter
 	public View getView(int position, View convertView, ViewGroup parent) {
 		TextView view;
+		ICalendarSquare square = calendar.getSquare(position);
+		int resource = square instanceof DaySquare
+			? R.layout.calendar_date_element
+			: R.layout.calendar_placeholder_element;
 		if (convertView == null) {  // if it's not recycled, initialize some attributes
-			view = (TextView)inflater.inflate(android.R.layout.simple_list_item_1, parent, false);
+			view = (TextView)inflater.inflate(resource, parent, false);
 //			imageView.setLayoutParams(new GridView.LayoutParams(85, 85));
 		} else {
 			view = (TextView) convertView;
 		}
 		
-		ICalendarSquare square = calendar.getSquare(position);
 		view.setBackgroundColor(square.getHighlightColor());
 		view.setText(square.getMessage());
 
 		return view;
+	}
+
+	@Override
+	public boolean areAllItemsEnabled() {
+		return false;
+	}
+
+	@Override
+	public int getViewTypeCount() {
+		return 2;
+	}
+
+	@Override
+	public boolean isEnabled(int position) {
+		return calendar.getSquare(position) instanceof DaySquare;
+	}
+
+	@Override
+	public int getItemViewType(int position) {
+		return calendar.getSquare(position) instanceof DaySquare ? 0 : 1;
 	}
 }

@@ -45,7 +45,7 @@ public class DaySquare implements ICalendarSquare {
 	 * @return The total number of hours
 	 */
 	public int totalHours() {
-		return (grantHours + nonGrantHours) - leave;
+		return grantHours + nonGrantHours + leave;
 	}
 	
 	public String toString() {

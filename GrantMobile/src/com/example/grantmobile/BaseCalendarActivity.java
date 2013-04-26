@@ -7,6 +7,7 @@ import com.example.grantmobile.CalendarSquare.ICalendarSquare;
 
 import android.os.Bundle;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
@@ -46,22 +47,21 @@ public abstract class BaseCalendarActivity extends GrantServiceBindingActivity {
 				openDetailView(calendar.getSquare(position));
 			}
 		});
+		findViewById(R.id.btnApproveDisapprove).setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				onEmailButtonClicked();
+			}
+		});
 	}
 	
 	/**
 	 * This procedure loads the calendar with the data for hours, and totals.
 	 */
 	public void initFooterMessage() {
-		int monthTotalGrantHours = 0;
-		int monthTotalNonGrantHours = 0;
-		int monthTotalLeaveHours = 0;
 		int monthTotalHours = 0;
 		
 		for (int day = 1; day <= calendar.getNumberOfDays(); day++) {
 			DaySquare square = calendar.getDay(day);
-			monthTotalGrantHours += square.grantHours;
-			monthTotalNonGrantHours += square.nonGrantHours;
-			monthTotalLeaveHours += square.leave;
 			monthTotalHours += square.totalHours();
 		}
 		
@@ -104,6 +104,7 @@ public abstract class BaseCalendarActivity extends GrantServiceBindingActivity {
 	}
 	
 	protected abstract void openDetailView(ICalendarSquare detailSquare);
+	protected abstract void onEmailButtonClicked();
 	
 
 }
