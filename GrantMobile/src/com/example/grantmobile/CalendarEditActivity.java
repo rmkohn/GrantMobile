@@ -1,11 +1,10 @@
 package com.example.grantmobile;
 
+import java.util.Map;
+
 import android.app.Activity;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
@@ -19,7 +18,7 @@ import android.widget.Toast;
 
 import com.example.grantmobile.CalendarSquare.DaySquare;
 import com.example.grantmobile.CalendarSquare.ICalendarSquare;
-import com.example.grantmobile.GrantService.ToastHandler;
+import com.example.grantmobile.GrantService.ServiceCallback;
 
 public class CalendarEditActivity extends BaseCalendarActivity {
 	Spinner grantSpinner;
@@ -58,9 +57,6 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 			}
 			public void onNothingSelected(AdapterView<?> parent) { }
 		});
-		
-		// called in onResume()
-//		loadCalendar();
 	}
 	
 	private void populateGrantSpinner() {
@@ -71,15 +67,11 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 		Log.i("calendareditactivity", "loadcalendar");
 		final GrantService.GrantData data = new GrantService.GrantData(getYear(), getMonth()-1, userid);
 //		GrantService.getHours(this, new CalendarEditHandler().setParent(this), data, getGrantStrings());
-		new AsyncTask<Void, Void, Bundle>() {
-			protected Bundle doInBackground(Void... params) {
-				return getService().getViewRequest(data, getGrantStrings());
-			}
-			protected void onPostExecute(Bundle result) {
-				super.onPostExecute(result);
+		getService().getHours(data, getGrantStrings(), new GrantService.ServiceCallback<Map<String,double[]>>() {
+			public void run(Map<String, double[]> result) {
 				assignNewData(result);
 			}
-		}.execute((Void[])null);
+		});
 	}
 
 	private String[] getGrantStrings() {
@@ -117,27 +109,14 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 		}
 	}
 	
-	public static class CalendarEditHandler extends GrantService.WeakrefHandler<CalendarEditActivity> {
-		@Override
-		public void handleMessage(Message msg) {
-			CalendarEditActivity a = parent.get();
-			if (a == null)
-				return;
-			if (msg.arg1 == Activity.RESULT_OK) {
-				Bundle data = msg.getData();
-				a.assignNewData(data);
-			}
-		}
-	}
-	
-	public void assignNewData(Bundle data) {
+	public void assignNewData(Map<String, double[]> data) {
 		SparseArray<double[]> granthours = new SparseArray<double[]>();
 		for (int i: grantids) {
-			granthours.append(i, data.getDoubleArray(String.valueOf(i)));
+			granthours.append(i, data.get(String.valueOf(i)));
 		}
 		this.granthours    = granthours;
-		this.nongranthours = data.getDoubleArray("non-grant");
-		this.leavehours    = data.getDoubleArray("leave");
+		this.nongranthours = data.get("non-grant");
+		this.leavehours    = data.get("leave");
 		this.updateCalendar();
 	}
 	
@@ -166,15 +145,21 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 		switch (item.getItemId()) {
 		case R.id.mnuLoad:
 			// IntentService uses a single background thread, so this should work
-			GrantService.deleteHours(this, null, data, grantstrings);
+			getService().deleteHours(data, grantstrings);
 			loadCalendar();
 			break;
 		case R.id.mnuDialog:
 			Toast.makeText(this, "Sorry, not implemented yet", Toast.LENGTH_LONG).show();
 			break;
 		case R.id.mnuUpload:
-			Handler toaster = new ToastHandler("uploaded successfully", "error uploading").setParent(this);
-			GrantService.uploadHours(this, toaster, data, grantstrings);
+			getService().uploadHours(data, grantstrings, new ServiceCallback<Integer>() { 
+				public void run(Integer result) {
+					String message = (result == Activity.RESULT_OK)
+						? "uploaded successfully"
+						: "error uploading";
+					Toast.makeText(CalendarEditActivity.this, message, Toast.LENGTH_LONG).show();
+				}
+			});
 			break;
 		default: return false;
 		}

@@ -2,12 +2,12 @@ package com.example.grantmobile;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.example.grantmobile.GrantService.GrantData;
-import com.example.grantmobile.GrantService.WeakrefHandler;
 
 import android.os.Bundle;
-import android.os.Message;
 import android.app.Activity;
 import android.content.Intent;
 import android.view.View;
@@ -53,20 +53,10 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 	int domCurrent; // current day of month
 	int moy;
 	
-	TextView grantNameView;
-	TextView grantIdView;
-	TextView employeeNameView;
-	TextView catalogView;
-		
-	TextView dateView;
-	TextView dayView;
-	EditText grantHoursView;
-	EditText nonGrantHoursView;
-	EditText leaveHoursView;
-	
-	TextView dayTotalHoursView;
-	TextView monthTotalHoursView;
-	
+	TextView grantNameView, grantIdView, employeeNameView, catalogView;		
+	TextView dateView, dayView;
+	TextView dayTotalHoursView, monthTotalHoursView;
+	EditText grantHoursView, nonGrantHoursView, leaveHoursView;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -147,8 +137,19 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 		nonGrantHoursView.setOnFocusChangeListener(editListener);
 		leaveHoursView   .setOnFocusChangeListener(editListener);
         
+		if (getService() != null)
+			loadHours();
+	}
+	
+	private void loadHours() {
 		String[] hours = { String.valueOf(grantId), "non-grant", "leave" };
-		GrantService.getHours(this, new DetailHandler().setParent(this), grantdata, hours);
+	    GrantData grantdata = new GrantData(year, month, employeeid);
+		getService().getHours(grantdata, hours, new DetailHandler());
+	}
+	
+	@Override
+	protected void onBound() {
+		loadHours();
 	}
         
     private void updateView() {
@@ -196,45 +197,42 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
     		return 0;
     	}
     }
-	
-	public static class DetailHandler extends WeakrefHandler<DetailEditActivity> {
-		@Override
-		public void handleMessage(Message message) {
-			DetailEditActivity a = parent.get();
-			if (a == null)
-			{
-				return;
-			}
-			if (message.arg1 == RESULT_OK) {
-				a.grantHours = message.getData().getDoubleArray(String.valueOf(a.grantId));
-				a.nonGrantHours = message.getData().getDoubleArray(TAG_NON_GRANT);
-				a.leaveHours = message.getData().getDoubleArray(TAG_LEAVE);
-				a.updateView();
+    
+    public class DetailHandler implements GrantService.ServiceCallback<Map<String, double[]>> {
+		public void run(Map<String, double[]> result) {
+			if (result != null) {
+				grantHours = result.get(String.valueOf(grantId));
+				nonGrantHours = result.get(TAG_NON_GRANT);
+				leaveHours = result.get(TAG_LEAVE);
+				updateView();
 			} else {
-				Toast.makeText(a, "Download failed.",
+				Toast.makeText(DetailEditActivity.this, "Download failed.",
 						Toast.LENGTH_LONG).show();
 			}
+			
 		}
-	}
-	
-	public static class SaveHandler extends WeakrefHandler<DetailEditActivity> {
-		public void handleMessage(Message message) {
-			String result = (message.arg1 == Activity.RESULT_OK)
+    }
+    
+    public class SaveHandler implements GrantService.ServiceCallback<Integer> {
+		@Override
+		public void run(Integer result) {
+			String message = (result == Activity.RESULT_OK)
 				? "hours saved"
 				: "something went wrong";
-			Toast.makeText(parent.get(), result, Toast.LENGTH_LONG).show();
+			Toast.makeText(DetailEditActivity.this, message, Toast.LENGTH_LONG).show();
 		}
-	}
+    	
+    }
 
 	@Override
 	protected void onPause() {
 		super.onPause();
 	    GrantData data = new GrantData(year, month, employeeid);
-	    Bundle hourBundle = new Bundle();
-	    hourBundle.putDoubleArray(TAG_NON_GRANT, nonGrantHours);
-	    hourBundle.putDoubleArray(TAG_LEAVE, leaveHours);
-	    hourBundle.putDoubleArray(String.valueOf(grantId), grantHours);
-	    GrantService.saveHours(this, new SaveHandler().setParent(this), data, hourBundle);
+	    Map<String, double[]> hourBundle = new HashMap<String, double[]>();
+	    hourBundle.put(TAG_NON_GRANT, nonGrantHours);
+	    hourBundle.put(TAG_LEAVE, leaveHours);
+	    hourBundle.put(String.valueOf(grantId), grantHours);
+	    getService().saveHours(data, hourBundle);
 	}
 
 }

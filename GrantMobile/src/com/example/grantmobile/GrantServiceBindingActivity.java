@@ -28,15 +28,18 @@ public abstract class GrantServiceBindingActivity extends FragmentActivity {
 	}
 	@Override
 	protected void onStop() {
-		Log.w("grantservice binder", "onStop!");
+		Log.w("grantservice binder", "activity stopped");
 		super.onStop();
 	}
 	
 	@Override
 	protected void onDestroy() {
-		Log.w("grantservice binder", "destroyed!!");
+		Log.w("grantservice binder", "activity destroyed");
 		super.onDestroy();
 		unbind();
+		if (isFinishing()) {
+			stopService(new Intent(this, GrantService.class));
+		}
 	}
 	
 	private void bind() {
@@ -52,6 +55,11 @@ public abstract class GrantServiceBindingActivity extends FragmentActivity {
 			service = null;
 		}
 	}
+	
+	protected boolean isServiceBound() {
+		return service != null;
+	}
+	
 	// override me
 	protected void onBound() { }
 	
