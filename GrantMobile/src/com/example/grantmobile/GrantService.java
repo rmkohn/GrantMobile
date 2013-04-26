@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -225,7 +226,7 @@ public class GrantService extends Service {
 			this.employeeid = employeeid;
 		}
 		@Override public String toString() {
-			return String.format("GrantData(%d, %d, %d)", year, month, employeeid);
+			return String.format(Locale.US, "GrantData(%d, %d, %d)", year, month, employeeid);
 		}
 	}
 	
