@@ -121,7 +121,7 @@ public class GrantService extends Service {
 				}
 				return Activity.RESULT_CANCELED;
 			}
-		};
+		}.execute();
 	}
 	
 	public int saveHours(GrantData data, Map<String, double[]> hours) {
