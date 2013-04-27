@@ -192,6 +192,16 @@ public class GrantService extends Service {
 		}
 	}
 	
+	public static String[] getGrantStrings(int[] grantids) {
+		String[] grantStrings = new String[grantids.length + 2];
+		for (int i = 0; i < grantids.length; i++) {
+			grantStrings[i] = String.valueOf(grantids[i]);
+		}
+		grantStrings[grantids.length]   = "non-grant";
+		grantStrings[grantids.length+1] = "leave";
+		return grantStrings;
+	}
+	
 	// class to hold the time/employee details needed to specify a grant's hours
 	// TODO: give it a more meaningful (or meaningful at all) name
 	public static class GrantData implements Serializable {

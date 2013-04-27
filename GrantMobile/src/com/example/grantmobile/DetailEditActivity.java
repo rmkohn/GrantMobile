@@ -6,10 +6,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.example.grantmobile.GrantService.GrantData;
+import com.example.grantmobile.GrantService.ServiceCallback;
 
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.widget.Button;
@@ -234,5 +237,41 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 	    hourBundle.put(String.valueOf(grantId), grantHours);
 	    getService().saveHours(data, hourBundle);
 	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.edit, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		GrantService.GrantData data = new GrantService.GrantData(year, month, employeeid);
+		String[] grantstrings = GrantService.getGrantStrings(new int[] { grantId });
+		switch (item.getItemId()) {
+		case R.id.mnuLoad:
+			// IntentService uses a single background thread, so this should work
+			getService().deleteHours(data, grantstrings);
+			updateView();
+			break;
+		case R.id.mnuDialog:
+			Toast.makeText(this, "Sorry, not implemented yet", Toast.LENGTH_LONG).show();
+			break;
+		case R.id.mnuUpload:
+			getService().uploadHours(data, grantstrings, new ServiceCallback<Integer>() {
+				public void run(Integer result) {
+					String message = (result == Activity.RESULT_OK)
+						? "uploaded successfully"
+						: "error uploading";
+					Toast.makeText(DetailEditActivity.this, message, Toast.LENGTH_LONG).show();
+				}
+			});
+			break;
+		default: return false;
+		}
+		return true;
+	}
+
+	
 
 }

@@ -80,13 +80,7 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	}
 
 	private String[] getGrantStrings() {
-		String[] grantStrings = new String[grantids.length + 2];
-		for (int i = 0; i < grantids.length; i++) {
-			grantStrings[i] = String.valueOf(grantids[i]);
-		}
-		grantStrings[grantids.length]   = "non-grant";
-		grantStrings[grantids.length+1] = "leave";
-		return grantStrings;
+		return GrantService.getGrantStrings(grantids);
 	}
 	
 	protected void updateCalendar() {
