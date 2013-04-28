@@ -14,13 +14,21 @@ import org.json.JSONObject;
 import android.os.Bundle;
 import android.app.Activity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.TableLayout;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
+import android.widget.Button;
 import android.support.v4.app.NavUtils;
 import android.annotation.TargetApi;
 import android.content.Intent;
@@ -50,6 +58,7 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
 		
 		dumpBundle(getIntent().getExtras());
 		
+		Button continueButton = (Button)findViewById(R.id.grant_select_continue);
 		
 		grantViews = new AutoCompleteTextView[4];
 		TableLayout grantTable = (TableLayout)findViewById(R.id.grantTable);
@@ -59,17 +68,43 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
 			grantViews[i].setThreshold(0);
 			grantTable.addView(grantRow);
 		}
+		for (int i = 1; i < grantViews.length; i++) {
+			setNextFocusedView(grantViews[i-1], grantViews[i]);
+		}
+		
+		AutoCompleteTextView lastGrantView = grantViews[grantViews.length - 1];
+//		lastGrantView.setImeActionLabel("Done", -1);
+		lastGrantView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+		setNextFocusedView(lastGrantView, continueButton);
+		
 		grantViews[0].requestFocus();
 		
 		loadGrants();
 		
-		findViewById(R.id.grant_select_continue).setOnClickListener(new OnClickListener() {
+		continueButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             	loadCalendarEditActivity();
             }
         });
 	}
-
+	
+	private void setNextFocusedView(AutoCompleteTextView view, final View nextView) {
+		view.setOnEditorActionListener(new OnEditorActionListener() {
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				if (actionId == EditorInfo.IME_NULL) {
+					nextView.requestFocus();
+					return true;
+				}
+				return false;
+			}
+		});
+		view.setOnItemClickListener(new OnItemClickListener() {
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				nextView.requestFocus();
+			}
+		});
+	}
+	
 	public static void dumpBundle(Bundle extras) {
 		Set<String> keys = extras.keySet();
 		JSONObject bundle = new JSONObject();

@@ -117,6 +117,7 @@
             android:layout_below="@+id/nonGrantHoursView"
             android:gravity="right"
             android:text="leave hours"
+            android:inputType="numberDecimal"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
@@ -136,6 +137,7 @@
             android:layout_alignLeft="@+id/grantHoursView"
             android:gravity="right"
             android:text="non-grant hours"
+            android:inputType="numberDecimal"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
@@ -178,6 +180,7 @@
             android:layout_marginTop="21dp"
             android:gravity="right"
             android:text="grant hours"
+            android:inputType="numberDecimal"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
