@@ -165,15 +165,17 @@ public class DetailViewActivity extends GrantServiceBindingActivity {
 		moy = Integer.parseInt(map.get(TAG_MONTH));
     	dateView.setText(MOY[moy]+" "+domString+", "+map.get(TAG_YEAR));
     	dayView.setText(DOW[(domCurrent+dowStart-1)%7]);
-    	grantHoursView.setText(grantHours.get(domCurrent-1));
-    	nonGrantHoursView.setText(nonGrantHours.get(domCurrent-1));
-    	leaveHoursView.setText(leaveHours.get(domCurrent-1));
+    	grantHoursView.setText(Double.valueOf(grantHours.get(domCurrent-1)).toString());
+    	nonGrantHoursView.setText(Double.valueOf(nonGrantHours.get(domCurrent-1)).toString());
+    	leaveHoursView.setText(Double.valueOf(leaveHours.get(domCurrent-1)).toString());
     		
-    	Integer dayTotal = Integer.valueOf(grantHours.get(domCurrent-1))+Integer.valueOf(nonGrantHours.get(domCurrent-1))+Integer.valueOf(leaveHours.get(domCurrent-1));
+    	Double dayTotal = Double.valueOf(grantHours.get(domCurrent-1))
+    			+Double.valueOf(nonGrantHours.get(domCurrent-1))
+    			+Double.valueOf(leaveHours.get(domCurrent-1));
     	dayTotalHoursView.setText(dayTotal.toString());
-    	Integer tgh = 0;
+    	Double tgh = 0.0;
     	for (int i = 0; i < grantHours.size(); i++)
-    		tgh = tgh + Integer.valueOf(grantHours.get(i));
+    		tgh = tgh + Double.valueOf(grantHours.get(i));
     	monthTotalHoursView.setText(tgh.toString());
 	}
 	
