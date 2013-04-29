@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+    <EditText
+        android:id="@+id/dialog_grant_select_filter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:inputType="textNoSuggestions|textCapWords"
+        android:hint="start typing a grant title"
+        android:singleLine="true" />
+
+    <ListView
+        android:id="@+id/dialog_grant_select_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/dialog_grant_select_filter"
+        android:choiceMode="singleChoice"
+        android:fastScrollEnabled="true"
+        android:stackFromBottom="true"
+        android:textFilterEnabled="true" />
+
+</RelativeLayout>

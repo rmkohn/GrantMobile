@@ -3,6 +3,8 @@ package com.example.grantmobile;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -177,6 +179,13 @@ public class GrantService extends Service {
 					} catch (JSONException e) {
 						e.printStackTrace();
 						return null;
+					}
+					missingKeys.removeAll(allHours.keySet());
+					if (!missingKeys.isEmpty()) {
+						Log.e("grantservice", "still missing values!");
+						for (String s: missingKeys) {
+							Log.e("grantservice", s);
+						}
 					}
 				} else {
 					Log.i(TAG, "got values from cache");

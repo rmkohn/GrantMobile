@@ -5,29 +5,23 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.example.grantmobile.GrantService.ServiceCallback;
+
 import android.os.Bundle;
-import android.app.Activity;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.EditorInfo;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.TableLayout;
 import android.widget.TextView;
-import android.widget.TextView.OnEditorActionListener;
 import android.widget.Button;
 import android.support.v4.app.NavUtils;
 import android.annotation.TargetApi;
@@ -43,11 +37,20 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
 
 	public static final String TAG_INTENT_GRANT_IDS = "grantids";
 
-	AutoCompleteTextView[] grantViews;
+	ArrayList<Grant> selectedGrants;
 	
 	// TEMPORARY until we decide which values to display and which to discard
 	JSONObject[] grants;
-	String[] grantNames;
+	Grant[] grantInfo;
+	
+	public static class Grant {
+		String name;
+		int id;
+		public String toString() { return name; }
+		public Grant(String name, int id) { this.name = name; this.id = id; }
+	}
+	
+	TableLayout grantTable;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -60,24 +63,12 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
 		
 		Button continueButton = (Button)findViewById(R.id.grant_select_continue);
 		
-		grantViews = new AutoCompleteTextView[4];
-		TableLayout grantTable = (TableLayout)findViewById(R.id.grantTable);
-		for (int i = 0; i < grantViews.length; i++) {
-			View grantRow = getLayoutInflater().inflate(R.layout.tablerow_grantselect, grantTable, false);
-			grantViews[i] = (AutoCompleteTextView) grantRow.findViewById(R.id.grantrow_autocomplete);
-			grantViews[i].setThreshold(0);
-			grantTable.addView(grantRow);
-		}
-		for (int i = 1; i < grantViews.length; i++) {
-			setNextFocusedView(grantViews[i-1], grantViews[i]);
-		}
-		
-		AutoCompleteTextView lastGrantView = grantViews[grantViews.length - 1];
-//		lastGrantView.setImeActionLabel("Done", -1);
-		lastGrantView.setImeOptions(EditorInfo.IME_ACTION_DONE);
-		setNextFocusedView(lastGrantView, continueButton);
-		
-		grantViews[0].requestFocus();
+		grantTable = (TableLayout)findViewById(R.id.grantTable);
+		findViewById(R.id.grant_select_addgrant).setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				showAddGrantDialog();
+			}
+		});
 		
 		loadGrants();
 		
@@ -88,21 +79,39 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
         });
 	}
 	
-	private void setNextFocusedView(AutoCompleteTextView view, final View nextView) {
-		view.setOnEditorActionListener(new OnEditorActionListener() {
-			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-				if (actionId == EditorInfo.IME_NULL) {
-					nextView.requestFocus();
-					return true;
-				}
-				return false;
+	public void showAddGrantDialog() {
+		GrantSelectDialog dialog = new GrantSelectDialog();
+		dialog.setGrants(getUnchosenGrants());
+		dialog.setCallback(new ServiceCallback<Grant>() {
+			public void run(Grant result) {
+				if (result != null)
+					addGrant(result);
 			}
 		});
-		view.setOnItemClickListener(new OnItemClickListener() {
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				nextView.requestFocus();
+		dialog.show(getSupportFragmentManager(), "");
+	}
+	
+	public List<Grant> getUnchosenGrants() {
+		ArrayList<Grant> unchosenGrants = new ArrayList<Grant>(Arrays.asList(grantInfo));
+		unchosenGrants.removeAll(selectedGrants);
+		return unchosenGrants;
+	}
+	
+	public void addGrant(Grant grant) {
+//		Log.i("addgrant", "adding grant " + grantIndex);
+//		Log.i("addgrant", "grants: " + grants);
+//		Log.i("addgrant", "this grant: "  + grants[grantIndex]);
+		final View grantRow = getLayoutInflater().inflate(R.layout.tablerow_grantselect, grantTable, false);
+		((TextView)grantRow.findViewById(R.id.grant_select_grantname)).setText(grant.name);
+		grantRow.findViewById(R.id.removeGrant).setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				int delIndex = grantTable.indexOfChild(grantRow);
+				grantTable.removeViewAt(delIndex);
+				selectedGrants.remove(delIndex);
 			}
 		});
+		selectedGrants.add(grant);
+		grantTable.addView(grantRow);
 	}
 	
 	public static void dumpBundle(Bundle extras) {
@@ -126,47 +135,46 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
 	}
 
 	protected void loadCalendarEditActivity() {
-		boolean grantFail = false;
-		
-		ArrayList<JSONObject> grantidlist = new ArrayList<JSONObject>();
-		for (int i = 0; i < 4; i++) {
-			String text = grantViews[i].getText().toString();
-			int pos = Arrays.binarySearch(grantNames, text);
-			if (pos >= 0) {
-				grantidlist.add(grants[pos]);
-			} else if (text != null && !text.equals("")) {
-				grantViews[i].setError("Choose a grant from the dropdown, or leave empty");
-				grantFail = true;
-			}
-		}
-		
-		if (grantFail) {
-			return;
-		} else if (grantidlist.size() == 0) {
-			grantViews[0].setError("Select one or more grants");
-			return;
-		}
+//		boolean grantFail = false;
+//		
+//		ArrayList<JSONObject> grantidlist = new ArrayList<JSONObject>();
+//		for (int i = 0; i < 4; i++) {
+//			String text = grantViews[i].getText().toString();
+//			int pos = Arrays.binarySearch(grantNames, text);
+//			if (pos >= 0) {
+//				grantidlist.add(grants[pos]);
+//			} else if (text != null && !text.equals("")) {
+//				grantViews[i].setError("Choose a grant from the dropdown, or leave empty");
+//				grantFail = true;
+//			}
+//		}
+//		
+//		if (grantFail) {
+//			return;
+//		} else if (grantidlist.size() == 0) {
+//			grantViews[0].setError("Select one or more grants");
+//			return;
+//		}
 		
 		Intent intent = new Intent(GrantSelectActivity.this, CalendarEditActivity.class);
 		intent.putExtras(getIntent());
 
-		int[] grants = new int[grantidlist.size()];
-		String[] grantnames = new String[grantidlist.size()];
-		try {
-			for (int i = 0; i < grantidlist.size(); i++) {
-				grants[i] = grantidlist.get(i).getInt("ID");
-				grantnames[i] = grantidlist.get(i).getString("grantTitle");
+		int[] grantids = new int[selectedGrants.size()];
+		String[] grantnames = new String[selectedGrants.size()];
+//		try {
+			for (int i = 0; i < grantids.length; i++) {
+				Grant grant = selectedGrants.get(i);
+				grantids[i]   = grant.id;
+				grantnames[i] = grant.name;
 			}
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
+//		} catch (JSONException e) {
+//			e.printStackTrace();
+//		}
 
-		intent.putExtra(TAG_INTENT_GRANT_IDS, grants);
+		intent.putExtra(TAG_INTENT_GRANT_IDS, grantids);
 		intent.putExtra(TAG_INTENT_GRANT_NAMES, grantnames);
 		intent.putExtra("editing", true);
 		startActivity(intent);
-		// TODO Auto-generated method stub
-
 	}
 
 	private void loadGrants() {
@@ -181,27 +189,23 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
 					grants[i] = jsonGrants.getJSONObject(i);
 				}
 				Arrays.sort(grants, grantComparator);
-				loadAutocompleteViews();
+				finishGrantInit();
 			}
 		});
 	}
 
-	protected void loadAutocompleteViews() {
-		grantNames = new String[grants.length];
+	protected void finishGrantInit() {
+//		grantNames = new String[grants.length];
+		grantInfo = new Grant[grants.length];
 		try {
-			for (int i = 0; i < grantNames.length; i++) {
-				grantNames[i] = grants[i].getString("grantTitle");
+			for (int i = 0; i < grantInfo.length; i++) {
+				grantInfo[i] = new Grant(grants[i].getString("grantTitle"), grants[i].getInt("ID"));
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 			return;
 		}
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-			this, android.R.layout.simple_dropdown_item_1line, grantNames
-		);
-		for (AutoCompleteTextView view: grantViews) {
-			view.setAdapter(adapter);
-		}
+		selectedGrants = new ArrayList<Grant>();
 	}
 
 	/**
