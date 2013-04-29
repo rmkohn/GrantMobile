@@ -1,7 +1,5 @@
 package com.example.grantmobile.CalendarSquare;
 
-import android.graphics.Color;
-
 public class PlaceholderSquare implements ICalendarSquare {
 	String message;
 

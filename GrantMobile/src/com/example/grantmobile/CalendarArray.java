@@ -114,7 +114,7 @@ public class CalendarArray {
 		thisDailyNumber = 1 - firstDay;
 		
 		// Vertical
-		for (int yy = 1; yy < WEEKSTODRAW; yy++)
+		while (thisDailyNumber < daysInMonth)
 		{
 			// used for weekly totals
 			ArrayList<DaySquare> realDaysInWeek = new ArrayList<DaySquare>();
@@ -131,7 +131,7 @@ public class CalendarArray {
 					tmpRealDays.add(daySquare);
 				} else {
 					// create placeholder day
-					curSquare = new PlaceholderSquare("-");
+					curSquare = new PlaceholderSquare("");
 				}
 				
 				// add whatever square we made to calendar and advance a day
@@ -142,7 +142,7 @@ public class CalendarArray {
 			if (realDaysInWeek.size() > 0) {
 				tmpCalendar.add(new TotalSquare(realDaysInWeek));
 			} else {
-				tmpCalendar.add(new PlaceholderSquare("-"));
+				tmpCalendar.add(new PlaceholderSquare(""));
 			}
 		} // end for yy
 		// we are gonna be in a bad way if these get out of sync, so make it tougher for that to happen

@@ -37,20 +37,19 @@ public class CalendarSquareAdapter extends BaseAdapter {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		TextView view;
 		ICalendarSquare square = calendar.getSquare(position);
-		int resource = square instanceof DaySquare
-			? R.layout.calendar_date_element
-			: R.layout.calendar_placeholder_element;
 		if (convertView == null) {  // if it's not recycled, initialize some attributes
-			view = (TextView)inflater.inflate(resource, parent, false);
+			int resource = square instanceof DaySquare
+				? R.layout.calendar_date_element
+				: R.layout.calendar_placeholder_element;
+			convertView = inflater.inflate(resource, parent, false);
 //			imageView.setLayoutParams(new GridView.LayoutParams(85, 85));
-		} else {
-			view = (TextView) convertView;
 		}
+		view = (TextView) convertView.findViewById(R.id.calendarTextView);
 		
 		view.setBackgroundColor(square.getHighlightColor());
 		view.setText(square.getMessage());
 
-		return view;
+		return convertView;
 	}
 
 	@Override
