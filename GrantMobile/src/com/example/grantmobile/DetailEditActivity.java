@@ -1,3 +1,4 @@
+
 package com.example.grantmobile;
 
 import java.util.Arrays;
@@ -217,6 +218,7 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
     		tgh = tgh + gh;
     	monthTotalHoursView.setText(String.valueOf(tgh));
 	}
+    
     private void saveHours() {
     	double grant    = getTimeFromView(grantHoursView);
     	double nongrant = getTimeFromView(nonGrantHoursView);
@@ -225,6 +227,7 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
     	leaveHours   [domCurrent-1] = leave;
     	nonGrantHours[domCurrent-1] = nongrant;
     }
+    
     private double getTimeFromView(EditText view) {
     	try {
     		return Double.valueOf(view.getText().toString());
@@ -265,13 +268,14 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 
 	@Override
 	protected void onPause() {
-		super.onPause();
+		saveHours();
 	    GrantData data = new GrantData(year, month, employeeid);
 	    Map<String, double[]> hourBundle = new HashMap<String, double[]>();
 	    hourBundle.put(TAG_NON_GRANT, nonGrantHours);
 	    hourBundle.put(TAG_LEAVE, leaveHours);
 	    hourBundle.put(String.valueOf(grantId), grantHours);
 	    getService().saveHours(data, hourBundle);
+		super.onPause();
 	}
 	
 	@Override
