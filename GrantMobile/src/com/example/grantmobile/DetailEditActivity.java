@@ -1,9 +1,13 @@
 package com.example.grantmobile;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.example.grantmobile.GrantService.GrantData;
 import com.example.grantmobile.GrantService.ServiceCallback;
@@ -11,6 +15,7 @@ import com.example.grantmobile.GrantService.ServiceCallback;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -95,6 +100,8 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 		dayTotalHoursView = (TextView)findViewById(R.id.dayTotalHoursView);
 		monthTotalHoursView = (TextView)findViewById(R.id.monthTotalHoursView);
 		
+		loadGrantInfo();
+		
         final Button backwardButton = (Button) findViewById(R.id.backBtn);
         backwardButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -144,6 +151,29 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 			loadHours();
 	}
 	
+		
+	private void loadGrantInfo() {
+		if (isServiceBound()) {
+			Log.i("detailedit", "loading grant info");
+			getService().getGrantByParameter("ID", Integer.valueOf(grantId), new ServiceCallback<JSONObject>() {
+				public void run(JSONObject result) {
+					updateGrantViews(result);
+				}
+			});
+		}
+	}
+	
+	private void updateGrantViews(JSONObject result) {
+		Log.i("detailedit", "updating grant info views");
+		try {
+			grantNumber     = result.getString(DetailViewActivity.TAG_GRANT_NUMBER);
+			grantTitle      = result.getString(DetailViewActivity.TAG_GRANT_TITLE);
+			stateCatalogNum = result.getString(DetailViewActivity.TAG_STATE_CATALOG_NUM);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	private void loadHours() {
 		String[] hours = { String.valueOf(grantId), "non-grant", "leave" };
 	    GrantData grantdata = new GrantData(year, month, employeeid);
@@ -152,6 +182,7 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 	
 	@Override
 	protected void onBound() {
+		loadGrantInfo();
 		loadHours();
 	}
         

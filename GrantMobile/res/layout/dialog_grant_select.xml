@@ -21,7 +21,6 @@
         android:layout_above="@id/dialog_grant_select_filter"
         android:choiceMode="singleChoice"
         android:fastScrollEnabled="true"
-        android:stackFromBottom="true"
         android:textFilterEnabled="true" />
 
 </RelativeLayout>

@@ -12,7 +12,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:text="Continue" />
-    
+
     <Button
         android:id="@+id/grant_select_addgrant"
         android:layout_width="wrap_content"
@@ -20,14 +20,18 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:text="Add Grant..." />
-        
 
-    <TableLayout
-        android:id="@+id/grantTable"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/grant_select_continue"
-        android:shrinkColumns="1"
-        android:stretchColumns="0" />
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/grant_select_continue" >
+
+        <TableLayout
+            android:id="@+id/grantTable"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:shrinkColumns="1"
+            android:stretchColumns="0" />
+    </ScrollView>
 
 </RelativeLayout>

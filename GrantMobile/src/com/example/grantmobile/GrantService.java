@@ -3,8 +3,6 @@ package com.example.grantmobile;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -25,6 +23,7 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+import android.util.SparseArray;
 
 public class GrantService extends Service {
 	
@@ -36,6 +35,7 @@ public class GrantService extends Service {
 	DBAdapter db;
 	GrantBinder binder;
 	Map<String, JSONObject> emailRequestCache;
+	JSONObject[] grants;
 
 	@Override
 	public void onCreate() {
@@ -193,6 +193,45 @@ public class GrantService extends Service {
 				return allHours;
 			}
 		}.execute();
+	}
+	
+	public void getGrants(final ServiceCallback<JSONObject[]> callback) {
+		if (grants == null) {
+			new JSONParser.RequestBuilder("http://mid-state.net/mobileclass2/android")
+			.addParam("q", "listallgrants")
+			.makeRequest(new JSONParser.SimpleResultHandler() {
+				@Override
+				public void onSuccess(Object result) throws JSONException, IOException {
+					JSONArray jsonGrants = (JSONArray) result;
+					grants = new JSONObject[jsonGrants.length()];
+					for (int i = 0; i < jsonGrants.length(); i++) {
+						JSONObject grant = jsonGrants.getJSONObject(i);
+						grants[i] = grant;
+					}
+					callback.run(grants);
+				}
+			});
+		} else {
+			callback.run(grants);
+		}
+	}
+	
+	public void getGrantByParameter(final String key, final Object param, final ServiceCallback<JSONObject> callback) {
+		getGrants(new ServiceCallback<JSONObject[]>() {
+			public void run(JSONObject[] result) {
+				try {
+					for (JSONObject grant: grants) {
+						if (grant.get(key).equals(param)) {
+							callback.run(grant);
+							return;
+						}
+					}
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+				callback.run(null);
+			}
+		});
 	}
 	
 	public class GrantBinder extends Binder {

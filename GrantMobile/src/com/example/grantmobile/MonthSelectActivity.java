@@ -16,7 +16,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class MonthSelectActivity extends Activity {
+// this activity gets reopened for a split-second when the next-opened view rotates
+// that split-second is enough to shut down GrantService if the foreground activity (this)
+// doesn't also use it.
+// (this may all be an emulator artifact; its timescale and memory management are a tiny bit wonky)
+public class MonthSelectActivity extends GrantServiceBindingActivity {
 
 	private ListView mYearView;
 	private ListView mMonthView;

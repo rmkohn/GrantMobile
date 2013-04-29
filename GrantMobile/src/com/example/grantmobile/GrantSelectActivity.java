@@ -1,6 +1,6 @@
 package com.example.grantmobile;
 
-import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +15,8 @@ import org.json.JSONObject;
 import com.example.grantmobile.GrantService.ServiceCallback;
 
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,10 +30,6 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.os.Build;
 
-// this activity gets reopened for a split-second when CalendarEditView rotates
-// that split-second is enough to shut down GrantService if the foreground activity (this)
-// doesn't also use it.
-// (this may all be an emulator artifact; its timescale and memory management are a tiny bit wonky)
 public class GrantSelectActivity extends GrantServiceBindingActivity {
 	public static final String TAG_INTENT_GRANT_NAMES = "grantnames";
 
@@ -43,7 +41,8 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
 	JSONObject[] grants;
 	Grant[] grantInfo;
 	
-	public static class Grant {
+	public static class Grant implements Serializable {
+		private static final long serialVersionUID = 0L;
 		String name;
 		int id;
 		public String toString() { return name; }
@@ -51,6 +50,7 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
 	}
 	
 	TableLayout grantTable;
+	Button continueButton;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -59,11 +59,24 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
 		// Show the Up button in the action bar.
 		setupActionBar();
 		
+		selectedGrants = new ArrayList<Grant>();
 		dumpBundle(getIntent().getExtras());
 		
-		Button continueButton = (Button)findViewById(R.id.grant_select_continue);
-		
 		grantTable = (TableLayout)findViewById(R.id.grantTable);
+		continueButton = (Button)findViewById(R.id.grant_select_continue);
+		if (savedInstanceState != null) {
+			// casting to a generic type
+			@SuppressWarnings("unchecked")
+			ArrayList<Grant> oldgrants =
+				(ArrayList<Grant>)savedInstanceState.getSerializable("grants");
+			if (oldgrants != null) {
+				for (Grant grant: oldgrants) {
+					addGrant(grant);
+				}
+			}
+		}
+		updateContinueButton();
+		
 		findViewById(R.id.grant_select_addgrant).setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				showAddGrantDialog();
@@ -98,9 +111,6 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
 	}
 	
 	public void addGrant(Grant grant) {
-//		Log.i("addgrant", "adding grant " + grantIndex);
-//		Log.i("addgrant", "grants: " + grants);
-//		Log.i("addgrant", "this grant: "  + grants[grantIndex]);
 		final View grantRow = getLayoutInflater().inflate(R.layout.tablerow_grantselect, grantTable, false);
 		((TextView)grantRow.findViewById(R.id.grant_select_grantname)).setText(grant.name);
 		grantRow.findViewById(R.id.removeGrant).setOnClickListener(new OnClickListener() {
@@ -108,10 +118,12 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
 				int delIndex = grantTable.indexOfChild(grantRow);
 				grantTable.removeViewAt(delIndex);
 				selectedGrants.remove(delIndex);
+				updateContinueButton();
 			}
 		});
 		selectedGrants.add(grant);
 		grantTable.addView(grantRow);
+		updateContinueButton();
 	}
 	
 	public static void dumpBundle(Bundle extras) {
@@ -135,65 +147,46 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
 	}
 
 	protected void loadCalendarEditActivity() {
-//		boolean grantFail = false;
-//		
-//		ArrayList<JSONObject> grantidlist = new ArrayList<JSONObject>();
-//		for (int i = 0; i < 4; i++) {
-//			String text = grantViews[i].getText().toString();
-//			int pos = Arrays.binarySearch(grantNames, text);
-//			if (pos >= 0) {
-//				grantidlist.add(grants[pos]);
-//			} else if (text != null && !text.equals("")) {
-//				grantViews[i].setError("Choose a grant from the dropdown, or leave empty");
-//				grantFail = true;
-//			}
-//		}
-//		
-//		if (grantFail) {
-//			return;
-//		} else if (grantidlist.size() == 0) {
-//			grantViews[0].setError("Select one or more grants");
-//			return;
-//		}
-		
 		Intent intent = new Intent(GrantSelectActivity.this, CalendarEditActivity.class);
 		intent.putExtras(getIntent());
 
 		int[] grantids = new int[selectedGrants.size()];
 		String[] grantnames = new String[selectedGrants.size()];
-//		try {
-			for (int i = 0; i < grantids.length; i++) {
-				Grant grant = selectedGrants.get(i);
-				grantids[i]   = grant.id;
-				grantnames[i] = grant.name;
-			}
-//		} catch (JSONException e) {
-//			e.printStackTrace();
-//		}
+		
+		for (int i = 0; i < grantids.length; i++) {
+			Grant grant = selectedGrants.get(i);
+			grantids[i]   = grant.id;
+			grantnames[i] = grant.name;
+		}
 
 		intent.putExtra(TAG_INTENT_GRANT_IDS, grantids);
 		intent.putExtra(TAG_INTENT_GRANT_NAMES, grantnames);
 		intent.putExtra("editing", true);
 		startActivity(intent);
 	}
-
-	private void loadGrants() {
-		new JSONParser.RequestBuilder("http://mid-state.net/mobileclass2/android")
-		.addParam("q", "listallgrants")
-		.makeRequest(new JSONParser.SimpleResultHandler() {
-			@Override
-			public void onSuccess(Object result) throws JSONException, IOException {
-				JSONArray jsonGrants = (JSONArray) result;
-				grants = new JSONObject[jsonGrants.length()];
-				for (int i = 0; i < jsonGrants.length(); i++) {
-					grants[i] = jsonGrants.getJSONObject(i);
-				}
-				Arrays.sort(grants, grantComparator);
-				finishGrantInit();
-			}
-		});
+	
+	protected void onBound() {
+		loadGrants();
 	}
 
+	private void loadGrants() {
+		if (grants == null && isServiceBound()) {
+			getService().getGrants(new ServiceCallback<JSONObject[]>() {
+				public void run(JSONObject[] result) {
+					grants = result;
+					finishGrantInit();
+				}
+			});
+		}
+	}
+
+	private void updateContinueButton() {
+		int visibility = selectedGrants.size() > 0
+				? View.VISIBLE
+				: View.INVISIBLE;
+		continueButton.setVisibility(visibility);
+	}
+	
 	protected void finishGrantInit() {
 //		grantNames = new String[grants.length];
 		grantInfo = new Grant[grants.length];
@@ -205,7 +198,6 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
 			e.printStackTrace();
 			return;
 		}
-		selectedGrants = new ArrayList<Grant>();
 	}
 
 	/**
@@ -243,15 +235,11 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
-	Comparator<JSONObject> grantComparator = new Comparator<JSONObject>() {
-		public int compare(JSONObject lhs, JSONObject rhs) {
-			try {
-				return lhs.getString("grantTitle").compareTo(rhs.getString("grantTitle"));
-			} catch (JSONException e) {
-				return 0;
-			}
-		}
-	};
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putSerializable("grants", selectedGrants);
+	}
 
 }
