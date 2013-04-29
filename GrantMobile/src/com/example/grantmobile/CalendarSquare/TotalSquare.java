@@ -4,9 +4,9 @@ import java.util.List;
 
 public class TotalSquare implements ICalendarSquare {
 	public List<DaySquare> squares;
-	public int grant = 0;
-	public int nongrant = 0;
-	public int leave = 0;
+	public double grant = 0;
+	public double nongrant = 0;
+	public double leave = 0;
 
 	public TotalSquare(List<DaySquare> squares) {
 		this.squares = squares;
@@ -24,7 +24,7 @@ public class TotalSquare implements ICalendarSquare {
 	@Override
 	public String getMessage() {
 		updateTimes();
-		return "T: " + grant;
+		return "T: " + (int)grant;
 	}
 	
 	@Override

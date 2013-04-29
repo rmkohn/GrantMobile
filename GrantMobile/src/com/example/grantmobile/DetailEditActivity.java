@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.json.JSONException;
@@ -205,9 +206,9 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 		moy = month;
     	dateView.setText(MOY[moy]+" "+domString+", "+year);
     	dayView.setText(DOW[(domCurrent+dowStart-1)%7]);
-    	grantHoursView.setText(String.valueOf(grantHours[domCurrent-1]));
-    	nonGrantHoursView.setText(String.valueOf(nonGrantHours[domCurrent-1]));
-    	leaveHoursView.setText(String.valueOf(leaveHours[domCurrent-1]));
+    	grantHoursView.setText(getFormattedHours(grantHours[domCurrent-1]));
+    	nonGrantHoursView.setText(getFormattedHours(nonGrantHours[domCurrent-1]));
+    	leaveHoursView.setText(getFormattedHours(leaveHours[domCurrent-1]));
     		
     	double dayTotal = grantHours[domCurrent-1] + nonGrantHours[domCurrent-1] + leaveHours[domCurrent-1];
     	dayTotalHoursView.setText(String.valueOf(dayTotal));
@@ -230,6 +231,10 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
     	} catch (NumberFormatException e) {
     		return 0;
     	}
+    }
+    
+    private String getFormattedHours(double hours) {
+    	return String.format(Locale.US, "%.1f", hours).replace(".0", "");
     }
     
     public class DetailHandler implements GrantService.ServiceCallback<Map<String, double[]>> {

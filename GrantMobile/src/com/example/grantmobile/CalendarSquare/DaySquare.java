@@ -16,14 +16,12 @@
 
 package com.example.grantmobile.CalendarSquare;
 
-import android.graphics.Color;
-
 
 public class DaySquare implements ICalendarSquare {
 	public int dailyNumber = 0;
-	public int grantHours = 0;
-	public int nonGrantHours = 0;
-	public int leave = 0;
+	public double grantHours = 0;
+	public double nonGrantHours = 0;
+	public double leave = 0;
 	
 	/**
 	 * This constructor is for calendar squares using all parameters.
@@ -32,7 +30,7 @@ public class DaySquare implements ICalendarSquare {
 	 * @param n Non-grant hours
 	 * @param l Leave hours
 	 */
-	public DaySquare(int d, int g, int n, int l)
+	public DaySquare(int d, double g, double n, double l)
 	{
 		dailyNumber = d;
 		grantHours = g;
@@ -44,7 +42,7 @@ public class DaySquare implements ICalendarSquare {
 	 * This procedure returns the total number of hours on this calendar square.
 	 * @return The total number of hours
 	 */
-	public int totalHours() {
+	public double totalHours() {
 		return grantHours + nonGrantHours + leave;
 	}
 	

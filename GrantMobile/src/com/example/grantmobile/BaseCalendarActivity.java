@@ -58,16 +58,17 @@ public abstract class BaseCalendarActivity extends GrantServiceBindingActivity {
 	 * This procedure loads the calendar with the data for hours, and totals.
 	 */
 	public void initFooterMessage() {
-		int monthTotalHours = 0;
+		double monthTotalHours = 0;
 		
 		for (int day = 1; day <= calendar.getNumberOfDays(); day++) {
 			DaySquare square = calendar.getDay(day);
 			monthTotalHours += square.totalHours();
 		}
+		int hoursOnly = (int)Math.floor(monthTotalHours);
+		int minutesOnly = (int) ((monthTotalHours - hoursOnly) * 60);
 		
 		// Determine footer message from monthly totals
-		footerView.setText("Total Hours This Month: " +
-			String.valueOf(monthTotalHours));
+		footerView.setText(String.format("Total Hours This Month: %d:%02d", hoursOnly, minutesOnly));
 		
 	}
 	

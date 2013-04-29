@@ -23,7 +23,7 @@ public class SquareColors {
 		return (c & 0xfefefefe) >> 1;
 	}
 	
-	public static final int getHighlightColor(int grantHours, int nonGrantHours, int leaveHours) {
+	public static final int getHighlightColor(double grantHours, double nonGrantHours, double leaveHours) {
 		int grantColor = grantHours == 0 ? DEFAULT_COLOR : GRANT_COLOR;
 		int otherColor = nonGrantHours + leaveHours == 0 ? DEFAULT_COLOR : NONGRANT_LEAVE_COLOR;
 		return setAlpha(dissolveColor(grantColor)

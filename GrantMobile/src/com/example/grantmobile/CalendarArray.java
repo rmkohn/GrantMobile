@@ -69,9 +69,9 @@ public class CalendarArray {
 	
 	public void loadTimes(double[] granthours, double[] nongranthours, double[] leavehours) {
 		for (DaySquare cal : realDays) {
-			cal.leave         = (int)leavehours   [cal.dailyNumber-1];
-			cal.nonGrantHours = (int)nongranthours[cal.dailyNumber-1];
-			cal.grantHours    = (int)granthours   [cal.dailyNumber-1];
+			cal.leave         = leavehours   [cal.dailyNumber-1];
+			cal.nonGrantHours = nongranthours[cal.dailyNumber-1];
+			cal.grantHours    = granthours   [cal.dailyNumber-1];
 		}
 	}
 	
@@ -80,9 +80,9 @@ public class CalendarArray {
 		// load hours into calendar squares
 		for (DaySquare cal : realDays)
 		{
-			cal.leave         = (int)leavehours   .optDouble(cal.dailyNumber-1, 0);
-			cal.nonGrantHours = (int)nongranthours.optDouble(cal.dailyNumber-1, 0);
-			cal.grantHours    = (int)granthours   .optDouble(cal.dailyNumber-1, 0);
+			cal.leave         = leavehours   .optDouble(cal.dailyNumber-1, 0);
+			cal.nonGrantHours = nongranthours.optDouble(cal.dailyNumber-1, 0);
+			cal.grantHours    = granthours   .optDouble(cal.dailyNumber-1, 0);
 		}
 	}
 	/**
