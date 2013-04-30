@@ -228,7 +228,7 @@ public class CalendarActivity extends BaseCalendarActivity {
 		// (Using provided data)
 		String grant = grantName + " " + grantCatalogNum;
 		
-		String monthName = CalendarArray.monthNames[month];
+		String monthName = CalendarArray.monthNames[month-1];
 	
 		// Determine long date
 		longDate = monthName + ", " + String.valueOf(headerYear);
