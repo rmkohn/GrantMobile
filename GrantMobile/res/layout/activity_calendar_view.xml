@@ -13,7 +13,7 @@
             android:id="@+id/calendarHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Grant Name 999-999\nEmployee Name: Employee McEmployington\nJanuary, 2099"
+            android:text="Grant Name: Loading\nEmployee Name: Loading\nLoading"
             android:textAppearance="?android:attr/textAppearanceSmall" />
         <Spinner
             android:id="@+id/calendarGrantSwitcher"
@@ -32,7 +32,7 @@
 	        android:layout_width="0dp"
 	        android:layout_weight="1"
 	        android:layout_height="match_parent"
-	        android:text="Total Hours This Month: 5000"
+	        android:text="Total Hours This Month: Loading"
 	        android:textAppearance="?android:attr/textAppearanceMedium" />
 	    <Button 
 	        android:id="@+id/btnApproveDisapprove"

@@ -32,6 +32,9 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 	public static final String TAG_REQUEST_ID = "RequestId"; // required, no default!!!!
 	public static final String TAG_DAY_OF_MONTH = "DayOfMonth"; // optional, default is first day of month
 
+	// do not try to save to GrantService unless we've successfully loaded hours from it
+	// (this could happen when the server has not yet replied, and the user rotates their device)
+	private boolean hoursLoaded = false;
 	double[] grantHours; // grant hour array 
 	double[] nonGrantHours; // non-grant hour array
 	double[] leaveHours;  // leave hour array
@@ -210,13 +213,17 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
     	grantHoursView.setText(getFormattedHours(grantHours[domCurrent-1]));
     	nonGrantHoursView.setText(getFormattedHours(nonGrantHours[domCurrent-1]));
     	leaveHoursView.setText(getFormattedHours(leaveHours[domCurrent-1]));
-    		
+    	Log.i("detailedit", String.format("loaded hours for day %d: %.1f, %.1f, %.1f", domCurrent,
+    			grantHours[domCurrent-1],
+    			nonGrantHours[domCurrent-1],
+    			leaveHours[domCurrent-1]));
+    	
     	double dayTotal = grantHours[domCurrent-1] + nonGrantHours[domCurrent-1] + leaveHours[domCurrent-1];
-    	dayTotalHoursView.setText(String.valueOf(dayTotal));
+    	dayTotalHoursView.setText(getFormattedHours(dayTotal));
     	double tgh = 0;
     	for (double gh: grantHours)
     		tgh = tgh + gh;
-    	monthTotalHoursView.setText(String.valueOf(tgh));
+    	monthTotalHoursView.setText(getFormattedHours(tgh));
 	}
     
     private void saveHours() {
@@ -226,6 +233,7 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
     	grantHours   [domCurrent-1] = grant;
     	leaveHours   [domCurrent-1] = leave;
     	nonGrantHours[domCurrent-1] = nongrant;
+    	Log.i("detailedit", String.format("saving hours for day %d: %.1f, %.1f, %.1f", domCurrent, grant, nongrant, leave));
     }
     
     private double getTimeFromView(EditText view) {
@@ -247,6 +255,7 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 				nonGrantHours = result.get(TAG_NON_GRANT);
 				leaveHours = result.get(TAG_LEAVE);
 				updateView();
+				hoursLoaded = true;
 			} else {
 				Toast.makeText(DetailEditActivity.this, "Download failed.",
 						Toast.LENGTH_LONG).show();
@@ -274,7 +283,9 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 	    hourBundle.put(TAG_NON_GRANT, nonGrantHours);
 	    hourBundle.put(TAG_LEAVE, leaveHours);
 	    hourBundle.put(String.valueOf(grantId), grantHours);
-	    getService().saveHours(data, hourBundle);
+	    if (hoursLoaded) {
+		    getService().saveHours(data, hourBundle);
+	    }
 		super.onPause();
 	}
 	
