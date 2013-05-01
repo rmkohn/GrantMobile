@@ -119,11 +119,7 @@ public class CalendarActivity extends FragmentActivity {
 				// get some info about the grant
 				JSONObject grantinfo = result.getJSONObject("grant");
 				grantId              = grantinfo.getInt("ID");
-				if (result.isNull("status")) {
-					grantApprovalStatus  = "none";
-				} else {
-					grantApprovalStatus  = result.getString("status");
-				}// end if
+				grantApprovalStatus  = result.optString("status", "none");
 				grantName            = grantinfo.getString("grantTitle");
 				grantNumber          = grantinfo.getString("grantNumber");
 				grantCatalogNumber   = grantinfo.getString("stateCatalogNum");
@@ -131,8 +127,7 @@ public class CalendarActivity extends FragmentActivity {
 				workMonthId = result.getInt("id");
 				
 				// if pending
-				if (grantApprovalStatus == "pending") {
-				
+				if (grantApprovalStatus.equals("pending")) {
 					// get that info ready to display, also set year and monthNumber class-level variables
 					calendarView.initHeaderMessage(month, year, grantName, grantNumber, employeeName);
 					
@@ -240,23 +235,23 @@ public class CalendarActivity extends FragmentActivity {
 		String message = "";
 		
 		// Determine title and message
-		if (status == "new") {
+		if (status.equals("new")) {
 			
 			title = "Not Availabley Yet";
 			message = "This grant is still being filled out. You shouldn't even see this.";
 			
 		} else {
-			
-			if (status == "none") {
-			
+
+			if (status.equals("none")) {
+
 				title = "No Grant";
 				message = "There is no grant here. How did you get here?";
-				
+
 			} else {
-				
+
 				title = "Already Handled";
 				message = "Grant already handled";
-				
+
 			}// end if
 		
 		}// end if
