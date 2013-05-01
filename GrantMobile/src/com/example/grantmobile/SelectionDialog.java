@@ -1,9 +1,8 @@
 package com.example.grantmobile;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
-
-import com.example.grantmobile.GrantSelectActivity.Grant;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -19,25 +18,25 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
-public class GrantSelectDialog extends DialogFragment {
-	private List<Grant> grants;
-	private GrantService.ServiceCallback<Grant> callback;
+public abstract class SelectionDialog<T extends Serializable> extends DialogFragment {
 	
-	public GrantSelectDialog() { }
+	private List<T> items;
+	
+	public SelectionDialog() { }
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		final View dialogView = getActivity().getLayoutInflater().inflate(R.layout.dialog_grant_select, null);
 		ListView dialogList = (ListView)dialogView.findViewById(R.id.dialog_grant_select_list);
-		if (grants == null)
-			grants = Arrays.asList((Grant[])savedInstanceState.getSerializable("grants"));
-		final ArrayAdapter<Grant> adapter = new ArrayAdapter<Grant>(
-//			getActivity(), android.R.layout.simple_list_item_single_choice, grants);
-			getActivity(), android.R.layout.simple_list_item_1, grants);
+		if (items == null)
+			items = (List<T>)Arrays.asList((Object[])savedInstanceState.getSerializable("grants"));
+		final ArrayAdapter<T> adapter = new ArrayAdapter<T>(
+			getActivity(), android.R.layout.simple_list_item_1, items);
 		dialogList.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				callback.run((Grant)parent.getItemAtPosition(position));
-				GrantSelectDialog.this.dismiss();
+				onResult((T)parent.getItemAtPosition(position));
+				SelectionDialog.this.dismiss();
 			}
 		});
 		dialogList.setAdapter(adapter);
@@ -62,18 +61,16 @@ public class GrantSelectDialog extends DialogFragment {
 		return dialog;
 	}
 
-	public void setGrants(List<Grant> grants) {
-		this.grants = grants;
+	public void setItems(List<T> items) {
+		this.items = items;
 	}
-
-	public void setCallback(GrantService.ServiceCallback<Grant> callback) {
-		this.callback = callback;
-	}
+	
+	public abstract void onResult(T result);
 
 	@Override
 	public void onSaveInstanceState(Bundle arg0) {
 		super.onSaveInstanceState(arg0);
-		arg0.putSerializable("grants", grants.toArray(new Grant[grants.size()]));
+		arg0.putSerializable("grants", items.toArray());
 	}
 
 }

@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -15,8 +14,6 @@ import org.json.JSONObject;
 import com.example.grantmobile.GrantService.ServiceCallback;
 
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -91,16 +88,10 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
             }
         });
 	}
-	
+
 	public void showAddGrantDialog() {
-		GrantSelectDialog dialog = new GrantSelectDialog();
-		dialog.setGrants(getUnchosenGrants());
-		dialog.setCallback(new ServiceCallback<Grant>() {
-			public void run(Grant result) {
-				if (result != null)
-					addGrant(result);
-			}
-		});
+		SelectionDialog<Grant> dialog = new GrantAdderDialog();
+		dialog.setItems(getUnchosenGrants());
 		dialog.show(getSupportFragmentManager(), "");
 	}
 	
@@ -197,6 +188,13 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
 		} catch (JSONException e) {
 			e.printStackTrace();
 			return;
+		}
+	}
+	
+	public static class GrantAdderDialog extends SelectionDialog<Grant> {
+		public void onResult(Grant result) {
+			if (result != null)
+				((GrantSelectActivity)getActivity()).addGrant(result);
 		}
 	}
 

@@ -23,27 +23,23 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
-import android.util.SparseArray;
 
 public class GrantService extends Service {
 	
 	public static final String TAG_REQUEST_DETAILS = "requestDetails";
 	
-	private static String requestURL = "http://mid-state.net/mobileclass2/android";
+	public static final String requestURL = "http://mid-state.net/mobileclass2/android";
 	private static final String TAG = "grantservice";
 	
 	DBAdapter db;
 	GrantBinder binder;
-//	Map<String, JSONObject> emailRequestCache;
 	Map<Map<String, String>, Object> queryCache;
-//	JSONObject[] grants;
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		db = new DBAdapter();
 		binder = new GrantBinder();
-//		emailRequestCache = new HashMap<String, JSONObject>();
 		queryCache = new HashMap<Map<String, String>, Object>();
 		Log.w(TAG, "newly created");
 	}
@@ -212,15 +208,8 @@ public class GrantService extends Service {
 		Map<String, String> query = new HashMap<String, String>(1);
 		query.put("q", "listallgrants");
 		sendGenericRequest(query, new JSONParser.SimpleResultHandler() {
-			@Override
-			public void onSuccess(Object result) throws JSONException, IOException {
-				JSONArray jsonGrants = (JSONArray) result;
-				JSONObject[] grants = new JSONObject[jsonGrants.length()];
-				for (int i = 0; i < jsonGrants.length(); i++) {
-					JSONObject grant = jsonGrants.getJSONObject(i);
-					grants[i] = grant;
-				}
-				callback.run(grants);
+			@Override public void onSuccess(Object result) throws JSONException {
+				callback.run(getJSONObjectArray((JSONArray) result));
 			}
 		});
 	}
@@ -243,6 +232,16 @@ public class GrantService extends Service {
 		});
 	}
 	
+	public void getSupervisors(final ServiceCallback<JSONObject[]> callback) {
+		Map<String, String> query = new HashMap<String, String>(1);
+		query.put("q", "listsupervisors");
+		sendGenericRequest(query, new JSONParser.SimpleResultHandler() {
+			@Override public void onSuccess(Object result) throws JSONException {
+				callback.run(getJSONObjectArray((JSONArray) result));
+			}
+		});
+	}
+	
 	public class GrantBinder extends Binder {
 		GrantService getService() {
 			return GrantService.this;
@@ -257,6 +256,15 @@ public class GrantService extends Service {
 		grantStrings[grantids.length]   = "non-grant";
 		grantStrings[grantids.length+1] = "leave";
 		return grantStrings;
+	}
+	
+	public static JSONObject[] getJSONObjectArray(JSONArray array) throws JSONException {
+		JSONObject[] result = new JSONObject[array.length()];
+		for (int i = 0; i < array.length(); i++) {
+			JSONObject grant = array.getJSONObject(i);
+			result[i] = grant;
+		}
+		return result;
 	}
 	
 	// class to hold the time/employee details needed to specify a grant's hours

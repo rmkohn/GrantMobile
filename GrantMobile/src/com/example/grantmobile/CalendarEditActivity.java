@@ -1,6 +1,10 @@
 package com.example.grantmobile;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -10,7 +14,6 @@ import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -20,6 +23,7 @@ import android.widget.Toast;
 
 import com.example.grantmobile.CalendarSquare.DaySquare;
 import com.example.grantmobile.CalendarSquare.ICalendarSquare;
+import com.example.grantmobile.GrantService.GrantData;
 import com.example.grantmobile.GrantService.ServiceCallback;
 
 public class CalendarEditActivity extends BaseCalendarActivity {
@@ -93,8 +97,11 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	}
 	
 	protected double[] getSelectedGrantHours() {
-		int grantid = grantids[grantSpinner.getSelectedItemPosition()];
-		return granthours.get(grantid);
+		return granthours.get(getSelectedGrantId());
+	}
+	
+	protected int getSelectedGrantId() {
+		return grantids[grantSpinner.getSelectedItemPosition()];
 	}
 	
 	@Override
@@ -114,7 +121,19 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	}
 	
 	private void openEmailDialog() {
-		Toast.makeText(this, "Sorry, not implemented yet", Toast.LENGTH_LONG).show();
+		getService().getSupervisors(new ServiceCallback<JSONObject[]>() {
+			public void run(JSONObject[] result) {
+				EmployeeDialog dialog = new EmployeeDialog();
+				List<EmployeeDialog.Employee> supervisors = new ArrayList<EmployeeDialog.Employee>(result.length);
+				for (JSONObject obj: result) {
+					supervisors.add(EmployeeDialog.Employee.fromJson(obj));
+				}
+				dialog.setItems(supervisors);
+				dialog.setData(new GrantData(getYear(), getMonth(), userid));
+				dialog.setGrantid(getSelectedGrantId());
+				dialog.show(getSupportFragmentManager(), "");
+			}
+		});
 	}
 	
 	public void assignNewData(Map<String, double[]> data) {
