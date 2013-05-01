@@ -85,8 +85,11 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 		GrantData grantdata = (GrantData)intent.getSerializableExtra(GrantService.TAG_REQUEST_DETAILS);
 		year = grantdata.year;
 		month = grantdata.month;
-		employeeid = grantdata.employeeid;
 		grantId = intent.getIntExtra("grantid", -1);
+		EmployeeDialog.Employee employee = (EmployeeDialog.Employee)intent.getSerializableExtra(LoginActivity.TAG_INTENT_USERID);
+		employeeid = employee.id;
+		firstName = employee.firstname;
+		lastName = employee.lastname;
 		
 		// setup view for displaying grant info
 		grantNameView = (TextView)findViewById(R.id.grantNameView);

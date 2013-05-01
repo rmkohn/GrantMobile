@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.example.grantmobile.CalendarSquare.DaySquare;
 import com.example.grantmobile.CalendarSquare.ICalendarSquare;
+import com.example.grantmobile.EmployeeDialog.Employee;
 import com.example.grantmobile.GrantService.GrantData;
 import com.example.grantmobile.GrantService.ServiceCallback;
 
@@ -30,7 +31,8 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	Spinner grantSpinner;
 	int[] grantids;
 	String[] grantnames;
-	int userid;
+//	int user.id;
+	Employee user;
 	SparseArray<double[]> granthours;
 	double[] nongranthours;
 	double[] leavehours;
@@ -46,7 +48,7 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 		Intent i = getIntent();
 		grantids = i.getIntArrayExtra(GrantSelectActivity.TAG_INTENT_GRANT_IDS);
 		grantnames = i.getStringArrayExtra(GrantSelectActivity.TAG_INTENT_GRANT_NAMES);
-		userid = i.getIntExtra(LoginActivity.TAG_INTENT_USERID, -1);
+		user = (Employee)i.getSerializableExtra(LoginActivity.TAG_INTENT_USERID);
 		
 		createCalendarArray(
 			i.getIntExtra(MonthSelectActivity.TAG_INTENT_YEAR,  -1),
@@ -74,7 +76,7 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	
 	private void loadCalendar() {
 		Log.i("calendareditactivity", "loadcalendar");
-		final GrantService.GrantData data = new GrantService.GrantData(getYear(), getMonth()-1, userid);
+		final GrantService.GrantData data = new GrantService.GrantData(getYear(), getMonth()-1, user.id);
 //		GrantService.getHours(this, new CalendarEditHandler().setParent(this), data, getGrantStrings());
 		getService().getHours(data, getGrantStrings(), new GrantService.ServiceCallback<Map<String,double[]>>() {
 			public void run(Map<String, double[]> result) {
@@ -109,7 +111,8 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 		if (detailSquare instanceof DaySquare) {
 			Intent i = new Intent(this, DetailEditActivity.class);
 			i.putExtra(DetailEditActivity.TAG_DAY_OF_MONTH, ((DaySquare) detailSquare).dailyNumber);
-			i.putExtra(GrantService.TAG_REQUEST_DETAILS, new GrantService.GrantData(getYear(), getMonth()-1, userid));
+			i.putExtra(GrantService.TAG_REQUEST_DETAILS, new GrantService.GrantData(getYear(), getMonth()-1, user.id));
+			i.putExtra(LoginActivity.TAG_INTENT_USERID, user);
 			i.putExtra("grantid", grantids[grantSpinner.getSelectedItemPosition()]);
 			startActivity(i);
 		}
@@ -129,7 +132,7 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 					supervisors.add(EmployeeDialog.Employee.fromJson(obj));
 				}
 				dialog.setItems(supervisors);
-				dialog.setData(new GrantData(getYear(), getMonth(), userid));
+				dialog.setData(new GrantData(getYear(), getMonth(), user.id));
 				dialog.setGrantid(getSelectedGrantId());
 				dialog.show(getSupportFragmentManager(), "");
 			}
@@ -167,7 +170,7 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		GrantService.GrantData data = new GrantService.GrantData(getYear(), getMonth()-1, userid);
+		GrantService.GrantData data = new GrantService.GrantData(getYear(), getMonth()-1, user.id);
 		String[] grantstrings = getGrantStrings();
 		switch (item.getItemId()) {
 		case R.id.mnuLoad:

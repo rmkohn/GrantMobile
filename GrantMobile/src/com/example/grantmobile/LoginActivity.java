@@ -3,6 +3,8 @@ package com.example.grantmobile;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.example.grantmobile.EmployeeDialog.Employee;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
@@ -173,11 +175,11 @@ public class LoginActivity extends Activity {
 
 		        public void onSuccess(Object oResult) throws JSONException {
 		        	JSONObject result = (JSONObject) oResult;
-		        	String name = result.getString("firstname") + " " + result.getString("lastname");
-		        	int id = result.getInt("id");
+		        	Employee user = Employee.fromJson(result);
+		        	String name = user.firstname + " " + user.lastname;
 		            Toast.makeText(LoginActivity.this, "Logged in as " + name, Toast.LENGTH_LONG).show();
 		            Log.i("loginactivity", "logged in successfully");
-		            continueAsUser(id);
+		            continueAsUser(user);
 		        }
 		        public void onFailure(String message) {
     				mPasswordView
@@ -192,7 +194,7 @@ public class LoginActivity extends Activity {
 		}
 	}
 	
-	public void continueAsUser(int user) {
+	public void continueAsUser(Employee user) {
 		Intent i = new Intent(this, MonthSelectActivity.class);
 		i.putExtra(TAG_INTENT_USERID, user);
 		startActivity(i);
