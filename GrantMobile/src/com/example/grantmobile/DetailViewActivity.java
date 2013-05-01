@@ -98,17 +98,17 @@ public class DetailViewActivity extends FragmentActivity {
 		}
 
 		// setup view for displaying grant info
-		grantNameView = (TextView)findViewById(R.id.grantNameView);
-		grantIdView = (TextView)findViewById(R.id.grantIdView);
-		employeeNameView = (TextView)findViewById(R.id.employeeNameView);
-		catalogView = (TextView)findViewById(R.id.catalogView);
+		grantNameView = (TextView)findViewById(R.id.grantNameTv);
+		grantIdView = (TextView)findViewById(R.id.grantIdTv);
+		employeeNameView = (TextView)findViewById(R.id.employeeNameTv);
+		catalogView = (TextView)findViewById(R.id.catalogTv);
 
 		// setup view for displaying specific info for a given date
-		dateView = (TextView)findViewById(R.id.dateView);
-		dayView = (TextView)findViewById(R.id.dayOfWeekView);
-		grantHoursView = (TextView)findViewById(R.id.grantHoursView);
-		nonGrantHoursView = (TextView)findViewById(R.id.nonGrantHoursView);
-		leaveHoursView = (TextView)findViewById(R.id.leaveHoursView);
+		dateView = (TextView)findViewById(R.id.dateTv);
+		dayView = (TextView)findViewById(R.id.dayOfWeekTv);
+		grantHoursView = (TextView)findViewById(R.id.grantHoursTv);
+		nonGrantHoursView = (TextView)findViewById(R.id.nonGrantHoursTv);
+		leaveHoursView = (TextView)findViewById(R.id.leaveHoursTv);
 
 		dayTotalHoursView = (TextView)findViewById(R.id.dayTotalHoursView);
 		monthTotalHoursView = (TextView)findViewById(R.id.monthTotalHoursView);
