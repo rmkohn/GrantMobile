@@ -48,7 +48,18 @@ public class GrantService extends Service {
 
 	@Override
 	public void onDestroy() {
-		// TODO save to permanent storage (server or database)
+		// TODO save only the changed values to permanent storage (server or database)
+		for (final Map.Entry<GrantData, Map<String, double[]>> entry: db.cache.entrySet()) {
+			this.uploadHours(entry.getKey(), entry.getValue(), new ServiceCallback<Integer>() {
+				public void run(Integer result) {
+					if (result == Activity.RESULT_OK) {
+						Log.i(TAG, "saved hours for " + entry.getKey() + " to server");
+					} else {
+						Log.i(TAG, "failed to save hours for " + entry.getKey());
+					}
+				}
+			});
+		}
 		super.onDestroy();
 		Log.w(TAG, "grant service shut down");
 	}
@@ -93,9 +104,12 @@ public class GrantService extends Service {
 	}
 	
 	public void uploadHours(final GrantData data, final String[] grantStrings, ServiceCallback<Integer> callback) {
+		uploadHours(data, db.getTimes(data, grantStrings), callback);
+	}
+	
+	public void uploadHours(final GrantData data, final Map<String, double[]> hours, ServiceCallback<Integer> callback) {
 		new AsyncServiceCallback<Integer>(callback) {
 			Integer doInBackground() {
-				Map<String, double[]> hours = db.getTimes(data, grantStrings);
 				try {
 					// this is seriously the only way to load variables into the json object
 					// the map constructor for JSONObject and collection constructor for JSONArray don't work

@@ -56,6 +56,7 @@ public abstract class GrantServiceBindingActivity extends FragmentActivity {
 	
 	private void unbind() {
 		if (service != null) {
+			onUnbound();
 			unbindService(conn);
 			service = null;
 		}
@@ -65,8 +66,19 @@ public abstract class GrantServiceBindingActivity extends FragmentActivity {
 		return service != null;
 	}
 	
-	// override me
+	/**
+	 * This method is called as soon as GrantService is bound.
+	 * Override it if your activity uses GrantService when it starts up.
+	 * <br/>The default implementation does nothing.
+	 */
 	protected void onBound() { }
+	/**
+	 * This method is called immediately before unbinding GrantService.
+	 * If your activity needs to save data into GrantService before it closes,
+	 * this is the place to do it.
+	 * <br/>The default implementation does nothing.
+	 */
+	protected void onUnbound() { }
 	
 	// callback for bindService
 	private final ServiceConnection conn = new ServiceConnection() {

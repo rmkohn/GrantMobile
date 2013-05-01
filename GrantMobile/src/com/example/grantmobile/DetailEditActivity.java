@@ -272,11 +272,10 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 				: "something went wrong";
 			Toast.makeText(DetailEditActivity.this, message, Toast.LENGTH_LONG).show();
 		}
-    	
     }
 
 	@Override
-	protected void onPause() {
+	protected void onUnbound() {
 		saveHours();
 	    GrantData data = new GrantData(year, month, employeeid);
 	    Map<String, double[]> hourBundle = new HashMap<String, double[]>();
@@ -285,8 +284,8 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 	    hourBundle.put(String.valueOf(grantId), grantHours);
 	    if (hoursLoaded) {
 		    getService().saveHours(data, hourBundle);
+		    getService().uploadHours(data, hourBundle, new SaveHandler());
 	    }
-		super.onPause();
 	}
 	
 	@Override
