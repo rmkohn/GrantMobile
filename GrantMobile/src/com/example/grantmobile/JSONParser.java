@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -134,6 +135,12 @@ public class JSONParser {
 			params.add(new BasicNameValuePair(name, value));
 			return this;
 		}
+		public RequestBuilder addAllParams(Map<String, String> values) {
+			for (Map.Entry<String, String> entry: values.entrySet()) {
+				params.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
+			}
+			return this;
+		}
 		public RequestBuilder setUrl(String url) {
 			this.url = url;
 			return this;
@@ -208,6 +215,16 @@ public class JSONParser {
         public void onFailure(String errorMessage) { Log.w("GrantMobile", errorMessage); }
         public void onError(Exception e) { e.printStackTrace(); }
         public void onCancelled() { }
+	}
+	
+	public static class ResultHandlerWrapper implements ResultHandler {
+		ResultHandler h;
+		public ResultHandlerWrapper(ResultHandler h) { this.h = h; }
+	    public void onPostExecute() { h.onPostExecute(); }
+        public void onSuccess(Object result) throws JSONException, IOException { h.onSuccess(result); }
+        public void onFailure(String errorMessage) { h.onFailure(errorMessage); }
+        public void onError(Exception e) { h.onError(e); }
+        public void onCancelled() { h.onCancelled(); }
 	}
 }
 

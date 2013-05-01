@@ -34,15 +34,17 @@ public class GrantService extends Service {
 	
 	DBAdapter db;
 	GrantBinder binder;
-	Map<String, JSONObject> emailRequestCache;
-	JSONObject[] grants;
+//	Map<String, JSONObject> emailRequestCache;
+	Map<Map<String, String>, Object> queryCache;
+//	JSONObject[] grants;
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		db = new DBAdapter();
 		binder = new GrantBinder();
-		emailRequestCache = new HashMap<String, JSONObject>();
+//		emailRequestCache = new HashMap<String, JSONObject>();
+		queryCache = new HashMap<Map<String, String>, Object>();
 		Log.w(TAG, "newly created");
 	}
 
@@ -68,39 +70,36 @@ public class GrantService extends Service {
 	public IBinder onBind(Intent intent) {
 		return binder;
 	}
-
-	public void sendEmailRequest(final String requestId, final ResultHandler jsonResultHandler) {
-		JSONObject cached = emailRequestCache.get(requestId);
+	
+	public void sendGenericRequest(final Map<String, String> params, ResultHandler handler) {
+		Object cached = queryCache.get(params);
 		if (cached == null) {
 			new JSONParser.RequestBuilder()
 			.setUrl(requestURL)
-			.addParam("q", "email")
-			.addParam("id", requestId)
-			.makeRequest(new JSONParser.SimpleResultHandler() {
+			.addAllParams(params)
+			.makeRequest(new JSONParser.ResultHandlerWrapper(handler) {
 				public void onSuccess(Object result) throws JSONException, IOException {
-					Log.i(TAG + " sendEmailRequest", "saving " + requestId + " to cache");
-					jsonResultHandler.onSuccess(result);
-					emailRequestCache.put(requestId, (JSONObject) result);
-				}
-				public void onFailure(String errorMessage) {
-					jsonResultHandler.onFailure(errorMessage);
-				}
-				public void onError(Exception e) {
-					jsonResultHandler.onError(e);
-				}
-				public void onPostExecute() {
-					jsonResultHandler.onPostExecute();
+					Log.i(TAG + " sendGenericRequest", "caching result for " + params);
+					super.onSuccess(result);
+					queryCache.put(params, result);
 				}
 			});
 		} else {
-			Log.i(TAG + " sendEmailRequest", "got " + requestId + " from cache");
+			Log.i(TAG + " sendGenericRequest", "retrieving result for " + params);
 			try {
-				jsonResultHandler.onSuccess(cached);
+				handler.onSuccess(cached);
 			} catch (Exception e) {
 				// caching is done after onSuccess() completes the first time, so this should not happen
 				throw(new RuntimeException(e));
 			}
 		}
+	}
+
+	public void sendEmailRequest(final String requestId, final ResultHandler jsonResultHandler) {
+		Map<String, String> query = new HashMap<String, String>(2);
+		query.put("q", "email");
+		query.put("id", requestId);
+		sendGenericRequest(query, jsonResultHandler);
 	}
 	
 	public void uploadHours(final GrantData data, final String[] grantStrings, ServiceCallback<Integer> callback) {
@@ -210,31 +209,27 @@ public class GrantService extends Service {
 	}
 	
 	public void getGrants(final ServiceCallback<JSONObject[]> callback) {
-		if (grants == null) {
-			new JSONParser.RequestBuilder("http://mid-state.net/mobileclass2/android")
-			.addParam("q", "listallgrants")
-			.makeRequest(new JSONParser.SimpleResultHandler() {
-				@Override
-				public void onSuccess(Object result) throws JSONException, IOException {
-					JSONArray jsonGrants = (JSONArray) result;
-					grants = new JSONObject[jsonGrants.length()];
-					for (int i = 0; i < jsonGrants.length(); i++) {
-						JSONObject grant = jsonGrants.getJSONObject(i);
-						grants[i] = grant;
-					}
-					callback.run(grants);
+		Map<String, String> query = new HashMap<String, String>(1);
+		query.put("q", "listallgrants");
+		sendGenericRequest(query, new JSONParser.SimpleResultHandler() {
+			@Override
+			public void onSuccess(Object result) throws JSONException, IOException {
+				JSONArray jsonGrants = (JSONArray) result;
+				JSONObject[] grants = new JSONObject[jsonGrants.length()];
+				for (int i = 0; i < jsonGrants.length(); i++) {
+					JSONObject grant = jsonGrants.getJSONObject(i);
+					grants[i] = grant;
 				}
-			});
-		} else {
-			callback.run(grants);
-		}
+				callback.run(grants);
+			}
+		});
 	}
 	
 	public void getGrantByParameter(final String key, final Object param, final ServiceCallback<JSONObject> callback) {
 		getGrants(new ServiceCallback<JSONObject[]>() {
 			public void run(JSONObject[] result) {
 				try {
-					for (JSONObject grant: grants) {
+					for (JSONObject grant: result) {
 						if (grant.get(key).equals(param)) {
 							callback.run(grant);
 							return;
