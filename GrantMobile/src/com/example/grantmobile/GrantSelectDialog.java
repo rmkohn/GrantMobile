@@ -1,5 +1,6 @@
 package com.example.grantmobile;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.example.grantmobile.GrantSelectActivity.Grant;
@@ -28,6 +29,8 @@ public class GrantSelectDialog extends DialogFragment {
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		final View dialogView = getActivity().getLayoutInflater().inflate(R.layout.dialog_grant_select, null);
 		ListView dialogList = (ListView)dialogView.findViewById(R.id.dialog_grant_select_list);
+		if (grants == null)
+			grants = Arrays.asList((Grant[])savedInstanceState.getSerializable("grants"));
 		final ArrayAdapter<Grant> adapter = new ArrayAdapter<Grant>(
 //			getActivity(), android.R.layout.simple_list_item_single_choice, grants);
 			getActivity(), android.R.layout.simple_list_item_1, grants);
@@ -65,6 +68,12 @@ public class GrantSelectDialog extends DialogFragment {
 
 	public void setCallback(GrantService.ServiceCallback<Grant> callback) {
 		this.callback = callback;
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle arg0) {
+		super.onSaveInstanceState(arg0);
+		arg0.putSerializable("grants", grants.toArray(new Grant[grants.size()]));
 	}
 
 }
