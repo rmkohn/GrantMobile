@@ -30,6 +30,8 @@ public class CalendarActivity extends FragmentActivity {
 	String grantCatalogNumber = "";
 	// Database ID of grant
 	int grantId = 0;
+	// Grant approval status
+	String grantApprovalStatus = "";
 	// Database ID of WorkMonth
 	int workMonthId = 0;
 	// Name of employee working on grant
@@ -62,6 +64,8 @@ public class CalendarActivity extends FragmentActivity {
 				openDetailView(square);
 			}
 		});
+		
+	
 	}
 
 	/**
@@ -83,6 +87,7 @@ public class CalendarActivity extends FragmentActivity {
 		.addParam("q", "email")
 		.addParam("id", String.valueOf(id))
 		.makeRequest(new CalendarResultHandler());
+		
 	}	
 	
     class CalendarResultHandler extends JSONParser.SimpleResultHandler
@@ -98,6 +103,8 @@ public class CalendarActivity extends FragmentActivity {
 		@Override
 		public void onSuccess(Object oResult)
 		{
+			
+			
 			try
 			{
 				JSONObject result = (JSONObject) oResult;
@@ -112,32 +119,49 @@ public class CalendarActivity extends FragmentActivity {
 				// get some info about the grant
 				JSONObject grantinfo = result.getJSONObject("grant");
 				grantId              = grantinfo.getInt("ID");
+				if (result.isNull("status")) {
+					grantApprovalStatus  = "none";
+				} else {
+					grantApprovalStatus  = result.getString("status");
+				}// end if
 				grantName            = grantinfo.getString("grantTitle");
 				grantNumber          = grantinfo.getString("grantNumber");
 				grantCatalogNumber   = grantinfo.getString("stateCatalogNum");
 				
 				workMonthId = result.getInt("id");
 				
-				// get that info ready to display, also set year and monthNumber class-level variables
-				calendarView.initHeaderMessage(month, year, grantName, grantNumber, employeeName);
+				// if pending
+				if (grantApprovalStatus == "pending") {
 				
-				// set up calendar, now that we know what month it is
-				calendarView.initCalendar();
-				calendarView.setFrag(getSupportFragmentManager());
+					// get that info ready to display, also set year and monthNumber class-level variables
+					calendarView.initHeaderMessage(month, year, grantName, grantNumber, employeeName);
+					
+					// set up calendar, now that we know what month it is
+					calendarView.initCalendar();
+					calendarView.setFrag(getSupportFragmentManager());
+					
+					// get time arrays
+					JSONObject hours = result.getJSONObject("hours");
+					JSONArray leavehours    = hours.getJSONArray("leave");
+					JSONArray nongranthours = hours.getJSONArray("non-grant");
+					JSONArray granthours    = hours.getJSONArray("grant");
+					
+					calendarView.loadTimes(granthours, nongranthours, leavehours);
+					
+					// finally, display calendar
+					calendarView.loadCalendarData();
 				
-				// get time arrays
-				JSONObject hours = result.getJSONObject("hours");
-				JSONArray leavehours    = hours.getJSONArray("leave");
-				JSONArray nongranthours = hours.getJSONArray("non-grant");
-				JSONArray granthours    = hours.getJSONArray("grant");
+				} else {
+					
+					// show dialog for closing early
+					closeEarlyDialog(grantApprovalStatus);
+					
+				}// end if
 				
-				calendarView.loadTimes(granthours, nongranthours, leavehours);
-				
-				// finally, display calendar
-				calendarView.loadCalendarData();
 			}
 			catch (JSONException e)
 			{
+				Toast.makeText(getApplicationContext(), "Error loading grant information", Toast.LENGTH_LONG).show();
 				e.printStackTrace();
 			}
 		}
@@ -208,5 +232,52 @@ public class CalendarActivity extends FragmentActivity {
 		startActivity(i);
 	}
 	
+
+	private void closeEarlyDialog(String status) {
+		
+		// Variables for title and message
+		String title = "";
+		String message = "";
+		
+		// Determine title and message
+		if (status == "new") {
+			
+			title = "Not Availabley Yet";
+			message = "This grant is still being filled out. You shouldn't even see this.";
+			
+		} else {
+			
+			if (status == "none") {
+			
+				title = "No Grant";
+				message = "There is no grant here. How did you get here?";
+				
+			} else {
+				
+				title = "Already Handled";
+				message = "Grant already handled";
+				
+			}// end if
+		
+		}// end if
+			
+		// Show dialog with determined information
+		new AlertDialog.Builder(this)
+		.setTitle(title)
+		.setMessage(message)
+		.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+			
+			public void onClick(DialogInterface dialog, int which) {
+				
+				finish();
+				
+			}
+			
+		})
+		.setCancelable(false)
+		.show();
+		
+	}
+
 
 }

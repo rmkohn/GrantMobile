@@ -756,7 +756,7 @@ public class CalendarView extends View {
 		
 		// Determine footer message from monthly totals
 		footerMessage = "Monthly Total: " +
-			String.valueOf(monthTotalHours);
+			String.valueOf(monthTotalGrantHours);
 		
 		// Clear enlarged square
 		enlargedSquare = new CalendarSquare();
