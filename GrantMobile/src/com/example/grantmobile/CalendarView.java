@@ -695,7 +695,7 @@ public class CalendarView extends View {
 					
 					// Set display information as total hours 
 					calendar.get(i).displayString = "T: " +
-						String.valueOf(weekTotalHours);
+						String.valueOf(weekTotalGrantHours);
 
 					// Set weekly totals property on
 					calendar.get(i).weeklyTotal = true;
@@ -755,7 +755,7 @@ public class CalendarView extends View {
 		}// end for
 		
 		// Determine footer message from monthly totals
-		footerMessage = "Monthly Total: " +
+		footerMessage = "Monthly Grant Hours: " +
 			String.valueOf(monthTotalGrantHours);
 		
 		// Clear enlarged square

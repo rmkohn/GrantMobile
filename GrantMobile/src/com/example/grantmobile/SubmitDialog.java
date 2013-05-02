@@ -19,7 +19,7 @@ public class SubmitDialog extends DialogFragment {
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Submit Timesheet")
-        	   .setMessage("Click Approve or Deny for this timesheet.")
+        	   .setMessage("Click Approve or Disapprove for this timesheet.")
                .setPositiveButton("Approve", new DialogInterface.OnClickListener() {
 				      public void onClick(DialogInterface dialog, int id) {
 				    	  CommentDialog comment = new CommentDialog();
@@ -29,10 +29,10 @@ public class SubmitDialog extends DialogFragment {
 				    	  comment.show(getFragmentManager(), "");
 				      }
 				  })
-		        .setNeutralButton("Deny", new DialogInterface.OnClickListener() {
+		        .setNeutralButton("Disapprove", new DialogInterface.OnClickListener() {
 				      public void onClick(DialogInterface dialog, int id) {
 				    	  CommentDialog comment = new CommentDialog();
-				    	  comment.setTitle("Deny Time");
+				    	  comment.setTitle("Disapprove Time");
 				    	  comment.setUserID(userID);
 				    	  comment.setApproval(false);
 				    	  comment.show(getFragmentManager(), "");

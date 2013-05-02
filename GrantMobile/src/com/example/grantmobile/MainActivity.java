@@ -105,17 +105,18 @@ public class MainActivity extends Activity
 		new AlertDialog.Builder(this)
 		.setTitle("MSTC Grant App")
 		.setMessage(message)
+		.setCancelable(false)
 		.setNeutralButton("OK", new DialogInterface.OnClickListener() {
 			
 			public void onClick(DialogInterface dialog, int which) {
 				
-				// Nothing
+				finish();
 				
 			}
 		})
 		.show();
 		
-		finish();
+		
 	}
 
 }//END MAIN ACTIVITY
