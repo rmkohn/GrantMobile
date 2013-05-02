@@ -65,7 +65,7 @@ public class CalendarView extends View {
 	private static final int calendarMarginY = 10;
 	
 	public static final String[] monthNames = {
-		"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
+		"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 	};
 	
 	// Variables
@@ -199,7 +199,7 @@ public class CalendarView extends View {
 	            calendarMarginY + 20, paint);
 	    canvas.drawText(headerEmployee, calendarMarginX + 10,
 	            calendarMarginY + 45, paint);
-	    canvas.drawText(headerDate, calendarMarginX + (calendarSquareSizeW * 6) + 10,
+	    canvas.drawText(headerDate, calendarMarginX + (calendarSquareSizeW * 5) + 10,
 	            calendarMarginY + 45, paint);
 
 	    // Draw inner calendar squares
@@ -428,7 +428,7 @@ public class CalendarView extends View {
 	private void initHeaderMessage()
 	{	
 		// Load sample data
-		initHeaderMessage(1, 2000, "Loading", "Loading", "Loading");
+		initHeaderMessage(1, 1900, "Loading", "Loading", "Loading");
 	}
 	
 	/**
@@ -812,9 +812,11 @@ public class CalendarView extends View {
 		                    	
 		                    }// end if
 		                    
-		                    // Save square if daily number appropriate
-		                    enlargedSquareIndex = calendarSquareIndex;
-		                    enlargedSquare = new CalendarSquare(square);
+		                    // Save square if daily number appropriate and year valid
+		                    if (year != 1900) {
+			                    enlargedSquareIndex = calendarSquareIndex;
+			                    enlargedSquare = new CalendarSquare(square);
+		                    }// end if
 		                    
 		                    // Note tapped
 		                    tapped = true;
@@ -831,8 +833,8 @@ public class CalendarView extends View {
 	            // If something tapped now, update class variables for enlarged box
 	            if (tapped) {
 	            	
-	            	// Test daily number. If in range, make enlarged square
-	            	if ((enlargedSquare.dailyNumber != -1)) {
+	            	// Test daily number and year. If in range, make enlarged square
+	            	if ((enlargedSquare.dailyNumber != -1) && (year != 1900)) {
 	            	
 		            	// Update enlarged information
 		            	enlargedSquare.sizeW = calendarSquareSizeW * 3;
