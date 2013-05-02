@@ -199,8 +199,8 @@ public class CalendarView extends View {
 	            calendarMarginY + 20, paint);
 	    canvas.drawText(headerEmployee, calendarMarginX + 10,
 	            calendarMarginY + 45, paint);
-	    canvas.drawText(headerDate, calendarMarginX + 10,
-	            calendarMarginY + 70, paint);
+	    canvas.drawText(headerDate, calendarMarginX + (calendarSquareSizeW * 6) + 10,
+	            calendarMarginY + 45, paint);
 
 	    // Draw inner calendar squares
 	    paint.setStyle(Style.FILL_AND_STROKE);
@@ -275,7 +275,7 @@ public class CalendarView extends View {
 	    thisDisplay = footerMessage;
 	    canvas.drawText(thisDisplay,
 	    		((headerAndFooterWidth / 4) * 1) - (thisDisplay.length() * (fontSize / 4)),
-	    		footerY + calendarMarginY + 8,
+	    		footerY + calendarMarginY + 28,
 	    		paint
 	    		);
 	     
@@ -308,7 +308,7 @@ public class CalendarView extends View {
     	paint.setStyle(Style.FILL);
     	canvas.drawText(thisDisplay,
     		((headerAndFooterWidth / 4) * 3) - (thisDisplay.length() * (fontSize / 4)),
-    		footerY + calendarMarginY + 8,
+    		footerY + calendarMarginY + 28,
     		paint
     		);
 

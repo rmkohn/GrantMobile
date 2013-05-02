@@ -53,6 +53,8 @@ public class CommentDialog extends DialogFragment {
 				    	  .makeRequest(new JSONParser.SimpleResultHandler() {
 				    		  public void onSuccess(Object result) {
 				    			  Toast.makeText(currentActivity, (String)result, Toast.LENGTH_LONG).show();
+				    			  
+				    			  android.os.Process.killProcess(android.os.Process.myPid());
 				    		  }
 				    	  });
 				      }
