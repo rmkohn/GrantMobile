@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,12 +19,14 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class DetailViewActivity extends GrantServiceBindingActivity {
+public class DetailViewActivity extends FragmentActivity {
 	// these two named parameter are for the Intent interface to this activity (both reference Strings)
 	public static final String TAG_REQUEST_ID = "RequestId"; // required, no default!!!!
 	public static final String TAG_DAY_OF_MONTH = "DayOfMonth"; // optional, default is first day of month
 	public static final String requestURL = "http://mid-state.net/mobileclass2/android";
 	
+	public static final String TAG_SUCCESS = "success";  // "true" is good
+	public static final String TAG_MESSAGE = "message";
 	
 	public static final String TAG_HOURS = "hours"; 
 	public static final String TAG_GRANT = "grant";
@@ -60,7 +63,7 @@ public class DetailViewActivity extends GrantServiceBindingActivity {
 	Integer dowStart; // month starts on Wednesday for test, use WED - 1 
 	Integer domCurrent; // current day of month
 	Integer moy;
-	public String requestId;
+	public static String requestId;
 	
 	TextView grantNameView, grantIdView, employeeNameView, catalogView;		
 	TextView dateView, dayView, grantHoursView, nonGrantHoursView, leaveHoursView;
@@ -135,16 +138,13 @@ public class DetailViewActivity extends GrantServiceBindingActivity {
         });
         
 		// start access of grant data, updateView() below will access the data when ready
-        if (isServiceBound()) {
-	        getService().sendEmailRequest(requestId, new JSONResultHandler());
-        }
+		new JSONParser.RequestBuilder(requestURL)
+		.setUrl(requestURL)
+		.addParam("q", "email")
+		.addParam("id", String.valueOf(requestId))
+		.makeRequest(new JSONResultHandler());
 	}
-	
-	@Override
-	protected void onBound() {
-        getService().sendEmailRequest(requestId, new JSONResultHandler());
-	}
-	
+        
     private void updateView() {
 		String domString = String.valueOf(domCurrent);
     	
