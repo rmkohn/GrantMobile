@@ -92,20 +92,20 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 		lastName = employee.lastname;
 		
 		// setup view for displaying grant info
-		grantNameView = (TextView)findViewById(R.id.grantNameView);
+		grantNameView = (TextView)findViewById(R.id.grantNameTv);
 		grantIdView = (TextView)findViewById(R.id.grantIdView);
-		employeeNameView = (TextView)findViewById(R.id.employeeNameView);
-		catalogView = (TextView)findViewById(R.id.catalogView);
+		employeeNameView = (TextView)findViewById(R.id.employeeNameTv);
+		catalogView = (TextView)findViewById(R.id.catalogTv);
 
 		// setup view for displaying specific info for a given date
-		dateView = (TextView)findViewById(R.id.dateView);
-		dayView = (TextView)findViewById(R.id.dayOfWeekView);
-		grantHoursView = (EditText)findViewById(R.id.grantHoursView);
-		nonGrantHoursView = (EditText)findViewById(R.id.nonGrantHoursView);
-		leaveHoursView = (EditText)findViewById(R.id.leaveHoursView);
+		dateView = (TextView)findViewById(R.id.dateTv);
+		dayView = (TextView)findViewById(R.id.dayOfWeekTv);
+		grantHoursView = (EditText)findViewById(R.id.grantHoursTv);
+		nonGrantHoursView = (EditText)findViewById(R.id.nonGrantHoursTv);
+		leaveHoursView = (EditText)findViewById(R.id.leaveHoursTv);
 
-		dayTotalHoursView = (TextView)findViewById(R.id.dayTotalHoursView);
-		monthTotalHoursView = (TextView)findViewById(R.id.monthTotalHoursView);
+		dayTotalHoursView = (TextView)findViewById(R.id.dayTotalHoursTv);
+		monthTotalHoursView = (TextView)findViewById(R.id.monthTotalHoursTv);
 		
 		loadGrantInfo();
 		
@@ -131,7 +131,6 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
         returnButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
             	saveHours();
-                Toast.makeText(DetailEditActivity.this, "Return to Calendar View", Toast.LENGTH_LONG).show();
                 setResult(RESULT_CANCELED);
                 finish();
             }

@@ -10,89 +10,89 @@
         android:background="#ABABAB" >
 
         <TextView
-            android:id="@+id/employeeNameView"
+            android:id="@+id/employeeNameTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/textView5"
-            android:layout_alignBottom="@+id/textView5"
-            android:layout_alignLeft="@+id/grantIdView"
+            android:layout_alignBaseline="@+id/employeeNameLbl"
+            android:layout_alignBottom="@+id/employeeNameLbl"
+            android:layout_alignLeft="@+id/grantIdTv"
             android:text="employee name"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
-            android:id="@+id/catalogView"
+            android:id="@+id/catalogTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/textView13"
-            android:layout_alignBottom="@+id/textView13"
-            android:layout_alignLeft="@+id/employeeNameView"
+            android:layout_alignBaseline="@+id/catalogLbl"
+            android:layout_alignBottom="@+id/catalogLbl"
+            android:layout_alignLeft="@+id/employeeNameTv"
             android:text="catalog number"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
-            android:id="@+id/textView3"
+            android:id="@+id/grantIdLbl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_below="@+id/textView1"
+            android:layout_below="@+id/grantNameLbl"
             android:text="@string/grantIdLabel"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <ImageView
-            android:id="@+id/imageView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="14dp"
-            android:layout_toRightOf="@+id/textView1"
-            android:contentDescription="Logo"
-            android:src="@drawable/grantappicon" />
-
         <TextView
-            android:id="@+id/textView5"
+            android:id="@+id/employeeNameLbl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_below="@+id/textView13"
+            android:layout_below="@+id/catalogLbl"
             android:text="@string/employeeNameLabel"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
-            android:id="@+id/textView13"
+            android:id="@+id/catalogLbl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_below="@+id/textView3"
+            android:layout_below="@+id/grantIdLbl"
             android:text="@string/catalogLabel"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
-            android:id="@+id/grantIdView"
+            android:id="@+id/grantIdTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/catalogView"
+            android:layout_above="@+id/catalogTv"
             android:layout_centerHorizontal="true"
-            android:text="grant name"
+            android:text="grant id"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
-            android:id="@+id/grantNameView"
+            android:id="@+id/grantNameTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/grantIdView"
-            android:layout_alignLeft="@+id/grantIdView"
+            android:layout_above="@+id/grantIdTv"
+            android:layout_alignLeft="@+id/grantIdTv"
             android:text="waiting for data..."
             android:textAppearance="?android:attr/textAppearanceSmall" />
 
         <TextView
-            android:id="@+id/textView1"
+            android:id="@+id/grantNameLbl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_below="@+id/imageView1"
+            android:layout_below="@+id/logoIv"
             android:layout_marginTop="26dp"
             android:text="@string/grantNameLabel"
             android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <ImageView
+            android:id="@+id/logoIv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignRight="@+id/grantIdTv"
+            android:contentDescription="Logo"
+            android:src="@drawable/grantappicon" />
+
     </RelativeLayout>
 
     <RelativeLayout
@@ -101,82 +101,82 @@
         android:layout_weight="0.14" >
 
         <TextView
-            android:id="@+id/textView10"
+            android:id="@+id/leaveHoursLbl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_below="@+id/textView11"
+            android:layout_below="@+id/nonGrantHoursLbl"
             android:text="@string/leaveHoursLabel"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <EditText
-            android:id="@+id/leaveHoursView"
+            android:id="@+id/leaveHoursTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/nonGrantHoursView"
-            android:layout_below="@+id/nonGrantHoursView"
+            android:layout_alignLeft="@+id/nonGrantHoursTv"
+            android:layout_below="@+id/nonGrantHoursTv"
             android:gravity="right"
             android:text="leave hours"
             android:inputType="numberDecimal"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
-            android:id="@+id/textView11"
+            android:id="@+id/nonGrantHoursLbl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_below="@+id/textView7"
+            android:layout_below="@+id/grantHourslLbl"
             android:text="@string/nonGrantHoursLabel"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <EditText
-            android:id="@+id/nonGrantHoursView"
+        <ditText
+            android:id="@+id/nonGrantHoursTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/textView10"
-            android:layout_alignLeft="@+id/grantHoursView"
+            android:layout_above="@+id/leaveHoursLbl"
+            android:layout_alignLeft="@+id/grantHoursTv"
             android:gravity="right"
             android:text="non-grant hours"
             android:inputType="numberDecimal"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
-            android:id="@+id/textView15"
+            android:id="@+id/monthTotalLbl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_below="@+id/textView2"
+            android:layout_below="@+id/dayTotalLbl"
             android:text="@string/monthTotalLabel"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
-            android:id="@+id/dayTotalHoursView"
+            android:id="@+id/dayTotalHoursTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/textView2"
-            android:layout_alignBottom="@+id/textView2"
-            android:layout_alignLeft="@+id/leaveHoursView"
+            android:layout_alignBaseline="@+id/dayTotalLbl"
+            android:layout_alignBottom="@+id/dayTotalLbl"
+            android:layout_alignLeft="@+id/leaveHoursTv"
             android:gravity="right"
             android:text="total day hours"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
-            android:id="@+id/monthTotalHoursView"
+            android:id="@+id/monthTotalHoursTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/textView15"
-            android:layout_alignBottom="@+id/textView15"
-            android:layout_alignLeft="@+id/dayTotalHoursView"
+            android:layout_alignBaseline="@+id/monthTotalLbl"
+            android:layout_alignBottom="@+id/monthTotalLbl"
+            android:layout_alignLeft="@+id/dayTotalHoursTv"
             android:gravity="right"
             android:text="monthly hours"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <EditText
-            android:id="@+id/grantHoursView"
+        <ditText
+            android:id="@+id/grantHoursTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/dateView"
-            android:layout_below="@+id/dateView"
+            android:layout_alignLeft="@+id/dateTv"
+            android:layout_below="@+id/dateTv"
             android:layout_marginTop="21dp"
             android:gravity="right"
             android:text="grant hours"
@@ -184,45 +184,45 @@
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
-            android:id="@+id/textView7"
+            android:id="@+id/grantHourslLbl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/grantHoursView"
-            android:layout_alignBottom="@+id/grantHoursView"
+            android:layout_alignBaseline="@+id/grantHoursTv"
+            android:layout_alignBottom="@+id/grantHoursTv"
             android:layout_alignParentLeft="true"
             android:text="@string/grantHoursLabel"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
-            android:id="@+id/dayOfWeekView"
+            android:id="@+id/dayOfWeekTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/textView7"
-            android:layout_alignLeft="@+id/grantHoursView"
+            android:layout_above="@+id/grantHourslLbl"
+            android:layout_alignLeft="@+id/grantHoursTv"
             android:text="day of week"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
-            android:id="@+id/textView4"
+            android:id="@+id/dayOfWeeklLbl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/textView7"
+            android:layout_above="@+id/grantHourslLbl"
             android:layout_alignParentLeft="true"
             android:text="@string/dayOfWeekLabel"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
-            android:id="@+id/textView2"
+            android:id="@+id/dayTotalLbl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_below="@+id/textView10"
+            android:layout_below="@+id/leaveHoursLbl"
             android:layout_marginTop="14dp"
             android:text="@string/dayTotalLabel"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
-            android:id="@+id/textView19"
+            android:id="@+id/dateLbl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
@@ -232,13 +232,13 @@
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
-            android:id="@+id/dateView"
+            android:id="@+id/dateTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/textView19"
-            android:layout_alignBottom="@+id/textView19"
+            android:layout_alignBaseline="@+id/dateLbl"
+            android:layout_alignBottom="@+id/dateLbl"
             android:layout_marginLeft="23dp"
-            android:layout_toRightOf="@+id/textView11"
+            android:layout_toRightOf="@+id/nonGrantHoursLbl"
             android:text="date"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
