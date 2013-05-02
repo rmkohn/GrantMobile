@@ -107,8 +107,8 @@ public class DetailViewActivity extends GrantServiceBindingActivity {
 		nonGrantHoursView = (TextView)findViewById(R.id.nonGrantHoursTv);
 		leaveHoursView = (TextView)findViewById(R.id.leaveHoursTv);
 
-		dayTotalHoursView = (TextView)findViewById(R.id.dayTotalHoursView);
-		monthTotalHoursView = (TextView)findViewById(R.id.monthTotalHoursView);
+		dayTotalHoursView = (TextView)findViewById(R.id.dayTotalHoursTv);
+		monthTotalHoursView = (TextView)findViewById(R.id.monthTotalHoursTv);
 		
         final Button backwardButton = (Button) findViewById(R.id.backBtn);
         backwardButton.setOnClickListener(new View.OnClickListener() {
@@ -129,7 +129,6 @@ public class DetailViewActivity extends GrantServiceBindingActivity {
         final Button returnButton = (Button) findViewById(R.id.returnBtn);
         returnButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Toast.makeText(context, "Return to Calendar View", Toast.LENGTH_LONG).show();
                 setResult(RESULT_CANCELED);
                 finish();
             }
@@ -183,7 +182,7 @@ public class DetailViewActivity extends GrantServiceBindingActivity {
 		@Override
 		public void onSuccess(Object oResult) {
 			try {
-				Toast.makeText(context, "invoked JSON parser", Toast.LENGTH_LONG).show();
+//				Toast.makeText(context, "invoked JSON parser", Toast.LENGTH_LONG).show();
 				JSONObject json = (JSONObject) oResult;
 				JSONArray jsa = null; // json array
 				JSONObject jso = null; // misc., message & hours object
@@ -218,7 +217,6 @@ public class DetailViewActivity extends GrantServiceBindingActivity {
 				// get grant info
     			jso = json.getJSONObject(TAG_GRANT);	
 				map.put(TAG_GRANT_TITLE,jso.getString(TAG_GRANT_TITLE));
-				Toast.makeText(context, map.get(TAG_GRANT), Toast.LENGTH_LONG).show();
 				map.put(TAG_GRANT_ID,jso.getString(TAG_GRANT_ID));
 				map.put(TAG_STATE_CATALOG_NUM,jso.getString(TAG_STATE_CATALOG_NUM));
 				
