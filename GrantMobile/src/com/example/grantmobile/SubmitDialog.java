@@ -37,7 +37,15 @@ public class SubmitDialog extends DialogFragment {
 				    	  comment.setApproval(false);
 				    	  comment.show(getFragmentManager(), "");
 				      }
-				  });
+				  })
+        
+        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			
+			public void onClick(DialogInterface dialog, int which) {
+				
+				
+			}
+		});
         // Create the AlertDialog object and return it
         return builder.create();
     }
