@@ -164,6 +164,9 @@ public class CalendarActivity extends FragmentActivity {
 		@Override
 		public void onFailure(String errorMessage) {
 			Toast.makeText(CalendarActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+			
+			// show dialog for closing early
+			closeEarlyDialog("none");
 		}
 	}
 	
@@ -252,7 +255,7 @@ public class CalendarActivity extends FragmentActivity {
 				if (status.equals("disapproved")) {
 				
 					title = "Grant Disapproved";
-					message = "Entries for this month has not yet been resubmitted.";
+					message = "Entries for this month have not yet been resubmitted.";
 				
 				} else {
 					
