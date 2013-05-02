@@ -235,8 +235,17 @@ public class CalendarActivity extends BaseCalendarActivity {
 
 			} else {
 
-				title = "Already Handled";
-				message = "Grant already handled";
+				if (status.equals("disapproved")) {
+				
+					title = "Grant Disapproved";
+					message = "Entries for this month has not yet been resubmitted.";
+				
+				} else {
+					
+					title = "Grant Approved";
+					message = "This grant has already been approved.";
+					
+				}// end if
 
 			}// end if
 		
