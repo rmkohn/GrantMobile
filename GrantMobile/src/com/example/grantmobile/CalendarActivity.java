@@ -223,7 +223,7 @@ public class CalendarActivity extends BaseCalendarActivity {
 		// Determine title and message
 		if (status.equals("new")) {
 			
-			title = "Not Availabley Yet";
+			title = "Not Available Yet";
 			message = "This grant is still being filled out. You shouldn't even see this.";
 			
 		} else {
