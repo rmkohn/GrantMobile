@@ -227,14 +227,14 @@ public class CalendarActivity extends BaseCalendarActivity {
 		if (status.equals("new")) {
 			
 			title = "Not Available Yet";
-			message = "This grant is still being filled out. You shouldn't even see this.";
+			message = "This grant is being filled out for the first time.";
 			
 		} else {
 
 			if (status.equals("none")) {
 
 				title = "No Grant";
-				message = "There is no grant here. How did you get here?";
+				message = "There is no grant with that ID.";
 
 			} else {
 
