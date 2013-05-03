@@ -95,7 +95,12 @@ public class MainActivity extends Activity
 		
 		String id = data.getQueryParameter("ID");
 		
-		return Integer.parseInt(id);
+		if (id != null) {
+			try {
+				return Integer.parseInt(id);
+			} catch (NumberFormatException e) { }
+		}
+		return -1;
 	}//END GETWORKMONTHID
 		
 		
