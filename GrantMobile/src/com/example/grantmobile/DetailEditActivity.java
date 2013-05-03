@@ -1,9 +1,11 @@
 
 package com.example.grantmobile;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -306,7 +308,19 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 			updateView();
 			break;
 		case R.id.mnuDialog:
-			Toast.makeText(this, "Sorry, not implemented yet", Toast.LENGTH_LONG).show();
+			getService().getSupervisors(new ServiceCallback<JSONObject[]>() {
+				public void run(JSONObject[] result) {
+					EmployeeDialog dialog = new EmployeeDialog();
+					List<EmployeeDialog.Employee> supervisors = new ArrayList<EmployeeDialog.Employee>(result.length);
+					for (JSONObject obj: result) {
+						supervisors.add(EmployeeDialog.Employee.fromJson(obj));
+					}
+					dialog.setItems(supervisors);
+					dialog.setData(new GrantData(year, month, employeeid));
+					dialog.setGrantid(grantId);
+					dialog.show(getSupportFragmentManager(), "");
+				}
+			});
 			break;
 		case R.id.mnuUpload:
 			getService().uploadHours(data, grantstrings, new ServiceCallback<Integer>() {
