@@ -142,7 +142,7 @@ public class DetailViewActivity extends FragmentActivity {
 		.setUrl(requestURL)
 		.addParam("q", "email")
 		.addParam("id", String.valueOf(requestId))
-		.makeRequest(new JSONResultHandler());
+		.makeRequest(new JSONResultHandler(this));
 	}
         
     private void updateView() {
@@ -179,6 +179,10 @@ public class DetailViewActivity extends FragmentActivity {
 	}
 	
     class JSONResultHandler extends JSONParser.SimpleResultHandler {
+		public JSONResultHandler(Context ctx) {
+			super(ctx);
+		}
+
 		@Override
 		public void onSuccess(Object oResult) {
 			try {

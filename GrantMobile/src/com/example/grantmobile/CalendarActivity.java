@@ -8,6 +8,7 @@ import com.example.grantmobile.CalendarSquare.DaySquare;
 import com.example.grantmobile.CalendarSquare.ICalendarSquare;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -77,11 +78,15 @@ public class CalendarActivity extends BaseCalendarActivity {
 	}
 	
 	private void fillCalendarData(final int id) {
-		getService().sendEmailRequest(String.valueOf(id), new CalendarResultHandler());
+		getService().sendEmailRequest(String.valueOf(id), new CalendarResultHandler(this));
 	}	
 	
     class CalendarResultHandler extends JSONParser.SimpleResultHandler
     {
+
+		public CalendarResultHandler(Context ctx) {
+			super(ctx);
+		}
 
 		private String getEmployeeName(JSONObject employeeObj) throws JSONException
     	{

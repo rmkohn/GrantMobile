@@ -50,7 +50,7 @@ public class CommentDialog extends DialogFragment {
 				    	  .addParam("q", "approve")
 		    			  .addParam("approval", Boolean.toString(approval))
 				    	  .addParam("comment", input.getText().toString())
-				    	  .makeRequest(new JSONParser.SimpleResultHandler() {
+				    	  .makeRequest(new JSONParser.SimpleResultHandler(currentActivity) {
 				    		  public void onSuccess(Object result) {
 				    			  Toast.makeText(currentActivity, (String)result, Toast.LENGTH_LONG).show();
 				    			  

@@ -51,7 +51,7 @@ public class EmployeeDialog extends SelectionDialog<EmployeeDialog.Employee> {
 		.addParam("month", String.valueOf(data.month))
 		.addParam("grant", String.valueOf(grantid))
 		.addParam("supervisor", String.valueOf(result.id))
-		.makeRequest(new JSONParser.SimpleResultHandler() {
+		.makeRequest(new JSONParser.SimpleResultHandler(getActivity()) {
 			public void onSuccess(Object result) {
 				Toast.makeText(c, result.toString(), Toast.LENGTH_LONG).show();
 			}

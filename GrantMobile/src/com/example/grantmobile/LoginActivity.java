@@ -167,7 +167,7 @@ public class LoginActivity extends Activity {
 		    .addParam("q", "login")
 		    .addParam("id", mEmployeeId)
 		    .addParam("pass", mPassword)
-		    .makeRequest(new JSONParser.SimpleResultHandler() {
+		    .makeRequest(new JSONParser.SimpleResultHandler(this) {
 		        public void onPostExecute() {
         			mAuthTask = null;
         			showProgress(false);

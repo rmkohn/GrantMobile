@@ -207,7 +207,7 @@ public class GrantService extends Service {
 	public void getGrants(final ServiceCallback<JSONObject[]> callback) {
 		Map<String, String> query = new HashMap<String, String>(1);
 		query.put("q", "listallgrants");
-		sendGenericRequest(query, new JSONParser.SimpleResultHandler() {
+		sendGenericRequest(query, new JSONParser.SimpleResultHandler(this) {
 			@Override public void onSuccess(Object result) throws JSONException {
 				callback.run(getJSONObjectArray((JSONArray) result));
 			}
@@ -235,7 +235,7 @@ public class GrantService extends Service {
 	public void getSupervisors(final ServiceCallback<JSONObject[]> callback) {
 		Map<String, String> query = new HashMap<String, String>(1);
 		query.put("q", "listsupervisors");
-		sendGenericRequest(query, new JSONParser.SimpleResultHandler() {
+		sendGenericRequest(query, new JSONParser.SimpleResultHandler(this) {
 			@Override public void onSuccess(Object result) throws JSONException {
 				callback.run(getJSONObjectArray((JSONArray) result));
 			}
