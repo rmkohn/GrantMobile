@@ -132,7 +132,7 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 					supervisors.add(EmployeeDialog.Employee.fromJson(obj));
 				}
 				dialog.setItems(supervisors);
-				dialog.setData(new GrantData(getYear(), getMonth(), user.id));
+				dialog.setData(new GrantData(getYear(), getMonth()-1, user.id));
 				dialog.setGrantid(getSelectedGrantId());
 				dialog.show(getSupportFragmentManager(), "");
 			}
