@@ -53,9 +53,6 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 	private String lastName;
 	
 	private int grantId;
-	String stateCatalogNum;
-	private String grantNumber;
-	private String grantTitle;
 	
 	// day of week string array
 	static final String[] DOW = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
@@ -95,7 +92,7 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 		
 		// setup view for displaying grant info
 		grantNameView = (TextView)findViewById(R.id.grantNameTv);
-		grantIdView = (TextView)findViewById(R.id.grantIdView);
+		grantIdView = (TextView)findViewById(R.id.grantIdTv);
 		employeeNameView = (TextView)findViewById(R.id.employeeNameTv);
 		catalogView = (TextView)findViewById(R.id.catalogTv);
 
@@ -174,9 +171,9 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 	private void updateGrantViews(JSONObject result) {
 		Log.i("detailedit", "updating grant info views");
 		try {
-			grantNumber     = result.getString(DetailViewActivity.TAG_GRANT_NUMBER);
-			grantTitle      = result.getString(DetailViewActivity.TAG_GRANT_TITLE);
-			stateCatalogNum = result.getString(DetailViewActivity.TAG_STATE_CATALOG_NUM);
+			grantNameView.setText(result.getString(DetailViewActivity.TAG_GRANT_TITLE));
+			grantIdView.setText(result.getString(DetailViewActivity.TAG_GRANT_NUMBER));
+			catalogView.setText(result.getString(DetailViewActivity.TAG_STATE_CATALOG_NUM));
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -205,10 +202,7 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
     	cal.set(Calendar.DAY_OF_MONTH, 1); 	
         dowStart = (cal.get(Calendar.DAY_OF_WEEK)-Calendar.SUNDAY)%7;
         
-        grantNameView.setText(grantTitle);
-		grantIdView.setText(grantNumber);
 		employeeNameView.setText(firstName + " " + lastName);
-		catalogView.setText(stateCatalogNum);
     	
 		moy = month;
     	dateView.setText(MOY[moy]+" "+domString+", "+year);
