@@ -8,6 +8,7 @@ import com.example.grantmobile.CalendarSquare.ICalendarSquare;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
@@ -42,6 +43,7 @@ public abstract class BaseCalendarActivity extends GrantServiceBindingActivity {
 		headerFlipper = (ViewFlipper) findViewById(R.id.calendarHeaderFlipper);
 		
 		View placeholderView = getLayoutInflater().inflate(R.layout.calendar_gridview_placeholder, calendarGrid, false);
+		this.addContentView(placeholderView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		calendarGrid.setEmptyView(placeholderView);
 		
 		calendarGrid.setOnItemClickListener(new OnItemClickListener() {
