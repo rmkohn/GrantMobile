@@ -5,6 +5,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -86,12 +87,15 @@ public class CalendarActivity extends FragmentActivity {
 		.setUrl(requestURL)
 		.addParam("q", "email")
 		.addParam("id", String.valueOf(id))
-		.makeRequest(new CalendarResultHandler());
+		.makeRequest(new CalendarResultHandler(this));
 		
 	}	
 	
     class CalendarResultHandler extends JSONParser.SimpleResultHandler
     {
+		public CalendarResultHandler(Context ctx) {
+			super(ctx);
+		}
 
 		private String getEmployeeName(JSONObject employeeObj) throws JSONException
     	{

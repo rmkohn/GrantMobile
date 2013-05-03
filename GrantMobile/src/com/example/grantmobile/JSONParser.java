@@ -20,9 +20,14 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -50,6 +55,10 @@ public class JSONParser {
 		try {
 			DefaultHttpClient httpClient = new DefaultHttpClient();
 			httpClient.setCookieStore(cookies);
+			final HttpParams connectionParams = httpClient.getParams();
+
+			HttpConnectionParams.setConnectionTimeout(connectionParams, 5000); // wait for connection
+			HttpConnectionParams.setSoTimeout        (connectionParams, 5000); // wait for response
 			
 			// check for request method
 			if(method == "POST"){
@@ -76,10 +85,13 @@ public class JSONParser {
 
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
+			return null;
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
+			return null;
 		} catch (IOException e) {
 			e.printStackTrace();
+			return null;
 		}
 
 		try {
@@ -142,8 +154,8 @@ public class JSONParser {
 			this.method = method;
 			return this;
 		}
-		public void makeRequest(final ResultHandler handler) {
-			new AsyncTask<Void, Void, JSONObject>() {
+		public AsyncTask<Void, Void, JSONObject> makeRequest(final ResultHandler handler) {
+			return new AsyncTask<Void, Void, JSONObject>() {
 				protected JSONObject doInBackground(Void... params) {
 					return makeHttpRequest(url, method, RequestBuilder.this.params);
 				}
@@ -163,20 +175,48 @@ public class JSONParser {
 						handler.onError(e);
 					}
 				}
+				@Override
+				protected void onCancelled() {
+					super.onCancelled();
+					handler.onCancelled();
+				}
+				
 			}.execute();
 		}
 		
 	}
 	public static interface ResultHandler {
+	    public void onPostExecute();
         public void onSuccess(Object result) throws JSONException, IOException;
         public void onFailure(String errorMessage);
         public void onError(Exception e);
+        public void onCancelled();
 	}
 	
 	public static class SimpleResultHandler implements ResultHandler {
+		private Context ctx;
+		public SimpleResultHandler(Context ctx) {
+			this.ctx = ctx;
+		}
+	    public void onPostExecute() { }
         public void onSuccess(Object result) throws JSONException, IOException { }
         public void onFailure(String errorMessage) { Log.w("GrantMobile", errorMessage); }
-        public void onError(Exception e) { e.printStackTrace(); }
+        public void onError(Exception e) {
+        	e.printStackTrace();
+
+        	new AlertDialog.Builder(ctx)
+        	.setTitle("MSTC Grant App")
+        	.setMessage("Connection error")
+        	.setCancelable(false)
+        	.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+
+        		public void onClick(DialogInterface dialog, int which) {
+        			android.os.Process.killProcess(android.os.Process.myPid());
+        		}
+		})
+		.show();
+        }
+        public void onCancelled() { }
 	}
 	
 	
