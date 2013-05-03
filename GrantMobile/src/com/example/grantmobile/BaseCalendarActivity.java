@@ -41,6 +41,9 @@ public abstract class BaseCalendarActivity extends GrantServiceBindingActivity {
 		footerView    = (TextView)    findViewById(R.id.calendarFooter);
 		headerFlipper = (ViewFlipper) findViewById(R.id.calendarHeaderFlipper);
 		
+		View placeholderView = getLayoutInflater().inflate(R.layout.calendar_gridview_placeholder, calendarGrid, false);
+		calendarGrid.setEmptyView(placeholderView);
+		
 		calendarGrid.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
