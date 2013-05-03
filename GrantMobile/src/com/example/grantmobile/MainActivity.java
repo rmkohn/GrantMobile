@@ -1,5 +1,10 @@
 package com.example.grantmobile;
 
+import java.io.IOException;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Activity;
@@ -16,7 +21,7 @@ public class MainActivity extends Activity
 		
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
-		{
+	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
@@ -26,7 +31,27 @@ public class MainActivity extends Activity
 		
 		tvTest.setText("Uri data: " + data);//FOR TESTING PURPOSES ONLY.  D E L E T E BEFORE GOING INTO PRODUCTION
 		
-		int workMonthId				= getWorkMonthId(data);
+		// special handling for old-style email links
+		if (data != null && data.getPath().contains("aspx")) {
+			new JSONParser.RequestBuilder()
+			.setUrl(GrantService.requestURL)
+			.addParam("grant", data.getQueryParameter("GrantID"))
+			.addParam("employee", data.getQueryParameter("Employee"))
+			.addParam("month", data.getQueryParameter("month"))
+			.addParam("year", data.getQueryParameter("Year"))
+			.addParam("supervisor", data.getQueryParameter("ID"))
+			.addParam("q", "email")
+			.makeRequest(new JSONParser.SimpleResultHandler() {
+				public void onSuccess(Object result) throws JSONException {
+					useId(((JSONObject)result).getInt("id"));
+				}
+			});
+		} else {
+			useId(getWorkMonthId(data));
+		}
+	}
+		
+	private void useId(int workMonthId) {
 		
 		tvTest.setText("ID = " 		+ workMonthId);//FOR TESTING PURPOSES ONLY.  D E L E T E BEFORE GOING INTO PRODUCTION
 		
