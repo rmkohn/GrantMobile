@@ -9,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -19,7 +20,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class DetailViewActivity extends FragmentActivity {
+public class DetailViewActivity extends GrantServiceBindingActivity {
 	// these two named parameter are for the Intent interface to this activity (both reference Strings)
 	public static final String TAG_REQUEST_ID = "RequestId"; // required, no default!!!!
 	public static final String TAG_DAY_OF_MONTH = "DayOfMonth"; // optional, default is first day of month
@@ -51,6 +52,8 @@ public class DetailViewActivity extends FragmentActivity {
 	ArrayList<String> nonGrantHours; // non-grant hour array
 	ArrayList<String> leaveHours;  // leave hour array
 	HashMap<String,String> map;
+	
+	Uri launchUri = null;
 
 	JSONObject json = null; // entire json object
 
@@ -137,12 +140,12 @@ public class DetailViewActivity extends FragmentActivity {
             }
         });
         
+        launchUri = getIntent().getParcelableExtra("launchUri");
 		// start access of grant data, updateView() below will access the data when ready
-		new JSONParser.RequestBuilder(requestURL)
-		.setUrl(requestURL)
-		.addParam("q", "email")
-		.addParam("id", String.valueOf(requestId))
-		.makeRequest(new JSONResultHandler(this));
+	}
+	
+	protected void onBound() {
+		getService().sendEmailRequest(launchUri, new JSONResultHandler(this));
 	}
         
     private void updateView() {

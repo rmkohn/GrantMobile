@@ -11,6 +11,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -35,10 +36,10 @@ public class CalendarActivity extends BaseCalendarActivity {
 	String grantCatalogNumber = "";
 	// Database ID of grant
 	int grantId = 0;
+	// Uri the app was opened with
+	Uri launchUri = null;
 	// Grant approval status
 	String grantApprovalStatus = "";
-	// Database ID of WorkMonth
-	int workMonthId = 0;
 	// Name of employee working on grant
 	String employeeName = "";
 	// Name of grant supervisor
@@ -56,10 +57,11 @@ public class CalendarActivity extends BaseCalendarActivity {
 		headerView = (TextView) findViewById(R.id.calendarHeader);
 		headerFlipper.setDisplayedChild(headerFlipper.indexOfChild(headerView));
 		
-		workMonthId = getIntent().getIntExtra("workMonthId", -1);
+//		workMonthId = getIntent().getIntExtra("workMonthId", -1);
+		launchUri = getIntent().getParcelableExtra("launchUri");
 		
 		if (isServiceBound())
-			fillCalendarData(workMonthId);
+			fillCalendarData(launchUri);
 	}
 	
 	/**
@@ -74,11 +76,11 @@ public class CalendarActivity extends BaseCalendarActivity {
 	}
 
 	protected void onBound() {
-		fillCalendarData(workMonthId);
+		fillCalendarData(launchUri);
 	}
 	
-	private void fillCalendarData(final int id) {
-		getService().sendEmailRequest(String.valueOf(id), new CalendarResultHandler(this));
+	private void fillCalendarData(Uri uri) {
+		getService().sendEmailRequest(uri, new CalendarResultHandler(this));
 	}	
 	
     class CalendarResultHandler extends JSONParser.SimpleResultHandler
@@ -116,8 +118,6 @@ public class CalendarActivity extends BaseCalendarActivity {
 				grantName            = grantinfo.getString("grantTitle");
 				grantNumber          = grantinfo.getString("grantNumber");
 				grantCatalogNumber   = grantinfo.getString("stateCatalogNum");
-
-				workMonthId = result.getInt("id");
 
 				// if pending
 				if (grantApprovalStatus.equals("pending")) {
@@ -175,17 +175,6 @@ public class CalendarActivity extends BaseCalendarActivity {
 		
 		switch (itemId) {
 		case (R.id.mnuLoad)	:
-			final EditText e = new EditText(this);
-			new AlertDialog.Builder(this)
-			.setTitle("pick id")
-			.setView(e)
-			.setPositiveButton("ok", new AlertDialog.OnClickListener() {
-				public void onClick(DialogInterface dialog, int which) {
-					fillCalendarData(Integer.parseInt(e.getText().toString()));
-				}
-			})
-			.show();
-			
 			break;
 		case (R.id.mnuDetail) :
 			Intent intent = new Intent(this, DetailViewActivity.class);
@@ -216,7 +205,8 @@ public class CalendarActivity extends BaseCalendarActivity {
 		
 		Intent i = new Intent(this, DetailViewActivity.class);
 		
-		i.putExtra(TAG_REQUEST_ID, String.valueOf(workMonthId));
+		i.putExtra("launchUri", getIntent().getParcelableExtra("launchUri"));
+		
 		i.putExtra(TAG_DAY_OF_MONTH, String.valueOf(square.dailyNumber));
 		
 		startActivity(i);

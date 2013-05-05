@@ -19,30 +19,24 @@ public abstract class GrantServiceBindingActivity extends FragmentActivity {
 	@Override
 	protected void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
-		bind();
 	}
 	
 	@Override
 	protected void onStart() {
 		super.onStart();
+		bind();
 	}
 	@Override
 	protected void onStop() {
 		Log.w("grantservice binder", "activity stopped");
 		super.onStop();
+		unbind();
 	}
 	
 	@Override
 	protected void onDestroy() {
 		Log.w("grantservice binder", "activity destroyed");
 		super.onDestroy();
-//		GrantService temp = service;
-		unbind();
-//		if (isFinishing()) {
-//			Log.w("grantservice binder", "finish() called, stopping the service");
-//			// stopService() stops the service unconditionally, but stopSelf() is okay
-//			temp.stopSelf();
-//		}
 	}
 	
 	private void bind() {
@@ -57,6 +51,10 @@ public abstract class GrantServiceBindingActivity extends FragmentActivity {
 	private void unbind() {
 		if (service != null) {
 			onUnbound();
+			// keep service around a little longer (it shuts itself down after 5 seconds)
+			Intent waitIntent = new Intent(this, GrantService.class);
+			startService(waitIntent);
+			// now unbind it
 			unbindService(conn);
 			service = null;
 		}

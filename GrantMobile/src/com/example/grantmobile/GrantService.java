@@ -19,9 +19,12 @@ import com.example.grantmobile.JSONParser.ResultHandler;
 import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 
 public class GrantService extends Service {
@@ -67,6 +70,19 @@ public class GrantService extends Service {
 		return binder;
 	}
 	
+	@Override
+	public int onStartCommand(Intent intent, int flags, final int startId) {
+		// calling startService() keeps the service alive for 5 seconds
+		// this is used as a horrible hack to keep it from shutting down when the device
+		// is rotated (which destroys the activity binding us)
+		new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+			public void run() {
+				stopSelf(startId);
+			}
+		}, 5000);
+		return Service.START_NOT_STICKY;
+	}
+	
 	public void sendGenericRequest(final Map<String, String> params, ResultHandler handler) {
 		Object cached = queryCache.get(params);
 		if (cached == null) {
@@ -90,11 +106,19 @@ public class GrantService extends Service {
 			}
 		}
 	}
-
-	public void sendEmailRequest(final String requestId, final ResultHandler jsonResultHandler) {
-		Map<String, String> query = new HashMap<String, String>(2);
+	
+	public void sendEmailRequest(final Uri emailUri, final ResultHandler jsonResultHandler) {
+		Map<String, String> query = new HashMap<String, String>();
 		query.put("q", "email");
-		query.put("id", requestId);
+		if (emailUri.getPath().contains("aspx")) { // old-style email
+			query.put("grant", emailUri.getQueryParameter("GrantID"));
+			query.put("employee", emailUri.getQueryParameter("Employee"));
+			query.put("month", emailUri.getQueryParameter("month"));
+			query.put("year", emailUri.getQueryParameter("Year"));
+			query.put("supervisor", emailUri.getQueryParameter("ID"));
+		} else {
+			query.put("id", emailUri.getQueryParameter("ID"));
+		}
 		sendGenericRequest(query, jsonResultHandler);
 	}
 	
