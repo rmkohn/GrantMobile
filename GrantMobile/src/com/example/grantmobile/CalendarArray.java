@@ -13,6 +13,7 @@ import android.util.Log;
 import com.example.grantmobile.CalendarSquare.DaySquare;
 import com.example.grantmobile.CalendarSquare.ICalendarSquare;
 import com.example.grantmobile.CalendarSquare.PlaceholderSquare;
+import com.example.grantmobile.CalendarSquare.TitleSquare;
 import com.example.grantmobile.CalendarSquare.TotalSquare;
 
 public class CalendarArray {
@@ -104,7 +105,7 @@ public class CalendarArray {
 		
 
 		for (int x = 0; x < squareTitles.length; x++) {
-			tmpCalendar.add(new PlaceholderSquare(squareTitles[x]));
+			tmpCalendar.add(new TitleSquare(squareTitles[x]));
 		}
 		
 //		PlaceholderSquare emptyDay = new PlaceholderSquare("-");
@@ -112,6 +113,8 @@ public class CalendarArray {
 		// effective "day" of Sunday spot on first week
 		Log.i("loadcalendar", ""+firstDay);
 		thisDailyNumber = 1 - firstDay;
+		
+		PlaceholderSquare placeholder = new PlaceholderSquare();
 		
 		// Vertical
 		while (thisDailyNumber < daysInMonth)
@@ -131,7 +134,7 @@ public class CalendarArray {
 					tmpRealDays.add(daySquare);
 				} else {
 					// create placeholder day
-					curSquare = new PlaceholderSquare("");
+					curSquare = placeholder;
 				}
 				
 				// add whatever square we made to calendar and advance a day
@@ -142,7 +145,7 @@ public class CalendarArray {
 			if (realDaysInWeek.size() > 0) {
 				tmpCalendar.add(new TotalSquare(realDaysInWeek));
 			} else {
-				tmpCalendar.add(new PlaceholderSquare(""));
+				tmpCalendar.add(placeholder);
 			}
 		} // end for yy
 		// we are gonna be in a bad way if these get out of sync, so make it tougher for that to happen

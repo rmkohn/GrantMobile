@@ -2,6 +2,9 @@ package com.example.grantmobile;
 
 import com.example.grantmobile.CalendarSquare.DaySquare;
 import com.example.grantmobile.CalendarSquare.ICalendarSquare;
+import com.example.grantmobile.CalendarSquare.PlaceholderSquare;
+import com.example.grantmobile.CalendarSquare.TitleSquare;
+import com.example.grantmobile.CalendarSquare.TotalSquare;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -35,6 +38,7 @@ public class CalendarSquareAdapter extends BaseAdapter {
 
 	// create a new ImageView for each item referenced by the Adapter
 	public View getView(int position, View convertView, ViewGroup parent) {
+		int width = parent.getWidth() / 8;
 		TextView view;
 		ICalendarSquare square = calendar.getSquare(position);
 		if (convertView == null) {  // if it's not recycled, initialize some attributes
@@ -44,11 +48,19 @@ public class CalendarSquareAdapter extends BaseAdapter {
 			convertView = inflater.inflate(resource, parent, false);
 //			imageView.setLayoutParams(new GridView.LayoutParams(85, 85));
 		}
+		if (square instanceof TitleSquare) {
+			convertView.setMinimumHeight(0);
+			convertView.setMinimumWidth(0);
+		} else {
+			convertView.setMinimumHeight(width);
+			convertView.setMinimumWidth(width);
+		}
+		
 		view = (TextView) convertView.findViewById(R.id.calendarTextView);
 		
 		view.setBackgroundColor(square.getHighlightColor());
 		view.setText(square.getMessage());
-
+		
 		return convertView;
 	}
 
@@ -59,7 +71,7 @@ public class CalendarSquareAdapter extends BaseAdapter {
 
 	@Override
 	public int getViewTypeCount() {
-		return 2;
+		return 3;
 	}
 
 	@Override
@@ -69,6 +81,9 @@ public class CalendarSquareAdapter extends BaseAdapter {
 
 	@Override
 	public int getItemViewType(int position) {
-		return calendar.getSquare(position) instanceof DaySquare ? 0 : 1;
+		ICalendarSquare square = calendar.getSquare(position);
+		if      (square instanceof DaySquare)   return 0;
+		else if (square instanceof TitleSquare) return 1;
+		return 2;
 	}
 }

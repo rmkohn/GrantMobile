@@ -1,12 +1,15 @@
 package com.example.grantmobile.CalendarSquare;
 
-public class PlaceholderSquare implements ICalendarSquare {
+public class TitleSquare implements ICalendarSquare {
+	String message;
 
-	public PlaceholderSquare() { }
+	public TitleSquare(String message) {
+		this.message = message;
+	}
 
 	@Override
 	public String getMessage() {
-		return "";
+		return message;
 	}
 
 	@Override
