@@ -8,6 +8,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -16,7 +17,7 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class CalendarActivity extends FragmentActivity {
+public class CalendarActivity extends GrantServiceBindingActivity {
 	
 	private static final String TAG_REQUEST_ID = "RequestId"; // required, no default!!!!
 	private static final String TAG_DAY_OF_MONTH = "DayOfMonth"; // optional, default = first day of month	
@@ -31,10 +32,10 @@ public class CalendarActivity extends FragmentActivity {
 	String grantCatalogNumber = "";
 	// Database ID of grant
 	int grantId = 0;
+	// Uri the app was opened with
+	Uri launchUri = null;
 	// Grant approval status
 	String grantApprovalStatus = "";
-	// Database ID of WorkMonth
-	int workMonthId = 0;
 	// Name of employee working on grant
 	String employeeName = "";
 	// Name of grant supervisor
@@ -51,9 +52,8 @@ public class CalendarActivity extends FragmentActivity {
 	{
 		super.onCreate(savedInstanceState);
 		
-		int id = getIntent().getIntExtra("workMonthId", -1);
-		
-		fillCalendarData(id);
+//		workMonthId = getIntent().getIntExtra("workMonthId", -1);
+		launchUri = getIntent().getParcelableExtra("launchUri");
 		
 		setContentView(R.layout.activity_calendar_view);
 		calendarView = (CalendarView) findViewById(R.id.calendarView1);
@@ -81,14 +81,12 @@ public class CalendarActivity extends FragmentActivity {
 	}
 	
 
+	protected void onBound() {
+		fillCalendarData(launchUri);
+	}
 	
-	private void fillCalendarData(final int id) {
-		new JSONParser.RequestBuilder(requestURL)
-		.setUrl(requestURL)
-		.addParam("q", "email")
-		.addParam("id", String.valueOf(id))
-		.makeRequest(new CalendarResultHandler(this));
-		
+	private void fillCalendarData(Uri uri) {
+		getService().sendEmailRequest(uri, new CalendarResultHandler(this));
 	}	
 	
     class CalendarResultHandler extends JSONParser.SimpleResultHandler
@@ -127,8 +125,6 @@ public class CalendarActivity extends FragmentActivity {
 				grantName            = grantinfo.getString("grantTitle");
 				grantNumber          = grantinfo.getString("grantNumber");
 				grantCatalogNumber   = grantinfo.getString("stateCatalogNum");
-				
-				workMonthId = result.getInt("id");
 				
 				// if pending
 				if (grantApprovalStatus.equals("pending")) {
@@ -197,7 +193,7 @@ public class CalendarActivity extends FragmentActivity {
 			.setView(e)
 			.setPositiveButton("ok", new AlertDialog.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
-					fillCalendarData(Integer.parseInt(e.getText().toString()));
+					fillCalendarData(Uri.parse("http://mid-state.net/android?q=email&id="+e.getText().toString()));
 				}
 			})
 			.show();
@@ -228,7 +224,8 @@ public class CalendarActivity extends FragmentActivity {
 		
 		Intent i = new Intent(this, DetailViewActivity.class);
 		
-		i.putExtra(TAG_REQUEST_ID, String.valueOf(workMonthId));
+		i.putExtra("launchUri", getIntent().getParcelableExtra("launchUri"));
+		
 		i.putExtra(TAG_DAY_OF_MONTH, String.valueOf(detailSquare.dailyNumber));
 		
 		startActivity(i);

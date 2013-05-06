@@ -28,26 +28,21 @@ public class MainActivity extends Activity
 		tvTest 						= (TextView) findViewById(R.id.tvTest); 
 		
 		tvTest.setText("Uri data: " + data);//FOR TESTING PURPOSES ONLY.  D E L E T E BEFORE GOING INTO PRODUCTION
-				
-		int workMonthId				= getWorkMonthId(data);
-		
-		tvTest.setText("ID = " 		+ workMonthId);//FOR TESTING PURPOSES ONLY.  D E L E T E BEFORE GOING INTO PRODUCTION
 		
 		/******************************************************************************************************
 		 * CHECKS TO SEE IF THE APP WAS OPENED BY CLICKING THE APP ICON OR BY THE EMAIL LINK.                 *
 		 *                                                                                                    *
 		 ******************************************************************************************************/
-		if (workMonthId == -1)
+		if (getIntent().getData() == null)
 		{
 			
 			closeDialog();
 			
 		}//ENDIF
-		
 		else
 		{
 			Intent intent = new Intent(this, CalendarActivity.class);
-			intent.putExtra("workMonthId", workMonthId);
+			intent.putExtra("launchUri", getIntent().getData());
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			startActivity(intent);
 		}//ENDELSE

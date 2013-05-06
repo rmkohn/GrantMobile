@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -146,6 +147,12 @@ public class JSONParser {
 			params.add(new BasicNameValuePair(name, value));
 			return this;
 		}
+		public RequestBuilder addAllParams(Map<String, String> values) {
+			for (Map.Entry<String, String> entry: values.entrySet()) {
+				params.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
+			}
+			return this;
+		}
 		public RequestBuilder setUrl(String url) {
 			this.url = url;
 			return this;
@@ -157,23 +164,16 @@ public class JSONParser {
 		public AsyncTask<Void, Void, JSONObject> makeRequest(final ResultHandler handler) {
 			return new AsyncTask<Void, Void, JSONObject>() {
 				protected JSONObject doInBackground(Void... params) {
-					return makeHttpRequest(url, method, RequestBuilder.this.params);
+					return makeHttpRequest();
 				}
 				protected void onPostExecute(JSONObject result) {
-					try {
-				    	if (result.getBoolean("success"))
-				    		handler.onSuccess(result.get("message"));
-						else
-							handler.onFailure(result.getString("message"));
-					} catch (JSONException e) {
-						handler.onError(e);
-					} catch (IOException e) {
-						handler.onError(e);
-					} catch (NullPointerException e) {
-						handler.onError(e);
-					} catch (ClassCastException e) {
-						handler.onError(e);
-					}
+//				    try {
+//                        Log.i("JSONParser", result == null ? "null" : result.toString(2));
+//                    } catch (JSONException e1) {
+//                        // TODO Auto-generated catch block
+//                        e1.printStackTrace();
+//                    }
+					handleResults(result, handler);
 				}
 				@Override
 				protected void onCancelled() {
@@ -184,7 +184,35 @@ public class JSONParser {
 			}.execute();
 		}
 		
+		public void makeRequestInCurrentThread(final ResultHandler handler) {
+			JSONObject result = makeHttpRequest();
+			handleResults(result, handler);
+		}
+		
+		public JSONObject makeHttpRequest() {
+			return JSONParser.makeHttpRequest(url, method, params);
+		}
+		
 	}
+	
+	public static void handleResults(JSONObject result, ResultHandler handler) {
+		handler.onPostExecute();
+		try {
+			if (result.getBoolean("success"))
+				handler.onSuccess(result.get("message"));
+			else
+				handler.onFailure(result.getString("message"));
+		} catch (JSONException e) {
+			handler.onError(e);
+		} catch (IOException e) {
+			handler.onError(e);
+		} catch (NullPointerException e) {
+			handler.onError(e);
+		} catch (ClassCastException e) {
+			handler.onError(e);
+		}
+	}
+	
 	public static interface ResultHandler {
 	    public void onPostExecute();
         public void onSuccess(Object result) throws JSONException, IOException;
@@ -219,6 +247,14 @@ public class JSONParser {
         public void onCancelled() { }
 	}
 	
-	
+	public static class ResultHandlerWrapper implements ResultHandler {
+		ResultHandler h;
+		public ResultHandlerWrapper(ResultHandler h) { this.h = h; }
+	    public void onPostExecute() { h.onPostExecute(); }
+        public void onSuccess(Object result) throws JSONException, IOException { h.onSuccess(result); }
+        public void onFailure(String errorMessage) { h.onFailure(errorMessage); }
+        public void onError(Exception e) { h.onError(e); }
+        public void onCancelled() { h.onCancelled(); }
+	}
 }
 
