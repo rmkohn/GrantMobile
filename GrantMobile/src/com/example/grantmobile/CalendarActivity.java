@@ -66,7 +66,6 @@ public class CalendarActivity extends GrantServiceBindingActivity {
 			}
 		});
 		
-	
 	}
 
 	/**
@@ -158,7 +157,7 @@ public class CalendarActivity extends GrantServiceBindingActivity {
 			{
 				Toast.makeText(getApplicationContext(), "Error loading grant information", Toast.LENGTH_LONG).show();
 				e.printStackTrace();
-			}
+			}// end try
 		}
 
 		@Override
@@ -166,7 +165,7 @@ public class CalendarActivity extends GrantServiceBindingActivity {
 			Toast.makeText(CalendarActivity.this, errorMessage, Toast.LENGTH_LONG).show();
 			
 			// show dialog for closing early
-			closeEarlyDialog("none");
+			closeEarlyDialog("fail");
 		}
 	}
 	
@@ -239,36 +238,45 @@ public class CalendarActivity extends GrantServiceBindingActivity {
 		String message = "";
 		
 		// Determine title and message
-		if (status.equals("new")) {
+		if (status.equals("fail")) {
 			
-			title = "Not Available Yet";
-			message = "This grant is being filled out for the first time.";
+			title = "Failed to connect to database";
+			message = "There were database connection problems.";
 			
 		} else {
-
-			if (status.equals("none")) {
-
-				title = "No Grant";
-				message = "There is no grant with that ID.";
-
+			
+			if (status.equals("new")) {
+				
+				title = "Not Available Yet";
+				message = "This is still being filled out for the first time.";
+				
 			} else {
 
-				if (status.equals("disapproved")) {
-				
-					title = "Grant Disapproved";
-					message = "Entries for this month have not yet been resubmitted.";
-				
-				} else {
-					
-					title = "Grant Approved";
-					message = "This grant has already been approved.";
-					
-				}// end if
+				if (status.equals("none")) {
 
-			}// end if
-		
-		}// end if
+					title = "No Entries";
+					message = "There is no time with that ID.";
+
+				} else {
+
+					if (status.equals("disapproved")) {
+					
+						title = "Grant Disapproved";
+						message = "Entries for this month have not yet been resubmitted.";
+					
+					} else {
+						
+						title = "Grant Approved";
+						message = "This grant has already been approved.";
+						
+					}// end if
+
+				}// end if
 			
+			}// end if
+			
+		}// end if
+
 		// Show dialog with determined information
 		new AlertDialog.Builder(this)
 		.setTitle(title)

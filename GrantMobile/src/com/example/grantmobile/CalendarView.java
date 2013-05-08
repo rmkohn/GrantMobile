@@ -21,6 +21,7 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 public class CalendarView extends View {
 	
@@ -118,7 +119,7 @@ public class CalendarView extends View {
 	// Calendar square size height
 	int calendarSquareSizeH;
 	// Calendar square array list
-	ArrayList<CalendarSquare> calendar = new ArrayList<CalendarSquare>();
+	ArrayList<CalendarSquare> calendar;
 	// The enlarged day square
 	CalendarSquare enlargedSquare = new CalendarSquare();
 	// The enlarged day square's reference to main squares index
@@ -155,6 +156,9 @@ public class CalendarView extends View {
     
     public void init()
     {
+    	// Initialize calendar square array
+    	calendar = new ArrayList<CalendarSquare>();
+    	
         // Initialize header message
         initHeaderMessage();
         
@@ -406,6 +410,7 @@ public class CalendarView extends View {
 	    // this is the earliest possible point at which initCalendar() can be called
 	    // any earlier, and it won't be able to autosize
 	    initCalendar();
+	    loadCalendarData();
 	}
 		
 	/**
@@ -419,6 +424,7 @@ public class CalendarView extends View {
 		// standard gesture handler, route events to GestureDetector
 		if (tapDetector.onTouchEvent(event))
 		        return true;
+		
 		return super.onTouchEvent(event);
 	}	
 
@@ -659,6 +665,7 @@ public class CalendarView extends View {
 	public void loadCalendarData() {
 	
 		// Variables
+		Toast.makeText(getContext(), "LOADING...", Toast.LENGTH_LONG).show();
 		
 		// Total grant hours for a day
 		int dayTotalGrantHours = 0;
@@ -674,7 +681,7 @@ public class CalendarView extends View {
 		int weekTotalNonGrantHours = 0;
 		// Total leave hours for a week
 		int weekTotalLeaveHours = 0;
-		// Total hours for a day or week
+		// Total hours for a week
 		int weekTotalHours = 0;
 		
 		// Determine weekly and monthly totals and note information
