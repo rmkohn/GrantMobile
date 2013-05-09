@@ -266,10 +266,7 @@ public class DetailViewActivity extends GrantServiceBindingActivity {
 		itemId = item.getItemId();
 		
 		switch (itemId) {
-		case (R.id.mnuDetail) :
-			Intent intent = new Intent(this, DetailViewActivity.class);
-			startActivity(intent);
-			break;
+
 		case (R.id.mnuDialog) :
 			//show dialog box
 			SubmitDialog dialog = new SubmitDialog();

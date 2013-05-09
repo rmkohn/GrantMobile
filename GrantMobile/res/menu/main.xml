@@ -1,24 +1,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
-
-    <item
-        android:id="@+id/mnuLoad"
-        android:orderInCategory="100"
-        android:showAsAction="never"
-        android:title="Load"
-        />
-    
-    <item
-        android:id="@+id/mnuDetail"
-        android:orderInCategory="200"
-        android:showAsAction="never"
-        android:title="Detail View"
-        />
     
     <item
         android:id="@+id/mnuDialog"
         android:orderInCategory="300"
         android:showAsAction="never"
-        android:title="Dialog View"
+        android:title="Approve/Deny"
         />
 
 </menu>

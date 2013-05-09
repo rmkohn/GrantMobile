@@ -64,17 +64,6 @@ public class CalendarActivity extends BaseCalendarActivity {
 			fillCalendarData(launchUri);
 	}
 	
-	/**
-	 * This procedure initializes the options menu.
-	 */
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu)
-	{
-		// Inflate the menu
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}
-
 	protected void onBound() {
 		fillCalendarData(launchUri);
 	}
@@ -158,35 +147,6 @@ public class CalendarActivity extends BaseCalendarActivity {
 		}
 	}
 	
-
-    /**
-     * This procedure handles all of the options menu selection events.
-     */
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-	
-		// Variables
-		
-		// The id of the menu item chosen
-		int itemId = 0;	
-		
-		// Determine id of item chosen, and respond accordingly
-		itemId = item.getItemId();
-		
-		switch (itemId) {
-		case (R.id.mnuLoad)	:
-			break;
-		case (R.id.mnuDetail) :
-			Intent intent = new Intent(this, DetailViewActivity.class);
-			startActivity(intent);
-			break;
-		case (R.id.mnuDialog) :
-			openDialog();
-			break;
-		}// end switch
-		
-		return true;
-	}
 	
 	private void openDialog() {
 		//show dialog box

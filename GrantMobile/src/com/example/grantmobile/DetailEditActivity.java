@@ -296,11 +296,6 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 		GrantService.GrantData data = new GrantService.GrantData(year, month, employeeid);
 		String[] grantstrings = GrantService.getGrantStrings(new int[] { grantId });
 		switch (item.getItemId()) {
-		case R.id.mnuLoad:
-			// IntentService uses a single background thread, so this should work
-			getService().deleteHours(data, grantstrings);
-			updateView();
-			break;
 		case R.id.mnuDialog:
 			getService().getSupervisors(new ServiceCallback<JSONObject[]>() {
 				public void run(JSONObject[] result) {

@@ -96,13 +96,6 @@ public class LoginActivity extends Activity {
 					}
 				});
 	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
-		getMenuInflater().inflate(R.menu.activity_login, menu);
-		return true;
-	}
 	
 	/**
 	 * Attempts to sign in or register the account specified by the login form.

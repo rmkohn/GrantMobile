@@ -162,39 +162,4 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 		loadCalendar();
 	}
 	
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.edit, menu);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		GrantService.GrantData data = new GrantService.GrantData(getYear(), getMonth()-1, user.id);
-		String[] grantstrings = getGrantStrings();
-		switch (item.getItemId()) {
-		case R.id.mnuLoad:
-			// IntentService uses a single background thread, so this should work
-			getService().deleteHours(data, grantstrings);
-			loadCalendar();
-			break;
-		case R.id.mnuDialog:
-			openEmailDialog();
-			break;
-		case R.id.mnuUpload:
-			getService().uploadHours(data, grantstrings, new ServiceCallback<Integer>() { 
-				public void run(Integer result) {
-					String message = (result == Activity.RESULT_OK)
-						? "uploaded successfully"
-						: "error uploading";
-					Toast.makeText(CalendarEditActivity.this, message, Toast.LENGTH_LONG).show();
-				}
-			});
-			break;
-		default: return false;
-		}
-		return true;
-	}
-
-
 }
