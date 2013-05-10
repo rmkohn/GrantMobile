@@ -129,8 +129,6 @@
             android:id="@+id/dayOfWeekTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/grantHourslLbl"
-            android:layout_alignLeft="@+id/grantHoursTv"
             android:text="day of week"
             android:textAppearance="?android:attr/textAppearanceMedium" />
             
@@ -164,7 +162,6 @@
                 android:id="@+id/nonGrantHoursLbl"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/grantHourslLbl"
                 android:text="@string/nonGrantHoursLabel"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -172,7 +169,6 @@
                 android:id="@+id/nonGrantHoursTv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_above="@+id/leaveHoursLbl"
                 android:inputType="numberDecimal"
                 android:text="non-grant hours"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
