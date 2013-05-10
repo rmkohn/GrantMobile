@@ -57,11 +57,7 @@
         </activity>
         <activity
             android:name="com.example.grantmobile.GrantSelectActivity"
-            android:label="@string/title_activity_grant_select"
-            android:parentActivityName="com.example.grantmobile.MonthSelectActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.grantmobile.MonthSelectActivity" />
+            android:label="@string/title_activity_grant_select">
         </activity>
         <activity
             android:name="com.example.grantmobile.CalendarEditActivity"

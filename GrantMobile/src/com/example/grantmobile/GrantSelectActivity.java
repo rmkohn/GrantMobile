@@ -54,7 +54,6 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_grant_select);
 		// Show the Up button in the action bar.
-		setupActionBar();
 		
 		selectedGrants = new ArrayList<Grant>();
 		dumpBundle(getIntent().getExtras());
@@ -195,18 +194,6 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
 		public void onResult(Grant result) {
 			if (result != null)
 				((GrantSelectActivity)getActivity()).addGrant(result);
-		}
-	}
-
-	/**
-	 * Set up the {@link android.app.ActionBar}, if the API is available.
-	 */
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-	private void setupActionBar() {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-			if (getActionBar() != null) {
-				getActionBar().setDisplayHomeAsUpEnabled(true);
-			}
 		}
 	}
 
