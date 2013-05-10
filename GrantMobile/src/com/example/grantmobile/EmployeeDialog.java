@@ -7,8 +7,11 @@ import org.json.JSONObject;
 
 import com.example.grantmobile.GrantService.GrantData;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -54,6 +57,16 @@ public class EmployeeDialog extends SelectionDialog<EmployeeDialog.Employee> {
 		.makeRequest(new JSONParser.SimpleResultHandler(getActivity()) {
 			public void onSuccess(Object result) {
 				Toast.makeText(c, result.toString(), Toast.LENGTH_LONG).show();
+			}
+			public void onFailure(String errorMessage) {
+				new AlertDialog.Builder(c)
+				.setTitle("Cannot send email")
+				.setMessage(errorMessage)
+				.setCancelable(false)
+				.setNeutralButton("OK", new OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) { }
+				})
+				.show();
 			}
 		});
 	}
