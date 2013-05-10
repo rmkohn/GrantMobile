@@ -24,7 +24,7 @@ public class TotalSquare implements ICalendarSquare {
 	@Override
 	public String getMessage() {
 		updateTimes();
-		return "T: " + (int)grant;
+		return "T: " + (int)(grant+nongrant+leave);
 	}
 	
 	@Override
