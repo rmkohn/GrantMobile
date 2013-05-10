@@ -95,104 +95,36 @@
 
     </RelativeLayout>
 
-    <RelativeLayout
+    <TableLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:stretchColumns="*"
         android:layout_weight="0.14" >
 
-        <TextView
-            android:id="@+id/leaveHoursLbl"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/nonGrantHoursLbl"
-            android:text="@string/leaveHoursLabel"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+        <TableRow>
 
-        <EditText
-            android:id="@+id/leaveHoursTv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/nonGrantHoursTv"
-            android:layout_below="@+id/nonGrantHoursTv"
-            android:gravity="right"
-            android:text="leave hours"
-            android:inputType="numberDecimal"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            <TextView
+                android:id="@+id/dateLbl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dateLabel"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <TextView
-            android:id="@+id/nonGrantHoursLbl"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/grantHourslLbl"
-            android:text="@string/nonGrantHoursLabel"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            <TextView
+                android:id="@+id/dateTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="date"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+        </TableRow>
+        <TableRow>
 
-        <EditText
-            android:id="@+id/nonGrantHoursTv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/leaveHoursLbl"
-            android:layout_alignLeft="@+id/grantHoursTv"
-            android:gravity="right"
-            android:text="non-grant hours"
-            android:inputType="numberDecimal"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <TextView
-            android:id="@+id/monthTotalLbl"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/dayTotalLbl"
-            android:text="@string/monthTotalLabel"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <TextView
-            android:id="@+id/dayTotalHoursTv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/dayTotalLbl"
-            android:layout_alignBottom="@+id/dayTotalLbl"
-            android:layout_alignLeft="@+id/leaveHoursTv"
-            android:gravity="right"
-            android:text="total day hours"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <TextView
-            android:id="@+id/monthTotalHoursTv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/monthTotalLbl"
-            android:layout_alignBottom="@+id/monthTotalLbl"
-            android:layout_alignLeft="@+id/dayTotalHoursTv"
-            android:gravity="right"
-            android:text="monthly hours"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <EditText
-            android:id="@+id/grantHoursTv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/dateTv"
-            android:layout_below="@+id/dateTv"
-            android:layout_marginTop="21dp"
-            android:gravity="right"
-            android:text="grant hours"
-            android:inputType="numberDecimal"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <TextView
-            android:id="@+id/grantHourslLbl"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/grantHoursTv"
-            android:layout_alignBottom="@+id/grantHoursTv"
-            android:layout_alignParentLeft="true"
-            android:text="@string/grantHoursLabel"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
+            <TextView
+                android:id="@+id/dayOfWeeklLbl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dayOfWeekLabel"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
         <TextView
             android:id="@+id/dayOfWeekTv"
             android:layout_width="wrap_content"
@@ -201,48 +133,106 @@
             android:layout_alignLeft="@+id/grantHoursTv"
             android:text="day of week"
             android:textAppearance="?android:attr/textAppearanceMedium" />
+            
+        </TableRow>
+        
+        <TableRow>
 
-        <TextView
-            android:id="@+id/dayOfWeeklLbl"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/grantHourslLbl"
-            android:layout_alignParentLeft="true"
-            android:text="@string/dayOfWeekLabel"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            <TextView
+                android:id="@+id/grantHourslLbl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/grantHoursLabel"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <TextView
-            android:id="@+id/dayTotalLbl"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/leaveHoursLbl"
-            android:layout_marginTop="14dp"
-            android:text="@string/dayTotalLabel"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            <EditText
+                android:id="@+id/grantHoursTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="numberDecimal"
+                android:text="grant hours"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <TextView
-            android:id="@+id/dateLbl"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="17dp"
-            android:text="@string/dateLabel"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+        </TableRow>
 
-        <TextView
-            android:id="@+id/dateTv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/dateLbl"
-            android:layout_alignBottom="@+id/dateLbl"
-            android:layout_marginLeft="23dp"
-            android:layout_toRightOf="@+id/nonGrantHoursLbl"
-            android:text="date"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+        
+        
+        <TableRow>
 
-    </RelativeLayout>
+            <TextView
+                android:id="@+id/nonGrantHoursLbl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/grantHourslLbl"
+                android:text="@string/nonGrantHoursLabel"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <EditText
+                android:id="@+id/nonGrantHoursTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/leaveHoursLbl"
+                android:inputType="numberDecimal"
+                android:text="non-grant hours"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+        </TableRow>
+
+        
+        <TableRow>
+            <TextView
+                android:id="@+id/leaveHoursLbl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/leaveHoursLabel"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <EditText
+                android:id="@+id/leaveHoursTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
+                android:text="leave hours"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+        </TableRow>
+        <TableRow>
+
+
+            <TextView
+                android:id="@+id/dayTotalLbl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dayTotalLabel"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+            <TextView
+                android:id="@+id/dayTotalHoursTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="total day hours"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        </TableRow>
+        <TableRow>
+
+            <TextView
+                android:id="@+id/monthTotalLbl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/monthTotalLabel"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <TextView
+                android:id="@+id/monthTotalHoursTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="monthly hours"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+        </TableRow>
+
+
+
+
+    </TableLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -273,7 +263,7 @@
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:layout_marginLeft="25dp"
-            android:text="Back" />
+            android:text="Previous" />
 
     </RelativeLayout>
 
