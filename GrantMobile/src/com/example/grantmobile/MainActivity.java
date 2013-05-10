@@ -40,7 +40,7 @@ public class MainActivity extends Activity
 		{
 			Intent intent = new Intent(this, CalendarActivity.class);
 			intent.putExtra("launchUri", getIntent().getData());
-			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 		}//ENDELSE
 		
