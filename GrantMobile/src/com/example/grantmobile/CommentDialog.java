@@ -14,6 +14,7 @@ public class CommentDialog extends DialogFragment {
 	public static final String requestURL = "http://mid-state.net/mobileclass2/android";
 	private String title;
 	public int userID;
+	public int workmonthID;
 	public boolean approval;
 	
 	public void setUserID(int id){
@@ -26,6 +27,10 @@ public class CommentDialog extends DialogFragment {
 	
 	public void setApproval(boolean approval) {
 		this.approval = approval;
+	}
+	
+	public void setWorkMonthID(int id) {
+		this.workmonthID = id;
 	}
 	
 	@Override

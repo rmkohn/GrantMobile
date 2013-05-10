@@ -36,6 +36,10 @@ public class CalendarActivity extends BaseCalendarActivity {
 	String grantCatalogNumber = "";
 	// Database ID of grant
 	int grantId = 0;
+	// Database ID of request
+	int workmonthId = 0;
+	// Database ID of supervisor
+	int supervisorId = 0;
 	// Uri the app was opened with
 	Uri launchUri = null;
 	// Grant approval status
@@ -95,6 +99,9 @@ public class CalendarActivity extends BaseCalendarActivity {
 				// get the date
 				int month = result.getInt("month") + 1; // server months are 0-indexed
 				int year  = result.getInt("year");
+				
+				workmonthId = result.getInt("id");
+				supervisorId = result.getJSONObject("supervisor").getInt("id");
 
 				// load some general class-level data that will be needed later
 				supervisorName = getEmployeeName(result.getJSONObject("supervisor"));
@@ -152,7 +159,8 @@ public class CalendarActivity extends BaseCalendarActivity {
 		//show dialog box
 		SubmitDialog dialog = new SubmitDialog();
 		FragmentManager manager = getSupportFragmentManager();
-		dialog.setUserID(732);
+		dialog.setUserID(supervisorId);
+		dialog.setWorkmonthID(workmonthId);
 		dialog.show(manager, "");
 	}
 

@@ -52,6 +52,10 @@ public class DetailViewActivity extends GrantServiceBindingActivity {
 	ArrayList<String> nonGrantHours; // non-grant hour array
 	ArrayList<String> leaveHours;  // leave hour array
 	HashMap<String,String> map;
+	// Database ID of request
+	int workmonthId = 0;
+	// Database ID of supervisor
+	int supervisorId = 0;
 	
 	Uri launchUri = null;
 
@@ -194,6 +198,8 @@ public class DetailViewActivity extends GrantServiceBindingActivity {
 				JSONArray jsa = null; // json array
 				JSONObject jso = null; // misc., message & hours object
 //				Toast.makeText(context, json.toString(), Toast.LENGTH_LONG).show();
+				workmonthId = json.getInt("id");
+				supervisorId = json.getJSONObject("supervisor").getInt("id");
 				
 				// get time arrays
     			jso = json.getJSONObject(TAG_HOURS);
@@ -271,7 +277,8 @@ public class DetailViewActivity extends GrantServiceBindingActivity {
 			//show dialog box
 			SubmitDialog dialog = new SubmitDialog();
 			FragmentManager manager = getSupportFragmentManager();
-			dialog.setUserID(732);
+			dialog.setUserID(supervisorId);
+			dialog.setWorkmonthID(workmonthId);
 			dialog.show(manager, "");
 			break;
 		}// end switch

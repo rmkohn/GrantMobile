@@ -9,9 +9,14 @@ import android.os.Bundle;
 
 public class SubmitDialog extends DialogFragment {
 	public int userID;
+	public int workmonthID;
 	
 	public void setUserID(int id){
 		this.userID = id;
+	}
+	
+	public void setWorkmonthID(int id) {
+		this.workmonthID = id;
 	}
 	
 	@Override
@@ -25,6 +30,7 @@ public class SubmitDialog extends DialogFragment {
 				    	  CommentDialog comment = new CommentDialog();
 				    	  comment.setTitle("Approve Time");
 				    	  comment.setUserID(userID);
+				    	  comment.setWorkMonthID(workmonthID);
 				    	  comment.setApproval(true);
 				    	  comment.show(getFragmentManager(), "");
 				      }
@@ -34,6 +40,7 @@ public class SubmitDialog extends DialogFragment {
 				    	  CommentDialog comment = new CommentDialog();
 				    	  comment.setTitle("Disapprove Time");
 				    	  comment.setUserID(userID);
+				    	  comment.setWorkMonthID(workmonthID);
 				    	  comment.setApproval(false);
 				    	  comment.show(getFragmentManager(), "");
 				      }
