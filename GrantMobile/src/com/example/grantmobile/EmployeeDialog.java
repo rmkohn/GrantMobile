@@ -1,6 +1,8 @@
 package com.example.grantmobile;
 
 import java.io.Serializable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,7 +47,7 @@ public class EmployeeDialog extends SelectionDialog<EmployeeDialog.Employee> {
 
 	public void onResult(Employee result) {
 		// this dialog will probably be gone by the time the request returns
-		final Context c = getActivity().getBaseContext();
+		final Context c = getActivity();
 		new JSONParser.RequestBuilder()
 		.setUrl(GrantService.requestURL)
 		.addParam("q", "sendrequest")
@@ -54,14 +56,27 @@ public class EmployeeDialog extends SelectionDialog<EmployeeDialog.Employee> {
 		.addParam("month", String.valueOf(data.month))
 		.addParam("grant", String.valueOf(grantid))
 		.addParam("supervisor", String.valueOf(result.id))
-		.makeRequest(new JSONParser.SimpleResultHandler(getActivity()) {
+		.makeRequest(new JSONParser.SimpleResultHandler(c) {
 			public void onSuccess(Object result) {
 				Toast.makeText(c, result.toString(), Toast.LENGTH_LONG).show();
 			}
 			public void onFailure(String errorMessage) {
+				String userMessage;
+				Matcher msgMatcher = Pattern.compile("request is already (\\w+)").matcher(errorMessage);
+				if (msgMatcher.find()) {
+					String approvalType = msgMatcher.group(1);
+					if (approvalType.equals("pending"))
+						userMessage = "This grant request has already been sent, and is still awaiting approval.";
+					else if (approvalType.equals("approved"))
+						userMessage = "This grant request has already been approved.";
+					else
+						userMessage = "This grant request is already " + approvalType + ".";
+				} else {
+					userMessage = "An unknown error occurred: " + errorMessage;
+				}
 				new AlertDialog.Builder(c)
 				.setTitle("Cannot send email")
-				.setMessage(errorMessage)
+				.setMessage(userMessage)
 				.setCancelable(false)
 				.setNeutralButton("OK", new OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) { }
