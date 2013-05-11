@@ -248,11 +248,16 @@ public class JSONParser {
         	.setNeutralButton("OK", new DialogInterface.OnClickListener() {
 
         		public void onClick(DialogInterface dialog, int which) {
-        			android.os.Process.killProcess(android.os.Process.myPid());
+//        			android.os.Process.killProcess(android.os.Process.myPid());
+        			Intent quitIntent = new Intent(ctx, MainActivity.class);
+        			quitIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        			quitIntent.putExtra("quit", true);
+        			ctx.startActivity(quitIntent);
         		}
 		})
 		.show();
         }
+        
         public void onCancelled() { }
 	}
 	

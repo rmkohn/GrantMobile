@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.support.v4.app.DialogFragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -59,7 +60,10 @@ public class CommentDialog extends DialogFragment {
 				    		  public void onSuccess(Object result) {
 				    			  Toast.makeText(currentActivity, (String)result, Toast.LENGTH_LONG).show();
 				    			  
-				    			  android.os.Process.killProcess(android.os.Process.myPid());
+				    			  Intent quitIntent = new Intent(currentActivity, MainActivity.class);
+				    			  quitIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+				    			  quitIntent.putExtra("quit", true);
+				    			  currentActivity.startActivity(quitIntent);
 				    		  }
 				    	  });
 				      }
