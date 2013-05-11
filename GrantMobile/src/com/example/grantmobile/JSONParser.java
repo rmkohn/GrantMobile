@@ -87,10 +87,13 @@ public class JSONParser {
 			
 
 		} catch (UnsupportedEncodingException e) {
+			Log.w("makeHttpRequest", e.getMessage());
 			return null;
 		} catch (ClientProtocolException e) {
+			Log.w("makeHttpRequest", e.getMessage());
 			return null;
 		} catch (IOException e) {
+			Log.w("makeHttpRequest", e.getMessage());
 			return null;
 		}
 
