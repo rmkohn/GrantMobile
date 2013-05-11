@@ -51,13 +51,15 @@ public class GrantService extends Service {
 	public void onDestroy() {
 		// TODO save only the changed values to permanent storage (server or database)
 		for (final Map.Entry<GrantData, Map<String, double[]>> entry: db.cache.entrySet()) {
-			this.uploadHours(entry.getKey(), entry.getValue(), new ServiceCallback<Integer>() {
-				public void run(Integer result) {
-					if (result == Activity.RESULT_OK) {
-						Log.i(TAG, "saved hours for " + entry.getKey() + " to server");
-					} else {
-						Log.i(TAG, "failed to save hours for " + entry.getKey());
-					}
+			this.uploadHours(entry.getKey(), entry.getValue(), new JSONParser.SimpleResultHandler(this) {
+				public void onSuccess(Object oResult) {
+					Log.i(TAG, "saved hours for " + entry.getKey() + " to server");
+				}
+				public void onFailure(String errorMessage) {
+					Log.i(TAG, "failed to save hours for " + entry.getKey());
+				}
+				public void onError(Exception e) {
+					e.printStackTrace();
 				}
 			});
 		}
@@ -90,7 +92,7 @@ public class GrantService extends Service {
 			.setUrl(requestURL)
 			.addAllParams(params)
 			.makeRequest(new JSONParser.ResultHandlerWrapper(handler) {
-				public void onSuccess(Object result) throws JSONException, IOException {
+				public void onSuccess(Object result) throws JSONException {
 					Log.i(TAG + " sendGenericRequest", "caching result for " + params);
 					super.onSuccess(result);
 					queryCache.put(params, result);
@@ -122,41 +124,34 @@ public class GrantService extends Service {
 		sendGenericRequest(query, jsonResultHandler);
 	}
 	
-	public void uploadHours(final GrantData data, final String[] grantStrings, ServiceCallback<Integer> callback) {
+	public void uploadHours(final GrantData data, final String[] grantStrings, ResultHandler callback) {
 		uploadHours(data, db.getTimes(data, grantStrings), callback);
 	}
 	
-	public void uploadHours(final GrantData data, final Map<String, double[]> hours, ServiceCallback<Integer> callback) {
-		new AsyncServiceCallback<Integer>(callback) {
-			Integer doInBackground() {
-				try {
-					// this is seriously the only way to load variables into the json object
-					// the map constructor for JSONObject and collection constructor for JSONArray don't work
-					JSONObject jsonHours = new JSONObject();
-					for (String key: hours.keySet()) {
-						JSONArray array = new JSONArray();
-						for (double hour: hours.get(key)) {
-							array.put(hour);
-						}
-						jsonHours.put(key, array);
-					}
-					Log.i(TAG, jsonHours.toString(2));
-					JSONObject result = new JSONParser.RequestBuilder(requestURL)
-					.addParam("q", "updatehours")
-					.addParam("employee", String.valueOf(data.employeeid))
-					.addParam("year", String.valueOf(data.year))
-					.addParam("month", String.valueOf(data.month))
-					.addParam("hours", jsonHours.toString())
-					.addParam("supervisor", "-1") // not actually used, due to reasons
-					.makeHttpRequest();
-					Log.i(TAG, result.toString());
-					return result.getBoolean("success") ? Activity.RESULT_OK : Activity.RESULT_CANCELED;
-				} catch (JSONException e) {
-					e.printStackTrace();
+	public void uploadHours(final GrantData data, final Map<String, double[]> hours, ResultHandler callback) {
+		try {
+			// this is seriously the only way to load variables into the json object
+			// the map constructor for JSONObject and collection constructor for JSONArray don't work
+			JSONObject jsonHours = new JSONObject();
+			for (String key: hours.keySet()) {
+				JSONArray array = new JSONArray();
+				for (double hour: hours.get(key)) {
+					array.put(hour);
 				}
-				return Activity.RESULT_CANCELED;
+				jsonHours.put(key, array);
 			}
-		}.execute();
+			Log.i(TAG, jsonHours.toString(2));
+			new JSONParser.RequestBuilder(requestURL)
+			.addParam("q", "updatehours")
+			.addParam("employee", String.valueOf(data.employeeid))
+			.addParam("year", String.valueOf(data.year))
+			.addParam("month", String.valueOf(data.month))
+			.addParam("hours", jsonHours.toString())
+			.addParam("supervisor", "-1") // not actually used, due to reasons
+			.makeRequest(callback);
+		} catch (JSONException e) {
+			callback.onError(e);
+		}
 	}
 	
 	public int saveHours(GrantData data, Map<String, double[]> hours) {
@@ -171,47 +166,38 @@ public class GrantService extends Service {
 		return deletedCount == grantStrings.length ? Activity.RESULT_OK : Activity.RESULT_CANCELED;
 	}
 	
-	public void getHours(final GrantData data, final String[] grantStrings, ServiceCallback<Map<String, double[]>> callback) {
+	public void getHours(final GrantData data, final String[] grantStrings, ResultHandler handler) {
 		// see if the db has our entries
-		new AsyncServiceCallback<Map<String, double[]>>(callback) {
-			@Override
-			protected Map<String, double[]> doInBackground() {
-				Map<String, double[]> allHours = db.getTimes(data, grantStrings);
+		final Map<String, double[]> allHours = db.getTimes(data, grantStrings);
 
-				if (allHours.size() < grantStrings.length) {
-					// not enough entries? okay, fetch the ones we're missing
-					Set<String> missingKeys = new HashSet<String>(Arrays.asList(grantStrings));
-					missingKeys.removeAll(allHours.keySet());
-					Log.i(TAG, "retrieving values");
-					JSONObject json = new JSONParser.RequestBuilder(requestURL)
-					.addParam("q", "viewrequest")
-					.addParam("employee", String.valueOf(data.employeeid))
-					.addParam("year", String.valueOf(data.year))
-					.addParam("month", String.valueOf(data.month))
-					.addParam("grant", DBAdapter.mkString(missingKeys, ",", "", ""))
-					.makeHttpRequest();
-					try {
-						if (json.getBoolean("success")) {
-							// load doubles from json
-							JSONObject message = json.getJSONObject("message");
-							// (I don't know why this is unchecked)
-							@SuppressWarnings("unchecked")
-							Iterator<String> keys = message.keys();
-							while(keys.hasNext()) {
-								String key = keys.next();
-								JSONArray jsonHours = message.getJSONArray(key);
-								double[] hours = new double[jsonHours.length()];
-								for (int i = 0; i < hours.length; i++) {
-									hours[i] = jsonHours.getDouble(i);
-								}
-								// save to our returned map, and to the db
-								allHours.put(key, hours);
-								db.saveEntry(data, key, hours);
-							}
+		if (allHours.size() < grantStrings.length) {
+			// not enough entries? okay, fetch the ones we're missing
+			final Set<String> missingKeys = new HashSet<String>(Arrays.asList(grantStrings));
+			missingKeys.removeAll(allHours.keySet());
+			Log.i(TAG, "retrieving values");
+			new JSONParser.RequestBuilder(requestURL)
+			.addParam("q", "viewrequest")
+			.addParam("employee", String.valueOf(data.employeeid))
+			.addParam("year", String.valueOf(data.year))
+			.addParam("month", String.valueOf(data.month))
+			.addParam("grant", DBAdapter.mkString(missingKeys, ",", "", ""))
+			.makeRequest(new JSONParser.ResultHandlerWrapper(handler) {
+				public void onSuccess(Object oResult) throws JSONException {
+					// load doubles from json
+					JSONObject message = (JSONObject) oResult;
+					// (I don't know why this is unchecked)
+					@SuppressWarnings("unchecked")
+					Iterator<String> keys = message.keys();
+					while(keys.hasNext()) {
+						String key = keys.next();
+						JSONArray jsonHours = message.getJSONArray(key);
+						double[] hours = new double[jsonHours.length()];
+						for (int i = 0; i < hours.length; i++) {
+							hours[i] = jsonHours.getDouble(i);
 						}
-					} catch (JSONException e) {
-						e.printStackTrace();
-						return null;
+						// save to our returned map, and to the db
+						allHours.put(key, hours);
+						db.saveEntry(data, key, hours);
 					}
 					missingKeys.removeAll(allHours.keySet());
 					if (!missingKeys.isEmpty()) {
@@ -219,49 +205,57 @@ public class GrantService extends Service {
 						for (String s: missingKeys) {
 							Log.e("grantservice", s);
 						}
+						super.onFailure("missing values");
+					} else {
+						super.onSuccess(allHours);
 					}
-				} else {
-					Log.i(TAG, "got values from cache");
 				}
-				return allHours;
+			});
+		} else {
+			Log.i(TAG, "got values from cache");
+			try {
+				handler.onSuccess(allHours);
+			} catch (Exception e) {
+				throw(new RuntimeException(e)); // as with sendGenericRequest, this shouldn't happen
 			}
-		}.execute();
+		}
 	}
 	
-	public void getGrants(final ServiceCallback<JSONObject[]> callback) {
+	public void getGrants(final JSONParser.ResultHandler handler) {
 		Map<String, String> query = new HashMap<String, String>(1);
 		query.put("q", "listallgrants");
-		sendGenericRequest(query, new JSONParser.SimpleResultHandler(this) {
+		sendGenericRequest(query, new JSONParser.ResultHandlerWrapper(handler) {
 			@Override public void onSuccess(Object result) throws JSONException {
-				callback.run(getJSONObjectArray((JSONArray) result));
+				handler.onSuccess(getJSONObjectArray((JSONArray) result));
 			}
 		});
 	}
 	
-	public void getGrantByParameter(final String key, final Object param, final ServiceCallback<JSONObject> callback) {
-		getGrants(new ServiceCallback<JSONObject[]>() {
-			public void run(JSONObject[] result) {
+	public void getGrantByParameter(final String key, final Object param, final ResultHandler handler) {
+		getGrants(new JSONParser.ResultHandlerWrapper(handler) {
+			public void onSuccess(Object oResult) throws JSONException {
+				JSONObject[] result = (JSONObject[]) oResult;
 				try {
 					for (JSONObject grant: result) {
 						if (grant.get(key).equals(param)) {
-							callback.run(grant);
+							super.onSuccess(grant);
 							return;
 						}
 					}
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
-				callback.run(null);
+				super.onSuccess(null);
 			}
 		});
 	}
 	
-	public void getSupervisors(final ServiceCallback<JSONObject[]> callback) {
+	public void getSupervisors(final ResultHandler handler) {
 		Map<String, String> query = new HashMap<String, String>(1);
 		query.put("q", "listsupervisors");
-		sendGenericRequest(query, new JSONParser.SimpleResultHandler(this) {
+		sendGenericRequest(query, new JSONParser.ResultHandlerWrapper(handler) {
 			@Override public void onSuccess(Object result) throws JSONException {
-				callback.run(getJSONObjectArray((JSONArray) result));
+				super.onSuccess(getJSONObjectArray((JSONArray) result));
 			}
 		});
 	}
@@ -326,37 +320,6 @@ public class GrantService extends Service {
 		}
 		@Override public String toString() {
 			return String.format(Locale.US, "GrantData(%d, %d, %d)", year, month, employeeid);
-		}
-	}
-	
-	public static interface ServiceCallback<T> {
-		public void run(T result);
-	}
-	
-	public static class ResultHandlerCallback implements ServiceCallback<JSONObject> {
-		private JSONParser.ResultHandler handler;
-		public ResultHandlerCallback(JSONParser.ResultHandler handler) {
-			this.handler = handler;
-		}
-		public void run(JSONObject result) {
-			JSONParser.handleResults(result, handler);
-		}
-	}
-	
-	abstract class AsyncServiceCallback<T> extends AsyncTask<Void, Void, T> {
-		private ServiceCallback<T> callback;
-		public AsyncServiceCallback(ServiceCallback<T> callback) {
-			this.callback = callback;
-		}
-		@Override protected T doInBackground(Void... params) {
-			return doInBackground();
-		}
-		abstract T doInBackground();
-		@Override protected void onPostExecute(T result) {
-			callback.run(result);
-		}
-		public void execute() {
-			super.execute((Void[])null);
 		}
 	}
 }

@@ -13,10 +13,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.example.grantmobile.GrantService.GrantData;
-import com.example.grantmobile.GrantService.ServiceCallback;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
@@ -160,9 +160,9 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 	private void loadGrantInfo() {
 		if (isServiceBound()) {
 			Log.i("detailedit", "loading grant info");
-			getService().getGrantByParameter("ID", Integer.valueOf(grantId), new ServiceCallback<JSONObject>() {
-				public void run(JSONObject result) {
-					updateGrantViews(result);
+			getService().getGrantByParameter("ID", Integer.valueOf(grantId), new JSONParser.SimpleResultHandler(this) {
+				public void onSuccess(Object oResult) {
+					updateGrantViews((JSONObject) oResult);
 				}
 			});
 		}
@@ -245,8 +245,12 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
     	return String.format(Locale.US, "%.1f", hours).replace(".0", "");
     }
     
-    public class DetailHandler implements GrantService.ServiceCallback<Map<String, double[]>> {
-		public void run(Map<String, double[]> result) {
+    public class DetailHandler extends JSONParser.SimpleResultHandler {
+    	public DetailHandler() { super(DetailEditActivity.this); }
+
+		public void onSuccess(Object oResult) {
+    		@SuppressWarnings("unchecked")
+			Map<String, double[]> result = (Map<String, double[]>) oResult;
 			if (result != null) {
 				grantHours = result.get(String.valueOf(grantId));
 				nonGrantHours = result.get(TAG_NON_GRANT);
@@ -261,13 +265,21 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 		}
     }
     
-    public class SaveHandler implements GrantService.ServiceCallback<Integer> {
+    public class SaveHandler extends JSONParser.SimpleResultHandler {
+    	public SaveHandler() { super(DetailEditActivity.this); }
+
 		@Override
-		public void run(Integer result) {
-			String message = (result == Activity.RESULT_OK)
-				? "hours saved"
-				: "something went wrong";
-			Toast.makeText(DetailEditActivity.this, message, Toast.LENGTH_LONG).show();
+		public void onSuccess(Object oResult) {
+			showMessage("hours saved");
+		}
+		public void onFailure(String errorMessage) {
+			showMessage("unable to save hours");
+		}
+		public void onError(Exception e) {
+			showMessage("unable to save hours");
+		}
+		public void showMessage(String message) {
+			Toast.makeText(DetailEditActivity.this, message, Toast.LENGTH_SHORT).show();
 		}
     }
 
@@ -297,8 +309,9 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 		String[] grantstrings = GrantService.getGrantStrings(new int[] { grantId });
 		switch (item.getItemId()) {
 		case R.id.mnuDialog:
-			getService().getSupervisors(new ServiceCallback<JSONObject[]>() {
-				public void run(JSONObject[] result) {
+			getService().getSupervisors(new JSONParser.SimpleResultHandler(this) {
+				public void onSuccess(Object oResult) {
+					JSONObject[] result = (JSONObject[]) oResult;
 					EmployeeDialog dialog = new EmployeeDialog();
 					List<EmployeeDialog.Employee> supervisors = new ArrayList<EmployeeDialog.Employee>(result.length);
 					for (JSONObject obj: result) {
@@ -312,14 +325,7 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 			});
 			break;
 		case R.id.mnuUpload:
-			getService().uploadHours(data, grantstrings, new ServiceCallback<Integer>() {
-				public void run(Integer result) {
-					String message = (result == Activity.RESULT_OK)
-						? "uploaded successfully"
-						: "error uploading";
-					Toast.makeText(DetailEditActivity.this, message, Toast.LENGTH_LONG).show();
-				}
-			});
+			getService().uploadHours(data, grantstrings, new SaveHandler());
 			break;
 		default: return false;
 		}

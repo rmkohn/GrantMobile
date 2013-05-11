@@ -201,8 +201,6 @@ public class JSONParser {
 				handler.onFailure(result.getString("message"));
 		} catch (JSONException e) {
 			handler.onError(e);
-		} catch (IOException e) {
-			handler.onError(e);
 		} catch (NullPointerException e) {
 			handler.onError(e);
 		} catch (ClassCastException e) {
@@ -212,7 +210,7 @@ public class JSONParser {
 	
 	public static interface ResultHandler {
 	    public void onPostExecute();
-        public void onSuccess(Object result) throws JSONException, IOException;
+        public void onSuccess(Object result) throws JSONException;
         public void onFailure(String errorMessage);
         public void onError(Exception e);
         public void onCancelled();
@@ -224,7 +222,6 @@ public class JSONParser {
 			this.ctx = ctx;
 		}
 	    public void onPostExecute() { }
-        public void onSuccess(Object result) throws JSONException, IOException { }
         public void onFailure(String errorMessage) { Log.w("GrantMobile", errorMessage); }
         public void onError(Exception e) {
         	e.printStackTrace();
@@ -248,7 +245,7 @@ public class JSONParser {
 		ResultHandler h;
 		public ResultHandlerWrapper(ResultHandler h) { this.h = h; }
 	    public void onPostExecute() { h.onPostExecute(); }
-        public void onSuccess(Object result) throws JSONException, IOException { h.onSuccess(result); }
+        public void onSuccess(Object result) throws JSONException { h.onSuccess(result); }
         public void onFailure(String errorMessage) { h.onFailure(errorMessage); }
         public void onError(Exception e) { h.onError(e); }
         public void onCancelled() { h.onCancelled(); }

@@ -11,8 +11,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.example.grantmobile.GrantService.ServiceCallback;
-
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -84,6 +82,9 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
 	}
 
 	public void showAddGrantDialog() {
+		if (grantInfo == null) {
+			return;
+		}
 		SelectionDialog<Grant> dialog = new GrantAdderDialog();
 		dialog.setItems(getUnchosenGrants());
 		dialog.show(getSupportFragmentManager(), "");
@@ -156,9 +157,9 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
 
 	private void loadGrants() {
 		if (grants == null && isServiceBound()) {
-			getService().getGrants(new ServiceCallback<JSONObject[]>() {
-				public void run(JSONObject[] result) {
-					grants = result;
+			getService().getGrants(new JSONParser.SimpleResultHandler(this) {
+				public void onSuccess(Object oResult) {
+					grants = (JSONObject[]) oResult;
 					finishGrantInit();
 				}
 			});

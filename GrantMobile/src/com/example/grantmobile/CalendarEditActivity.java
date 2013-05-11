@@ -23,7 +23,6 @@ import com.example.grantmobile.CalendarSquare.DaySquare;
 import com.example.grantmobile.CalendarSquare.ICalendarSquare;
 import com.example.grantmobile.EmployeeDialog.Employee;
 import com.example.grantmobile.GrantService.GrantData;
-import com.example.grantmobile.GrantService.ServiceCallback;
 
 public class CalendarEditActivity extends BaseCalendarActivity {
 	Spinner grantSpinner;
@@ -76,9 +75,10 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 		Log.i("calendareditactivity", "loadcalendar");
 		final GrantService.GrantData data = new GrantService.GrantData(getYear(), getMonth()-1, user.id);
 //		GrantService.getHours(this, new CalendarEditHandler().setParent(this), data, getGrantStrings());
-		getService().getHours(data, getGrantStrings(), new GrantService.ServiceCallback<Map<String,double[]>>() {
-			public void run(Map<String, double[]> result) {
-				assignNewData(result);
+		getService().getHours(data, getGrantStrings(), new JSONParser.SimpleResultHandler(this) {
+			@SuppressWarnings("unchecked")
+			public void onSuccess(Object oResult) {
+				assignNewData((Map<String, double[]>)oResult);
 			}
 		});
 	}
@@ -122,8 +122,9 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	}
 	
 	private void openEmailDialog() {
-		getService().getSupervisors(new ServiceCallback<JSONObject[]>() {
-			public void run(JSONObject[] result) {
+		getService().getSupervisors(new JSONParser.SimpleResultHandler(this) {
+			public void onSuccess(Object oResult) {
+				JSONObject[] result = (JSONObject[]) oResult;
 				EmployeeDialog dialog = new EmployeeDialog();
 				List<EmployeeDialog.Employee> supervisors = new ArrayList<EmployeeDialog.Employee>(result.length);
 				for (JSONObject obj: result) {
