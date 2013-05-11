@@ -29,8 +29,10 @@ import org.json.JSONObject;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 public class JSONParser {
 
@@ -222,7 +224,17 @@ public class JSONParser {
 			this.ctx = ctx;
 		}
 	    public void onPostExecute() { }
-        public void onFailure(String errorMessage) { Log.w("GrantMobile", errorMessage); }
+        public void onSuccess(Object result) throws JSONException { }
+        public void onFailure(String errorMessage) {
+        	Log.w("GrantMobile", errorMessage);
+        	if (errorMessage.equals("Invalid Session ID")) {
+        		Toast.makeText(ctx, "You were automatically logged out, please log in again", Toast.LENGTH_LONG).show();
+        		Intent loginIntent = new Intent(ctx, LoginActivity.class);
+        		loginIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        		ctx.startActivity(loginIntent);
+        	}
+        }
+        
         public void onError(Exception e) {
         	e.printStackTrace();
 
