@@ -92,14 +92,13 @@
             android:layout_alignRight="@+id/grantIdTv"
             android:contentDescription="Logo"
             android:src="@drawable/grantappicon" />
-
     </RelativeLayout>
 
     <TableLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:stretchColumns="*"
-        android:layout_weight="0.14" >
+        android:layout_weight="0.14"
+        android:stretchColumns="*" >
 
         <TableRow>
 
@@ -114,9 +113,11 @@
                 android:id="@+id/dateTv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
                 android:text="date"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
         </TableRow>
+
         <TableRow>
 
             <TextView
@@ -125,15 +126,16 @@
                 android:layout_height="wrap_content"
                 android:text="@string/dayOfWeekLabel"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
-        <TextView
-            android:id="@+id/dayOfWeekTv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="day of week"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-            
+
+            <TextView
+                android:id="@+id/dayOfWeekTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:text="day of week"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
         </TableRow>
-        
+
         <TableRow>
 
             <TextView
@@ -151,11 +153,8 @@
                 android:inputType="numberDecimal"
                 android:text="grant hours"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
-
         </TableRow>
 
-        
-        
         <TableRow>
 
             <TextView
@@ -174,8 +173,8 @@
                 android:textAppearance="?android:attr/textAppearanceMedium" />
         </TableRow>
 
-        
         <TableRow>
+
             <TextView
                 android:id="@+id/leaveHoursLbl"
                 android:layout_width="wrap_content"
@@ -191,8 +190,8 @@
                 android:text="leave hours"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
         </TableRow>
-        <TableRow>
 
+        <TableRow>
 
             <TextView
                 android:id="@+id/dayTotalLbl"
@@ -200,14 +199,16 @@
                 android:layout_height="wrap_content"
                 android:text="@string/dayTotalLabel"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
+
             <TextView
                 android:id="@+id/dayTotalHoursTv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
                 android:text="total day hours"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
-
         </TableRow>
+
         <TableRow>
 
             <TextView
@@ -221,13 +222,10 @@
                 android:id="@+id/monthTotalHoursTv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
                 android:text="monthly hours"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
         </TableRow>
-
-
-
-
     </TableLayout>
 
     <RelativeLayout
@@ -260,7 +258,6 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="25dp"
             android:text="Previous" />
-
     </RelativeLayout>
 
 </LinearLayout>
