@@ -30,6 +30,15 @@ public class DBAdapter {
 				default: return -1;
 				}
 			}
+			public int getPriority() {
+				switch(this) {
+				case disapproved: return 4;
+				case New: return 3;
+				case pending: return 2;
+				case approved: return 1;
+				default: return 0;
+				}
+			}
 		}
 		public GrantStatus status;
 		public double[] hours;

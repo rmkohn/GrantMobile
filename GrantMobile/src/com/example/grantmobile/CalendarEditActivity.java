@@ -7,20 +7,15 @@ import java.util.Map;
 import org.json.JSONObject;
 
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.example.grantmobile.CalendarSquare.DaySquare;
 import com.example.grantmobile.CalendarSquare.ICalendarSquare;
@@ -31,7 +26,7 @@ import com.example.grantmobile.GrantService.GrantData;
 public class CalendarEditActivity extends BaseCalendarActivity {
 	Spinner grantSpinner;
 	int[] grantids;
-	String[] grantnames;
+	SparseArray<String> grantnames;
 //	int user.id;
 	Employee user;
 	SparseArray<Hours> granthours;
@@ -53,7 +48,11 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 		
 		Intent i = getIntent();
 		grantids = i.getIntArrayExtra(GrantSelectActivity.TAG_INTENT_GRANT_IDS);
-		grantnames = i.getStringArrayExtra(GrantSelectActivity.TAG_INTENT_GRANT_NAMES);
+		String[] grantnames = i.getStringArrayExtra(GrantSelectActivity.TAG_INTENT_GRANT_NAMES);
+		this.grantnames = new SparseArray<String>(grantnames.length);
+		for (int idx = 0; idx < grantnames.length; idx++) {
+			this.grantnames.put(grantids[idx], grantnames[idx]);
+		}
 		user = (Employee)i.getSerializableExtra(LoginActivity.TAG_INTENT_USERID);
 		
 		createCalendarArray(
@@ -75,7 +74,7 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 //		ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(
 //				this, android.R.layout.simple_spinner_item, grantnames);
 //		spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		GrantAdapter spinnerAdapter = new GrantAdapter();
+		GrantStatusAdapter spinnerAdapter = new GrantStatusAdapter(this, granthours, grantids, grantnames);
 		grantSpinner.setAdapter(spinnerAdapter);
 		if (savedSpinnerPos != -1)
 			grantSpinner.setSelection(savedSpinnerPos, false);
@@ -189,50 +188,5 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 		int pos = grantSpinner.getSelectedItemPosition();
 		if (pos == Spinner.INVALID_POSITION) pos = -1;
 		outState.putInt("spinnerPos", pos);
-	}
-	
-	private class GrantAdapter extends BaseAdapter {
-		Hours defaultStatus = new Hours(Hours.GrantStatus.New, null);
-		public int getCount() { return grantnames.length; }
-		public Object getItem(int position) {
-			return grantnames[position];
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return position;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			return getView(position, convertView, parent, android.R.layout.simple_spinner_item);
-		}
-		
-		@Override
-		public View getDropDownView(int position, View convertView, ViewGroup parent) {
-			return getView(position, convertView, parent, android.R.layout.simple_spinner_dropdown_item);
-		}
-		
-		private View getView(int position, View convertView, ViewGroup parent, int id) {
-			if (convertView == null) {
-				convertView = (TextView)getLayoutInflater().inflate(id, parent, false);
-			}
-			TextView text = (TextView) convertView.findViewById(android.R.id.text1);
-			text.setText(grantnames[position]);
-			setDrawable(text, position);
-			return convertView;
-		}
-		
-		private void setDrawable(TextView t, int pos) {
-			try {
-				if (granthours == null || grantids == null)
-					return;
-				Drawable d = getResources().getDrawable(granthours.get(grantids[pos], defaultStatus).status.getDrawable());
-				float ratio = ((float)d.getIntrinsicWidth()) / ((float)d.getIntrinsicHeight());
-				d.setBounds(0, 0, (int)(ratio*50), 50);
-				t.setCompoundDrawables(null, null, d, null);
-			} catch (Exception e) { } // our assumptions about a system-controlled layout are wrong, so no pretty pictures.
-			                          // Not really a huge deal.
-		}
 	}
 }
