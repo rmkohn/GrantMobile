@@ -17,6 +17,7 @@ import com.example.grantmobile.GrantService.GrantData;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -78,12 +79,14 @@ public class PendingGrantActivity extends GrantServiceBindingActivity {
 		});
 	}
 	private void loadRequests() {
+		Log.i("PendingGrantActivitiy", "loading requests");
 		getService().loadNewRequests(empid, new JSONParser.SimpleResultHandler<Map<GrantData, Map<String, Hours>>>(this) {
 			public void onSuccess(Map<GrantData, Map<String, Hours>> result) {
 				groups = new ArrayList<ExpandableGrantData>(result.size());
 				for (GrantData d: result.keySet()) {
 					if (d.employeeid == empid) {
 						groups.add(getGrantEntry(d, result.get(d)));
+						Log.i("PendingGrantActivity", "adding " + d.toString());
 					}
 				}
 				Collections.sort(groups, Collections.reverseOrder());
