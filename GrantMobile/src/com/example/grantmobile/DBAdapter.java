@@ -19,7 +19,8 @@ public class DBAdapter {
 			New,
 			pending,
 			denied,
-			approved;
+			approved,
+			none;
 			public int getDrawable() {
 				switch(this) {
 				case New: return R.drawable.image_new;
@@ -95,7 +96,6 @@ public class DBAdapter {
     	return ret;
 	}
     
-    
     // remove all entries matching the provided keys
     public int deleteEntries(GrantData data, String[] grants) {
     	Map<String, Hours> entry = getCacheEntry(data);
@@ -132,5 +132,4 @@ public class DBAdapter {
     	b.append(end);
     	return b.toString();
     }
-    
 }

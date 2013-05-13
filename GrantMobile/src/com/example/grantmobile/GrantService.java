@@ -226,7 +226,7 @@ public class GrantService extends Service {
 					while(keys.hasNext()) {
 						String key = keys.next();
 						JSONArray jsonHours = granthours.getJSONArray(key);
-						Hours.GrantStatus status = Hours.GrantStatus.valueOf(statuses.optString(key, "New"));
+						Hours.GrantStatus status = Hours.GrantStatus.valueOf(statuses.optString(key, "none"));
 						double[] hours = new double[jsonHours.length()];
 						for (int i = 0; i < hours.length; i++) {
 							hours[i] = jsonHours.getDouble(i);
