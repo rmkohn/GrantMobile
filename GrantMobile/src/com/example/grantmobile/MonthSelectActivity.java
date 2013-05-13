@@ -40,9 +40,7 @@ public class MonthSelectActivity extends GrantServiceBindingActivity {
 	Calendar tmpCalendar = new GregorianCalendar();
 	Calendar currentTime = new GregorianCalendar();
 
-	public static final String[] monthNames = {
-		"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
-	};
+	public static final String[] monthNames = GrantApp.monthNames;
 	
 
 	@Override

@@ -62,8 +62,6 @@ public class DetailViewActivity extends GrantServiceBindingActivity {
 	// day of week string array
 	static final String[] DOW = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
 							"Friday", "Saturday" };
-	static final String[] MOY = { "January", "February", "March", "April", "May", "June",
-									"July", "August", "September", "October", "November", "December" };
 		
 	Integer dowStart; // month starts on Wednesday for test, use WED - 1 
 	Integer domCurrent; // current day of month
@@ -167,7 +165,7 @@ public class DetailViewActivity extends GrantServiceBindingActivity {
 		catalogView.setText(map.get(TAG_STATE_CATALOG_NUM));
     	
 		moy = Integer.parseInt(map.get(TAG_MONTH));
-    	dateView.setText(MOY[moy]+" "+domString+", "+map.get(TAG_YEAR));
+    	dateView.setText(GrantApp.monthNames[moy]+" "+domString+", "+map.get(TAG_YEAR));
     	dayView.setText(DOW[(domCurrent+dowStart-1)%7]);
     	grantHoursView.setText(Double.valueOf(grantHours.get(domCurrent-1)).toString());
     	nonGrantHoursView.setText(Double.valueOf(nonGrantHours.get(domCurrent-1)).toString());

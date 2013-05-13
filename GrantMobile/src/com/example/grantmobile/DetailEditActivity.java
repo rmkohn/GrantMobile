@@ -56,8 +56,6 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 	// day of week string array
 	static final String[] DOW = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
 							"Friday", "Saturday" };
-	static final String[] MOY = { "January", "February", "March", "April", "May", "June",
-									"July", "August", "September", "October", "November", "December" };
 		
 	int dowStart; // month starts on Wednesday for test, use WED - 1 
 	int domCurrent; // current day of month
@@ -204,7 +202,7 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 		employeeNameView.setText(firstName + " " + lastName);
     	
 		moy = month;
-    	dateView.setText(MOY[moy]+" "+domString+", "+year);
+    	dateView.setText(GrantApp.monthNames[moy]+" "+domString+", "+year);
     	dayView.setText(DOW[(domCurrent+dowStart-1)%7]);
     	grantHoursView.setText(getFormattedHours(grantHours[domCurrent-1]));
     	nonGrantHoursView.setText(getFormattedHours(nonGrantHours[domCurrent-1]));

@@ -18,6 +18,9 @@ import android.widget.Toast;
 // App-level stuff that really, truly doesn't belong anywhere else
 public final class GrantApp {
 	public static final String requestURL = "http://mid-state.net/mobileclass2/android";
+	public static final String[] monthNames = {
+		"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
+	};
 
 	private GrantApp() { }
 	

@@ -23,9 +23,6 @@ public class CalendarArray {
 	// Weeks to draw
 	private static final int WEEKSTODRAW = 7;
 	
-	public static final String[] monthNames = {
-		"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
-	};
 	private static final String[] squareTitles = {
 		"Su","Mo","Tu","We","Th","Fr","Sa","To"
 	};
@@ -166,7 +163,7 @@ public class CalendarArray {
 		
 		// Determine month name and number of days in the month
 		cal = new GregorianCalendar(year, monthNumber - 1, 1);
-		monthName = monthNames[monthNumber - 1];
+		monthName = GrantApp.monthNames[monthNumber - 1];
 		daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
 		
 		// Determine what day of the week the first of the month is
