@@ -35,9 +35,14 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	double[] nongranthours;
 	double[] leavehours;
 	
+	int savedSpinnerPos = -1;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		if (savedInstanceState != null) {
+			savedSpinnerPos = savedInstanceState.getInt("spinnerPos", -1);
+		}
 		grantSpinner = (Spinner) findViewById(R.id.calendarGrantSwitcher);
 		headerFlipper.setDisplayedChild(headerFlipper.indexOfChild(grantSpinner));
 		
@@ -52,8 +57,6 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 			i.getIntExtra(MonthSelectActivity.TAG_INTENT_YEAR,  -1),
 			i.getIntExtra(MonthSelectActivity.TAG_INTENT_MONTH, -1)
 		);
-		
-		populateGrantSpinner();
 		
 		grantSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -70,6 +73,8 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 				this, android.R.layout.simple_spinner_item, grantnames);
 		spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		grantSpinner.setAdapter(spinnerAdapter);
+		if (savedSpinnerPos != -1)
+			grantSpinner.setSelection(savedSpinnerPos, false);
 	}
 	
 	private void loadCalendar() {
@@ -145,6 +150,7 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 		this.granthours    = granthours;
 		this.nongranthours = data.get("non-grant").hours;
 		this.leavehours    = data.get("leave").hours;
+		this.populateGrantSpinner();
 		this.updateCalendar();
 	}
 	
@@ -158,6 +164,13 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	@Override
 	protected void onBound() {
 		loadCalendar();
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		int pos = grantSpinner.getSelectedItemPosition();
+		if (pos == Spinner.INVALID_POSITION) pos = -1;
+		outState.putInt("spinnerPos", pos);
 	}
 	
 }
