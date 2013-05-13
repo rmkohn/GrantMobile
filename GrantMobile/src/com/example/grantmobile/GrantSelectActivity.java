@@ -143,14 +143,10 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
 	}
 
 	private void updateContinueButton() {
-		int visibility = selectedGrants.size() > 0
-				? View.VISIBLE
-				: View.INVISIBLE;
-		continueButton.setVisibility(visibility);
+		continueButton.setEnabled(selectedGrants.size() > 0);
 	}
 	
 	protected void finishGrantInit() {
-//		grantNames = new String[grants.length];
 		grantInfo = new Grant[grants.length];
 		try {
 			for (int i = 0; i < grantInfo.length; i++) {
