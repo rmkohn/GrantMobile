@@ -35,6 +35,7 @@ public class GrantService extends Service {
 	DBAdapter db;
 	GrantBinder binder;
 	Map<Map<String, String>, Object> queryCache;
+	Set<Runnable> updateListeners;
 
 	@Override
 	public void onCreate() {
@@ -42,6 +43,7 @@ public class GrantService extends Service {
 		db = new DBAdapter();
 		binder = new GrantBinder();
 		queryCache = new HashMap<Map<String, String>, Object>();
+		updateListeners = new HashSet<Runnable>();
 		Log.w(TAG, "newly created");
 	}
 
@@ -81,6 +83,17 @@ public class GrantService extends Service {
 			}
 		}, 5000);
 		return Service.START_NOT_STICKY;
+	}
+	
+	public boolean addUpdateCallback(Runnable callback) {
+		return updateListeners.add(callback);
+	}
+	public boolean removeUpdateCallback(Runnable callback) {
+		return updateListeners.remove(callback);
+	}
+	public void notifyUpdateListeners() {
+		for (Runnable listener: updateListeners)
+			listener.run();
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -166,10 +179,19 @@ public class GrantService extends Service {
 	}
 	
 	public int saveHours(GrantData data, Map<String, double[]> hours) {
+		boolean success = true;
 		for (String key: hours.keySet()) {
-			db.saveEntry(data, key, hours.get(key));
+			if (!db.saveEntry(data, key, hours.get(key)))
+				success = false;
 		}
-		return Activity.RESULT_OK;
+		notifyUpdateListeners();
+		return success ? Activity.RESULT_OK : Activity.RESULT_CANCELED;
+	}
+	
+	public int saveHourStatus(GrantData data, int grant, Hours.GrantStatus status) {
+		int ret = db.updateStatus(data, String.valueOf(grant), status) ? Activity.RESULT_OK : Activity.RESULT_CANCELED;
+		notifyUpdateListeners();
+		return ret;
 	}
 	
 	public int deleteHours(GrantData data, String[] grantStrings) {
@@ -204,7 +226,7 @@ public class GrantService extends Service {
 					while(keys.hasNext()) {
 						String key = keys.next();
 						JSONArray jsonHours = granthours.getJSONArray(key);
-						Hours.GrantStatus status = Hours.GrantStatus.valueOf(statuses.getString(key));
+						Hours.GrantStatus status = Hours.GrantStatus.valueOf(statuses.optString(key, "New"));
 						double[] hours = new double[jsonHours.length()];
 						for (int i = 0; i < hours.length; i++) {
 							hours[i] = jsonHours.getDouble(i);

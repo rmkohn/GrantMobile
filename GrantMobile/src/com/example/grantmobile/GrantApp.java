@@ -7,8 +7,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.widget.TextView;
+import android.widget.Toast;
 
 // App-level stuff that really, truly doesn't belong anywhere else
 public final class GrantApp {
@@ -34,6 +39,15 @@ public final class GrantApp {
 			}
 			Log.i("grantselect", bundle.toString(2));
 		} catch (JSONException e) { e.printStackTrace(); }
+	}
+	
+	@SuppressLint("ShowToast")
+	public static Toast makeIconToast(Context context, String message, int length) {
+		Toast ret = new Toast(context);
+		ret.setView(LayoutInflater.from(context).inflate(R.layout.toast_layout, null));
+		((TextView)ret.getView().findViewById(android.R.id.message)).setText(message);
+		ret.setDuration(length);
+		return ret;
 	}
 
 }

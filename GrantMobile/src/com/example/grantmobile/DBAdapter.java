@@ -19,7 +19,16 @@ public class DBAdapter {
 			New,
 			pending,
 			denied,
-			approved
+			approved;
+			public int getDrawable() {
+				switch(this) {
+				case New: return R.drawable.image_new;
+				case approved: return R.drawable.image_approved;
+				case denied: return R.drawable.image_disapproved;
+				case pending: return R.drawable.image_pending;
+				default: return -1;
+				}
+			}
 		}
 		public GrantStatus status;
 		public double[] hours;
@@ -63,6 +72,15 @@ public class DBAdapter {
     	} else {
     		oldHours.hours = time;
     	}
+    	return true;
+    }
+    
+    public boolean updateStatus(GrantData data, String grant, Hours.GrantStatus status) {
+    	Map<String, Hours> entry = getCacheEntry(data);
+    	Hours oldHours = entry.get(grant);
+    	if (oldHours == null)
+    		return false;
+    	oldHours.status = status;
     	return true;
     }
     

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- fairly close copy of the official Toast layout, plus an imageview -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@android:drawable/toast_frame"
+    android:gravity="center_vertical"
+    android:orientation="horizontal" >
+
+    <ImageView
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:scaleType="fitXY"
+        android:layout_marginRight="15dp"
+        android:src="@drawable/grantappicon" />
+
+    <TextView
+        android:id="@android:id/message"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:shadowColor="#BB000000"
+        android:shadowRadius="2.75"
+        android:textAppearance="@android:style/TextAppearance.Small"
+        android:textColor="@android:color/primary_text_dark" />
+
+</LinearLayout>

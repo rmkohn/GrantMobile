@@ -7,17 +7,20 @@ import java.util.Map;
 import org.json.JSONObject;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.example.grantmobile.CalendarSquare.DaySquare;
 import com.example.grantmobile.CalendarSquare.ICalendarSquare;
@@ -31,7 +34,7 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	String[] grantnames;
 //	int user.id;
 	Employee user;
-	SparseArray<double[]> granthours;
+	SparseArray<Hours> granthours;
 	double[] nongranthours;
 	double[] leavehours;
 	
@@ -69,9 +72,10 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	}
 	
 	private void populateGrantSpinner() {
-		ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(
-				this, android.R.layout.simple_spinner_item, grantnames);
-		spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//		ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(
+//				this, android.R.layout.simple_spinner_item, grantnames);
+//		spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		GrantAdapter spinnerAdapter = new GrantAdapter();
 		grantSpinner.setAdapter(spinnerAdapter);
 		if (savedSpinnerPos != -1)
 			grantSpinner.setSelection(savedSpinnerPos, false);
@@ -93,7 +97,7 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	}
 	
 	protected void updateCalendar() {
-		if (granthours != null && grantSpinner != null) {
+		if (granthours != null && grantSpinner != null && grantids != null) {
 			Log.i("updatecalendar", String.format("selected grant %d: %s\nnongrant: %s\nleave: %s",
 					grantSpinner.getSelectedItemPosition(), getSelectedGrantHours(),
 					nongranthours, leavehours));
@@ -102,7 +106,7 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	}
 	
 	protected double[] getSelectedGrantHours() {
-		return granthours.get(getSelectedGrantId());
+		return granthours.get(getSelectedGrantId()).hours;
 	}
 	
 	protected int getSelectedGrantId() {
@@ -143,9 +147,9 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	}
 	
 	public void assignNewData(Map<String, Hours> data) {
-		SparseArray<double[]> granthours = new SparseArray<double[]>();
+		SparseArray<Hours> granthours = new SparseArray<Hours>();
 		for (int i: grantids) {
-			granthours.append(i, data.get(String.valueOf(i)).hours);
+			granthours.append(i, data.get(String.valueOf(i)));
 		}
 		this.granthours    = granthours;
 		this.nongranthours = data.get("non-grant").hours;
@@ -153,6 +157,13 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 		this.populateGrantSpinner();
 		this.updateCalendar();
 	}
+	
+	private final Runnable updateStatus = new Runnable() {
+		public void run() {
+			savedSpinnerPos = grantSpinner.getSelectedItemPosition();
+			loadCalendar(); // serious overkill
+		}
+	};
 	
 	@Override
 	protected void onResume() {
@@ -164,6 +175,13 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	@Override
 	protected void onBound() {
 		loadCalendar();
+		getService().addUpdateCallback(updateStatus);
+	}
+	
+	@Override
+	protected void onUnbound() {
+		getService().removeUpdateCallback(updateStatus);
+	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
@@ -173,4 +191,43 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 		outState.putInt("spinnerPos", pos);
 	}
 	
+	private class GrantAdapter extends BaseAdapter {
+		Hours defaultStatus = new Hours(Hours.GrantStatus.New, null);
+		public int getCount() { return grantnames.length; }
+		public Object getItem(int position) {
+			return grantnames[position];
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return position;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			TextView ret = (TextView)getLayoutInflater().inflate(android.R.layout.simple_spinner_item, parent, false);
+			ret.setText(grantnames[position]);
+			setDrawable(ret, position);
+			return ret;
+		}
+		@Override
+		public View getDropDownView(int position, View convertView, ViewGroup parent) {
+			TextView ret = (TextView)getLayoutInflater().inflate(android.R.layout.simple_spinner_dropdown_item, parent, false);
+			ret.setText(grantnames[position]);
+			setDrawable(ret, position);
+			return ret;
+		}
+		
+		private void setDrawable(TextView t, int pos) {
+			try {
+				if (granthours == null || grantids == null)
+					return;
+				Drawable d = getResources().getDrawable(granthours.get(grantids[pos], defaultStatus).status.getDrawable());
+				float ratio = ((float)d.getIntrinsicWidth()) / ((float)d.getIntrinsicHeight());
+				d.setBounds(0, 0, (int)(ratio*50), 50);
+				t.setCompoundDrawables(null, null, d, null);
+			} catch (Exception e) { } // our assumptions about a system-controlled layout are wrong, so no pretty pictures.
+			                          // Not really a huge deal.
+		}
+	}
 }

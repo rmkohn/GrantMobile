@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.example.grantmobile.DBAdapter.Hours.GrantStatus;
 import com.example.grantmobile.GrantService.GrantData;
 
 import android.app.AlertDialog;
@@ -59,6 +60,8 @@ public class EmployeeDialog extends SelectionDialog<EmployeeDialog.Employee> {
 		.makeRequest(new JSONParser.SimpleResultHandler<Object>(c) {
 			public void onSuccess(Object result) {
 				Toast.makeText(c, result.toString(), Toast.LENGTH_LONG).show();
+				((GrantServiceBindingActivity)c).getService()
+					.saveHourStatus(data, grantid, DBAdapter.Hours.GrantStatus.pending);
 			}
 			public void onFailure(String errorMessage) {
 				String userMessage;
