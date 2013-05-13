@@ -87,13 +87,16 @@ public class JSONParser {
 			
 
 		} catch (UnsupportedEncodingException e) {
-			Log.w("makeHttpRequest", e.getMessage());
+			e.printStackTrace();
+			Log.w("makeHttpRequest", e.getMessage() == null ? e.toString() : e.getMessage());
 			return null;
 		} catch (ClientProtocolException e) {
-			Log.w("makeHttpRequest", e.getMessage());
+			e.printStackTrace();
+			Log.w("makeHttpRequest", e.getMessage() == null ? e.toString() : e.getMessage());
 			return null;
 		} catch (IOException e) {
-			Log.w("makeHttpRequest", e.getMessage());
+			e.printStackTrace();
+			Log.w("makeHttpRequest", e.getMessage() == null ? e.toString() : e.getMessage());
 			return null;
 		}
 
