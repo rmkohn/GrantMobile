@@ -161,7 +161,7 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	private final Runnable updateStatus = new Runnable() {
 		public void run() {
 			savedSpinnerPos = grantSpinner.getSelectedItemPosition();
-			loadCalendar(); // serious overkill
+			((BaseAdapter)grantSpinner.getAdapter()).notifyDataSetChanged();
 		}
 	};
 	

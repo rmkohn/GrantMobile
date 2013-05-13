@@ -1,5 +1,9 @@
 package com.example.grantmobile;
 
+import java.io.BufferedOutputStream;
+import java.io.FileNotFoundException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -7,6 +11,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.json.JSONArray;
@@ -18,6 +23,7 @@ import com.example.grantmobile.JSONParser.ResultHandler;
 
 import android.app.Activity;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Binder;
@@ -294,6 +300,40 @@ public class GrantService extends Service {
 				super.onWrappedSuccess(getJSONObjectArray(result));
 			}
 		});
+	}
+	
+	public void saveNewRequests() {
+		Map<String, JSONArray> users = new HashMap<String, JSONArray>();
+		for (Entry<GrantData, Map<String, Hours>> entry: db.cache.entrySet()) {
+			JSONArray months = users.get(String.valueOf(entry.getKey().employeeid));
+			if (months == null) {
+				months = new JSONArray();
+				users.put(String.valueOf(entry.getKey().employeeid), months);
+			}
+			JSONObject newgrants = getNewGrants(entry.getValue());
+			if (newgrants.length() > 0) {
+				JSONObject data = new JSONObject();
+				data.put("year", entry.getKey().year);
+				data.put("month", entry.getKey().month);
+				data.put("grants", newgrants);
+				months.put(data);
+			}
+		}
+		for (Entry<String, JSONArray> user: users.entrySet()) {
+			OutputStreamWriter out = new OutputStreamWriter(new BufferedOutputStream(
+					openFileOutput("new_grants_"+user.getKey(), Context.MODE_PRIVATE)));
+			out.write(user.getValue().toString());
+		}
+	}
+	
+	private JSONObject getNewGrants(Map<String, Hours> grants) throws JSONException {
+		JSONObject ret = new JSONObject();
+		for (String grant: grants.keySet()) {
+			if (grants.get(grant).status == Hours.GrantStatus.New) {
+				ret.put(grant, Hours.GrantStatus.New.toString());
+			}
+		}
+		return ret;
 	}
 	
 	public class GrantBinder extends Binder {
