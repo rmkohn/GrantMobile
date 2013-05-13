@@ -1,6 +1,12 @@
 package com.example.grantmobile;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.lang.reflect.Array;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 
 import org.json.JSONArray;
@@ -52,5 +58,32 @@ public final class GrantApp {
 		ret.setDuration(length);
 		return ret;
 	}
-
+	
+	public static String readFile(Context context, String filename) {
+		StringBuilder builder = new StringBuilder();
+		String ret = null;
+		Reader in = null;
+		char[] buf = new char[1024];
+		try {
+			in = new InputStreamReader(context.openFileInput("new_grants"));
+			while(true) {
+				int len = in.read(buf);
+				if (len == -1) break;
+				builder.append(buf, 0, len);
+			}
+			ret = builder.toString();
+		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (in != null) {
+				try {
+					in.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return ret;
+	}
 }

@@ -2,8 +2,12 @@ package com.example.grantmobile;
 
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -19,6 +23,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.example.grantmobile.DBAdapter.Hours;
+import com.example.grantmobile.DBAdapter.Hours.GrantStatus;
 import com.example.grantmobile.JSONParser.ResultHandler;
 
 import android.app.Activity;
@@ -30,6 +35,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.util.JsonReader;
 import android.util.Log;
 
 public class GrantService extends Service {
@@ -56,13 +62,13 @@ public class GrantService extends Service {
 	@Override
 	public void onDestroy() {
 		// TODO save only the changed values to permanent storage (server or database)
-		for (final Map.Entry<GrantData, Map<String, Hours>> entry: db.cache.entrySet()) {
-			this.uploadHoursFromDB(entry.getKey(), entry.getValue(), new JSONParser.SimpleResultHandler<JSONObject>(null) {
+		for (final GrantData entry: db.cache.keySet()) {
+			this.uploadHoursFromDB(entry, db.getAllTimes(entry), new JSONParser.SimpleResultHandler<JSONObject>(null) {
 				public void onSuccess(JSONObject result) {
-					Log.i(TAG, "saved hours for " + entry.getKey() + " to server");
+					Log.i(TAG, "saved hours for " + entry + " to server");
 				}
 				public void onFailure(String errorMessage) {
-					Log.i(TAG, "failed to save hours for " + entry.getKey());
+					Log.i(TAG, "failed to save hours for " + entry);
 				}
 				public void onError(Exception e) {
 					e.printStackTrace();
@@ -303,37 +309,62 @@ public class GrantService extends Service {
 	}
 	
 	public void saveNewRequests() {
-		Map<String, JSONArray> users = new HashMap<String, JSONArray>();
+		JSONArray users = new JSONArray();
 		for (Entry<GrantData, Map<String, Hours>> entry: db.cache.entrySet()) {
-			JSONArray months = users.get(String.valueOf(entry.getKey().employeeid));
-			if (months == null) {
-				months = new JSONArray();
-				users.put(String.valueOf(entry.getKey().employeeid), months);
-			}
-			JSONObject newgrants = getNewGrants(entry.getValue());
-			if (newgrants.length() > 0) {
-				JSONObject data = new JSONObject();
-				data.put("year", entry.getKey().year);
-				data.put("month", entry.getKey().month);
-				data.put("grants", newgrants);
-				months.put(data);
+			try {
+				for (Entry<String, Hours> grant: entry.getValue().entrySet()) {
+					if (grant.getValue().status == Hours.GrantStatus.New) {
+						JSONObject data = new JSONObject();
+						data.put("year", entry.getKey().year);
+						data.put("month", entry.getKey().month);
+						data.put("empid", entry.getKey().employeeid);
+						data.put("grants", grant.getKey());
+						users.put(data);
+					}
+				}
+			} catch (JSONException e) {
+				e.printStackTrace();
 			}
 		}
-		for (Entry<String, JSONArray> user: users.entrySet()) {
-			OutputStreamWriter out = new OutputStreamWriter(new BufferedOutputStream(
-					openFileOutput("new_grants_"+user.getKey(), Context.MODE_PRIVATE)));
-			out.write(user.getValue().toString());
+		OutputStreamWriter out = null;
+		try {
+			out = new OutputStreamWriter(new BufferedOutputStream(
+					openFileOutput("new_grants", Context.MODE_PRIVATE)));
+			out.write(users.toString());
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			if (out != null) {
+				try {
+					out.close();
+				} catch (IOException f) {
+					f.printStackTrace();
+				}
+			}
 		}
 	}
 	
-	private JSONObject getNewGrants(Map<String, Hours> grants) throws JSONException {
-		JSONObject ret = new JSONObject();
-		for (String grant: grants.keySet()) {
-			if (grants.get(grant).status == Hours.GrantStatus.New) {
-				ret.put(grant, Hours.GrantStatus.New.toString());
+	public void loadNewRequests(int empid, final ResultHandler<Map<GrantData, Map<String, Hours>>> handler) {
+		new JSONParser.RequestBuilder(GrantApp.requestURL)
+		.addParam("q", "listrequests")
+		.addParam("employee", String.valueOf(empid))
+		.makeRequest(new JSONParser.ResultHandlerWrapper<JSONArray, Map<GrantData, Map<String, Hours>>>(handler) {
+			public void onSuccess(JSONArray result) throws JSONException {
+				String newRequests = GrantApp.readFile(GrantService.this, "new_grants");
+				if (newRequests != null)
+					addStatusesToDb(new JSONArray(newRequests));
+				addStatusesToDb(result);
+				super.onWrappedSuccess(db.cache);
 			}
+		});
+	}
+	
+	private void addStatusesToDb(JSONArray statuses) throws JSONException {
+		for (int i = 0; i < statuses.length(); i++) {
+			JSONObject obj = statuses.getJSONObject(i);
+			GrantData data = new GrantData(obj.getInt("year"), obj.getInt("month"), obj.getJSONObject("employee").getInt("id"));
+			db.updateStatus(data, obj.getString("grant"), GrantStatus.valueOf(obj.optString("status", "New")));
 		}
-		return ret;
 	}
 	
 	public class GrantBinder extends Binder {

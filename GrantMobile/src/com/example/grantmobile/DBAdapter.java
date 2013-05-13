@@ -80,17 +80,28 @@ public class DBAdapter {
     	Map<String, Hours> entry = getCacheEntry(data);
     	Hours oldHours = entry.get(grant);
     	if (oldHours == null)
-    		return false;
-    	oldHours.status = status;
+    		entry.put(grant, new Hours(status, null));
+    	else
+    		oldHours.status = status;
     	return true;
+    }
+    
+    public Map<String, Hours> getAllTimes(GrantData data) {
+    	Map<String, Hours> entry = getCacheEntry(data);
+    	Map<String, Hours> ret = new HashMap<String, Hours>(entry);
+    	for (String key: entry.keySet()) {
+    		if (entry.get(key).hours == null)
+    			ret.remove(key);
+    	}
+    	Log.i("DBAdapter", String.format("entry for %s contains %d/%d granthours", data, ret.size(), entry.size()));
+    	
+    	return ret;
     }
     
     // get a map of grant ids to hours for the supplied year/month/employee and grants
     public Map<String, Hours> getTimes(GrantData data, String[] grants) {
-    	Map<String, Hours> entry = getCacheEntry(data);
-    	Map<String, Hours> ret = new HashMap<String, Hours>(entry);
+    	Map<String, Hours> ret = getAllTimes(data);
     	ret.keySet().retainAll(Arrays.asList(grants));
-    	Log.i("DBAdapter", String.format("entry for %s contains %d granthours", data, entry.size()));
     	Log.i("DBAdapter", String.format("got %d of %d granthours",ret.size(), grants.length));
     	
     	return ret;
