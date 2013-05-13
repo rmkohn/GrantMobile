@@ -3,11 +3,8 @@ package com.example.grantmobile;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import com.example.grantmobile.CalendarSquare.SquareColors;
-
 import android.os.Bundle;
 import android.content.Intent;
-import android.graphics.Color;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
