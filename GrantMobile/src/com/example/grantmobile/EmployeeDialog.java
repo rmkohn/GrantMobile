@@ -49,7 +49,7 @@ public class EmployeeDialog extends SelectionDialog<EmployeeDialog.Employee> {
 		// this dialog will probably be gone by the time the request returns
 		final Context c = getActivity();
 		new JSONParser.RequestBuilder()
-		.setUrl(GrantService.requestURL)
+		.setUrl(GrantApp.requestURL)
 		.addParam("q", "sendrequest")
 		.addParam("employee", String.valueOf(data.employeeid))
 		.addParam("year", String.valueOf(data.year))

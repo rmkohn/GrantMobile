@@ -1,18 +1,14 @@
 package com.example.grantmobile;
 
 import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TableLayout;
@@ -49,7 +45,7 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
 		// Show the Up button in the action bar.
 		
 		selectedGrants = new ArrayList<Grant>();
-		dumpBundle(getIntent().getExtras());
+		GrantApp.dumpBundle(getIntent().getExtras());
 		
 		grantTable = (TableLayout)findViewById(R.id.grantTable);
 		continueButton = (Button)findViewById(R.id.grant_select_continue);
@@ -112,26 +108,6 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
 		updateContinueButton();
 	}
 	
-	public static void dumpBundle(Bundle extras) {
-		Set<String> keys = extras.keySet();
-		JSONObject bundle = new JSONObject();
-		try {
-			for (String key: keys) {
-				Object value = extras.get(key);
-				Object jsonval = value.getClass().isArray() ? getJSONArray(value) : value;
-				bundle.put(key, jsonval);
-			}
-			Log.i("grantselect", bundle.toString(2));
-		} catch (JSONException e) { e.printStackTrace(); }
-	}
-	
-	public static JSONArray getJSONArray(Object array) {
-		JSONArray j = new JSONArray();
-		for (int i = 0; i < Array.getLength(array); i++)
-			j.put(Array.get(array, i));
-		return j;
-	}
-
 	protected void loadCalendarEditActivity() {
 		Intent intent = new Intent(GrantSelectActivity.this, CalendarEditActivity.class);
 		intent.putExtras(getIntent());

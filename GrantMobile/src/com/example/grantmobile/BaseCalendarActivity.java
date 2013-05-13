@@ -20,8 +20,6 @@ public abstract class BaseCalendarActivity extends GrantServiceBindingActivity {
 	protected static final String TAG_REQUEST_ID = "RequestId"; // required, no default!!!!
 	protected static final String TAG_DAY_OF_MONTH = "DayOfMonth"; // optional, default = first day of month	
 	
-	public static final String requestURL = "http://mid-state.net/mobileclass2/android";
-    
 	TextView footerView;
 	GridView calendarGrid;
 	ViewFlipper headerFlipper;

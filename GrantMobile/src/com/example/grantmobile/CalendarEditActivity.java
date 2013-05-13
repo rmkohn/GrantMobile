@@ -41,7 +41,7 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 		grantSpinner = (Spinner) findViewById(R.id.calendarGrantSwitcher);
 		headerFlipper.setDisplayedChild(headerFlipper.indexOfChild(grantSpinner));
 		
-		GrantSelectActivity.dumpBundle(getIntent().getExtras());
+		GrantApp.dumpBundle(getIntent().getExtras());
 		
 		Intent i = getIntent();
 		grantids = i.getIntArrayExtra(GrantSelectActivity.TAG_INTENT_GRANT_IDS);

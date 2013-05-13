@@ -34,7 +34,7 @@ public class LoginActivity extends Activity {
 	/**
 	 * Keep track of the login task to ensure we can cancel it if requested.
 	 */
-	private AsyncTask mAuthTask = null;
+	private AsyncTask<Void, Void, JSONObject> mAuthTask = null;
 
 	// Values for email and password at the time of the login attempt.
 	private String mEmployeeId;
@@ -156,7 +156,7 @@ public class LoginActivity extends Activity {
 			// perform the user login attempt.
 			mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
 			showProgress(true);
-		    mAuthTask = new JSONParser.RequestBuilder("http://mid-state.net/mobileclass2/android")
+		    mAuthTask = new JSONParser.RequestBuilder(GrantApp.requestURL)
 		    .addParam("q", "login")
 		    .addParam("id", mEmployeeId)
 		    .addParam("pass", mPassword)

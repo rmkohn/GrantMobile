@@ -30,7 +30,6 @@ public class GrantService extends Service {
 	
 	public static final String TAG_REQUEST_DETAILS = "requestDetails";
 	
-	public static final String requestURL = "http://mid-state.net/mobileclass2/android";
 	private static final String TAG = "grantservice";
 	
 	DBAdapter db;
@@ -89,7 +88,7 @@ public class GrantService extends Service {
 		Object cached = queryCache.get(params);
 		if (cached == null) {
 			new JSONParser.RequestBuilder()
-			.setUrl(requestURL)
+			.setUrl(GrantApp.requestURL)
 			.addAllParams(params)
 			.makeRequest(new JSONParser.ResultHandlerWrapper<Object, T>(handler) {
 				public void onSuccess(Object result) throws JSONException {
@@ -134,7 +133,7 @@ public class GrantService extends Service {
 			// the map constructor for JSONObject and collection constructor for JSONArray don't work
 			JSONObject jsonHours = new JSONObject();
 			for (String key: hours.keySet()) {
-				jsonHours.put(key, makeJSONArray(hours.get(key)));
+				jsonHours.put(key, GrantApp.getJSONArray(hours.get(key)));
 			}
 			uploadHours(data, jsonHours, callback);
 		} catch (JSONException e) {
@@ -146,7 +145,7 @@ public class GrantService extends Service {
 		try {
 			JSONObject jsonHours = new JSONObject();
 			for (String key: hours.keySet()) {
-				jsonHours.put(key, makeJSONArray(hours.get(key).hours));
+				jsonHours.put(key, GrantApp.getJSONArray(hours.get(key).hours));
 			}
 			uploadHours(data, jsonHours, callback);
 		} catch (JSONException e) {
@@ -156,7 +155,7 @@ public class GrantService extends Service {
 	
 	private void uploadHours(GrantData data, JSONObject jsonHours, ResultHandler<JSONObject> callback) throws JSONException {
 			Log.i(TAG, jsonHours.toString(2));
-			new JSONParser.RequestBuilder(requestURL)
+			new JSONParser.RequestBuilder(GrantApp.requestURL)
 			.addParam("q", "updatehours")
 			.addParam("employee", String.valueOf(data.employeeid))
 			.addParam("year", String.valueOf(data.year))
@@ -164,14 +163,6 @@ public class GrantService extends Service {
 			.addParam("hours", jsonHours.toString())
 			.addParam("supervisor", "-1") // not actually used, due to reasons
 			.makeRequest(callback);
-	}
-	
-	public static JSONArray makeJSONArray(double[] hours) throws JSONException {
-		JSONArray array = new JSONArray();
-		for (double hour: hours) {
-			array.put(hour);
-		}
-		return array;
 	}
 	
 	public int saveHours(GrantData data, Map<String, double[]> hours) {
@@ -195,7 +186,7 @@ public class GrantService extends Service {
 			final Set<String> missingKeys = new HashSet<String>(Arrays.asList(grantStrings));
 			missingKeys.removeAll(allHours.keySet());
 			Log.i(TAG, "retrieving values");
-			new JSONParser.RequestBuilder(requestURL)
+			new JSONParser.RequestBuilder(GrantApp.requestURL)
 			.addParam("q", "viewrequest")
 			.addParam("employee", String.valueOf(data.employeeid))
 			.addParam("year", String.valueOf(data.year))

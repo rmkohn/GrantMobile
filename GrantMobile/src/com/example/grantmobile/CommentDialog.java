@@ -12,7 +12,6 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 public class CommentDialog extends DialogFragment {
-	public static final String requestURL = "http://mid-state.net/mobileclass2/android";
 	private String title;
 	public int userID;
 	public int workmonthID;
@@ -52,7 +51,7 @@ public class CommentDialog extends DialogFragment {
         		.setMessage("Enter a comment below and click OK to submit")
         		.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 				      public void onClick(DialogInterface dialog, int id) {
-				    	  new JSONParser.RequestBuilder(requestURL)
+				    	  new JSONParser.RequestBuilder(GrantApp.requestURL)
 				    	  .addParam("q", "approve")
 		    			  .addParam("approval", Boolean.toString(approval))
 				    	  .addParam("comment", input.getText().toString())

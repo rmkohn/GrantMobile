@@ -23,7 +23,6 @@ public class DetailViewActivity extends GrantServiceBindingActivity {
 	// these two named parameter are for the Intent interface to this activity (both reference Strings)
 	public static final String TAG_REQUEST_ID = "RequestId"; // required, no default!!!!
 	public static final String TAG_DAY_OF_MONTH = "DayOfMonth"; // optional, default is first day of month
-	public static final String requestURL = "http://mid-state.net/mobileclass2/android";
 	
 	public static final String TAG_SUCCESS = "success";  // "true" is good
 	public static final String TAG_MESSAGE = "message";
