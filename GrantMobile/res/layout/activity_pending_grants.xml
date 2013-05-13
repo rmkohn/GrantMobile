@@ -1,7 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ExpandableListView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/pendingGrants"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
 
-</ExpandableListView>
+    <ExpandableListView
+        android:id="@+id/pendingGrants"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" >
+    </ExpandableListView>
+
+    <Button
+        android:id="@+id/btnNewGrantMonth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:layout_marginTop="10dp"
+        android:text="New..." />
+
+</LinearLayout>

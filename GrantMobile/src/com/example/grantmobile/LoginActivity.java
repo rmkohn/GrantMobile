@@ -187,7 +187,6 @@ public class LoginActivity extends Activity {
 	}
 	
 	public void continueAsUser(Employee user) {
-//		Intent i = new Intent(this, MonthSelectActivity.class);
 		Intent i = new Intent(this, PendingGrantActivity.class);
 		i.putExtra(TAG_INTENT_USERID, user);
 		startActivity(i);

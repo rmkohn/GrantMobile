@@ -56,6 +56,13 @@ public class PendingGrantActivity extends GrantServiceBindingActivity {
 		empid = ((Employee)getIntent().getSerializableExtra(LoginActivity.TAG_INTENT_USERID)).id;
 		setContentView(R.layout.activity_pending_grants);
 		pendingGrantView = (ExpandableListView) findViewById(R.id.pendingGrants);
+		findViewById(R.id.btnNewGrantMonth).setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				Intent i = new Intent(PendingGrantActivity.this, MonthSelectActivity.class);
+				i.putExtras(getIntent());
+				startActivity(i);
+			}
+		});
 	}
 
 	@Override
