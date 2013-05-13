@@ -205,17 +205,22 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-			TextView ret = (TextView)getLayoutInflater().inflate(android.R.layout.simple_spinner_item, parent, false);
-			ret.setText(grantnames[position]);
-			setDrawable(ret, position);
-			return ret;
+			return getView(position, convertView, parent, android.R.layout.simple_spinner_item);
 		}
+		
 		@Override
 		public View getDropDownView(int position, View convertView, ViewGroup parent) {
-			TextView ret = (TextView)getLayoutInflater().inflate(android.R.layout.simple_spinner_dropdown_item, parent, false);
-			ret.setText(grantnames[position]);
-			setDrawable(ret, position);
-			return ret;
+			return getView(position, convertView, parent, android.R.layout.simple_spinner_dropdown_item);
+		}
+		
+		private View getView(int position, View convertView, ViewGroup parent, int id) {
+			if (convertView == null) {
+				convertView = (TextView)getLayoutInflater().inflate(id, parent, false);
+			}
+			TextView text = (TextView) convertView.findViewById(android.R.id.text1);
+			text.setText(grantnames[position]);
+			setDrawable(text, position);
+			return convertView;
 		}
 		
 		private void setDrawable(TextView t, int pos) {
