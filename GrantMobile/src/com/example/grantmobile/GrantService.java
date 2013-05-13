@@ -1,6 +1,7 @@
 package com.example.grantmobile;
 
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
@@ -38,10 +39,18 @@ public class GrantService extends Service {
 	
 	private static final String TAG = "grantservice";
 	
+	// store hours and statuses
 	DBAdapter db;
+	// given out to activities that bind to the service
 	GrantBinder binder;
+	// store rarely changing data like supervisors and grants
 	Map<Map<String, String>, Object> queryCache;
+	// notify listeners of updates to DBAdapter
 	Set<Runnable> updateListeners;
+	// keep track of what statuses have been loaded -- we don't have user input like getHours()
+	// and our data is likely to be fresher than queryCache
+	public boolean offlineGrantsLoaded = false;
+	public Set<Integer> onlineGrantsLoaded;
 
 	@Override
 	public void onCreate() {
@@ -50,6 +59,7 @@ public class GrantService extends Service {
 		binder = new GrantBinder();
 		queryCache = new HashMap<Map<String, String>, Object>();
 		updateListeners = new HashSet<Runnable>();
+		onlineGrantsLoaded = new HashSet<Integer>();
 		Log.w(TAG, "newly created");
 	}
 
@@ -69,6 +79,7 @@ public class GrantService extends Service {
 				}
 			});
 		}
+		saveNewRequests();
 		super.onDestroy();
 		Log.w(TAG, "grant service shut down");
 	}
@@ -305,20 +316,28 @@ public class GrantService extends Service {
 	public void saveNewRequests() {
 		JSONArray users = new JSONArray();
 		for (Entry<GrantData, Map<String, Hours>> entry: db.cache.entrySet()) {
+			Log.i("grantservice", "saving to disk: "+entry.getKey().toString());
 			try {
 				for (Entry<String, Hours> grant: entry.getValue().entrySet()) {
 					if (grant.getValue().status == Hours.GrantStatus.New) {
+						Log.i("grantservice", "saving grant " + grant.getKey() + " to disk");
 						JSONObject data = new JSONObject();
 						data.put("year", entry.getKey().year);
 						data.put("month", entry.getKey().month);
-						data.put("empid", entry.getKey().employeeid);
-						data.put("grants", grant.getKey());
+						data.put("employee", new JSONObject().put("id",entry.getKey().employeeid));
+						data.put("grant", grant.getKey());
+						Log.i("grantservice", "it looks like: " + data.toString());
 						users.put(data);
 					}
 				}
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
+		}
+		try {
+			Log.i("grantservice", "full string is: " + users.toString(2));
+		} catch (JSONException e1) {
+			e1.printStackTrace();
 		}
 		OutputStreamWriter out = null;
 		try {
@@ -338,22 +357,46 @@ public class GrantService extends Service {
 		}
 	}
 	
-	public void loadNewRequests(int empid, final ResultHandler<Map<GrantData, Map<String, Hours>>> handler) {
-		new JSONParser.RequestBuilder(GrantApp.requestURL)
-		.addParam("q", "listrequests")
-		.addParam("employee", String.valueOf(empid))
-		.makeRequest(new JSONParser.ResultHandlerWrapper<JSONArray, Map<GrantData, Map<String, Hours>>>(handler) {
-			public void onSuccess(JSONArray result) throws JSONException {
+	public void loadNewRequests(final int empid, final ResultHandler<Map<GrantData, Map<String, Hours>>> handler) {
+		// caching the results using makeGenericRequest, besides wasting a tiny amount of space,
+		// would also overwrite our data with old cached data
+		try {
+			if (!offlineGrantsLoaded) {
+				// the offline statuses may also be out of date, so load them first
+				Log.i("grantservice", "loading statuses from disk");
 				String newRequests = GrantApp.readFile(GrantService.this, "new_grants");
 				if (newRequests != null)
 					addStatusesToDb(new JSONArray(newRequests));
-				addStatusesToDb(result);
-				super.onWrappedSuccess(db.cache);
+				offlineGrantsLoaded = true;
 			}
-		});
+		} catch (JSONException e) {
+			e.printStackTrace();
+			// it's not going to get any more readable if we leave it
+			new File(getFilesDir().getPath() + "/new_grants").delete();
+		}
+		if (!onlineGrantsLoaded.contains(empid)) {
+			new JSONParser.RequestBuilder(GrantApp.requestURL)
+			.addParam("q", "listrequests")
+			.addParam("employee", String.valueOf(empid))
+			.makeRequest(new JSONParser.ResultHandlerWrapper<JSONArray, Map<GrantData, Map<String, Hours>>>(handler) {
+				public void onSuccess(JSONArray result) throws JSONException {
+					addStatusesToDb(result);
+					onlineGrantsLoaded.add(empid);
+					super.onWrappedSuccess(db.cache);
+				}
+			});
+		} else {
+			Log.i("grantservice", "got cached statuses for empid " + empid);
+			try {
+				handler.onSuccess(db.cache);
+			} catch (Exception e) {
+				throw(new RuntimeException("this shouldn't happen", e));
+			}
+		}
 	}
 	
 	private void addStatusesToDb(JSONArray statuses) throws JSONException {
+		Log.i("grantservice", "loading " + statuses.length() + " statuses");
 		for (int i = 0; i < statuses.length(); i++) {
 			JSONObject obj = statuses.getJSONObject(i);
 			GrantData data = new GrantData(obj.getInt("year"), obj.getInt("month"), obj.getJSONObject("employee").getInt("id"));
