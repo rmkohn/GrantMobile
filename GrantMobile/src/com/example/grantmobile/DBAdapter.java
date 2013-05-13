@@ -18,14 +18,14 @@ public class DBAdapter {
 		public static enum GrantStatus {
 			New,
 			pending,
-			denied,
+			disapproved,
 			approved,
 			none;
 			public int getDrawable() {
 				switch(this) {
 				case New: return R.drawable.image_new;
 				case approved: return R.drawable.image_approved;
-				case denied: return R.drawable.image_disapproved;
+				case disapproved: return R.drawable.image_disapproved;
 				case pending: return R.drawable.image_pending;
 				default: return -1;
 				}
