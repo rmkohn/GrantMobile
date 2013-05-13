@@ -157,9 +157,9 @@ public class GrantSelectActivity extends GrantServiceBindingActivity {
 
 	private void loadGrants() {
 		if (grants == null && isServiceBound()) {
-			getService().getGrants(new JSONParser.SimpleResultHandler(this) {
-				public void onSuccess(Object oResult) {
-					grants = (JSONObject[]) oResult;
+			getService().getGrants(new JSONParser.SimpleResultHandler<JSONObject[]>(this) {
+				public void onSuccess(JSONObject[] result) {
+					grants = result;
 					finishGrantInit();
 				}
 			});

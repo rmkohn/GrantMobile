@@ -12,6 +12,7 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.example.grantmobile.DBAdapter.Hours;
 import com.example.grantmobile.GrantService.GrantData;
 
 import android.os.Bundle;
@@ -160,9 +161,9 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 	private void loadGrantInfo() {
 		if (isServiceBound()) {
 			Log.i("detailedit", "loading grant info");
-			getService().getGrantByParameter("ID", Integer.valueOf(grantId), new JSONParser.SimpleResultHandler(this) {
-				public void onSuccess(Object oResult) {
-					updateGrantViews((JSONObject) oResult);
+			getService().getGrantByParameter("ID", Integer.valueOf(grantId), new JSONParser.SimpleResultHandler<JSONObject>(this) {
+				public void onSuccess(JSONObject result) {
+					updateGrantViews(result);
 				}
 			});
 		}
@@ -245,16 +246,15 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
     	return String.format(Locale.US, "%.1f", hours).replace(".0", "");
     }
     
-    public class DetailHandler extends JSONParser.SimpleResultHandler {
+    public class DetailHandler extends JSONParser.SimpleResultHandler<Map<String, Hours>> {
     	public DetailHandler() { super(DetailEditActivity.this); }
 
-		public void onSuccess(Object oResult) {
-    		@SuppressWarnings("unchecked")
-			Map<String, double[]> result = (Map<String, double[]>) oResult;
+    	@Override
+		public void onSuccess(Map<String, Hours> result) {
 			if (result != null) {
-				grantHours = result.get(String.valueOf(grantId));
-				nonGrantHours = result.get(TAG_NON_GRANT);
-				leaveHours = result.get(TAG_LEAVE);
+				grantHours = result.get(String.valueOf(grantId)).hours;
+				nonGrantHours = result.get(TAG_NON_GRANT).hours;
+				leaveHours = result.get(TAG_LEAVE).hours;
 				updateView();
 				hoursLoaded = true;
 			} else {
@@ -265,11 +265,11 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 		}
     }
     
-    public class SaveHandler extends JSONParser.SimpleResultHandler {
+    public class SaveHandler extends JSONParser.SimpleResultHandler<JSONObject> {
     	public SaveHandler() { super(DetailEditActivity.this); }
 
 		@Override
-		public void onSuccess(Object oResult) {
+		public void onSuccess(JSONObject result) {
 			showMessage("hours saved");
 		}
 		public void onFailure(String errorMessage) {
@@ -309,9 +309,8 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 		String[] grantstrings = GrantService.getGrantStrings(new int[] { grantId });
 		switch (item.getItemId()) {
 		case R.id.mnuDialog:
-			getService().getSupervisors(new JSONParser.SimpleResultHandler(this) {
-				public void onSuccess(Object oResult) {
-					JSONObject[] result = (JSONObject[]) oResult;
+			getService().getSupervisors(new JSONParser.SimpleResultHandler<JSONObject[]>(this) {
+				public void onSuccess(JSONObject[] result) {
 					EmployeeDialog dialog = new EmployeeDialog();
 					List<EmployeeDialog.Employee> supervisors = new ArrayList<EmployeeDialog.Employee>(result.length);
 					for (JSONObject obj: result) {

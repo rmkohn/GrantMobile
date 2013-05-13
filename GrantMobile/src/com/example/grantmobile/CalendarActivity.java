@@ -67,7 +67,7 @@ public class CalendarActivity extends BaseCalendarActivity {
 		getService().sendEmailRequest(uri, new CalendarResultHandler(this));
 	}	
 	
-    class CalendarResultHandler extends JSONParser.SimpleResultHandler
+    class CalendarResultHandler extends JSONParser.SimpleResultHandler<JSONObject>
     {
 
 		public CalendarResultHandler(Context ctx) {
@@ -82,11 +82,10 @@ public class CalendarActivity extends BaseCalendarActivity {
     	}
 
 		@Override
-		public void onSuccess(Object oResult)
+		public void onSuccess(JSONObject result)
 		{
 			try
 			{
-				JSONObject result = (JSONObject) oResult;
 				// get the date
 				int month = result.getInt("month") + 1; // server months are 0-indexed
 				int year  = result.getInt("year");

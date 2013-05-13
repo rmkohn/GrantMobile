@@ -11,7 +11,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -185,16 +184,15 @@ public class DetailViewActivity extends GrantServiceBindingActivity {
     	monthTotalHoursView.setText(tgh.toString());
 	}
 	
-    class JSONResultHandler extends JSONParser.SimpleResultHandler {
+    class JSONResultHandler extends JSONParser.SimpleResultHandler<JSONObject> {
 		public JSONResultHandler(Context ctx) {
 			super(ctx);
 		}
 
 		@Override
-		public void onSuccess(Object oResult) {
+		public void onSuccess(JSONObject json) {
 			try {
 //				Toast.makeText(context, "invoked JSON parser", Toast.LENGTH_LONG).show();
-				JSONObject json = (JSONObject) oResult;
 				JSONArray jsa = null; // json array
 				JSONObject jso = null; // misc., message & hours object
 //				Toast.makeText(context, json.toString(), Toast.LENGTH_LONG).show();

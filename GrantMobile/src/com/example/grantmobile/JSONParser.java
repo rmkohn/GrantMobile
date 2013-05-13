@@ -166,7 +166,7 @@ public class JSONParser {
 			this.method = method;
 			return this;
 		}
-		public AsyncTask<Void, Void, JSONObject> makeRequest(final ResultHandler handler) {
+		public <T> AsyncTask<Void, Void, JSONObject> makeRequest(final ResultHandler<T> handler) {
 			return new AsyncTask<Void, Void, JSONObject>() {
 				protected JSONObject doInBackground(Void... params) {
 					return makeHttpRequest();
@@ -189,7 +189,7 @@ public class JSONParser {
 			}.execute();
 		}
 		
-		public void makeRequestInCurrentThread(final ResultHandler handler) {
+		public <T> void makeRequestInCurrentThread(final ResultHandler<T> handler) {
 			JSONObject result = makeHttpRequest();
 			handleResults(result, handler);
 		}
@@ -200,11 +200,12 @@ public class JSONParser {
 		
 	}
 	
-	public static void handleResults(JSONObject result, ResultHandler handler) {
+	@SuppressWarnings("unchecked")
+	public static <T> void handleResults(JSONObject result, ResultHandler<T> handler) {
 		handler.onPostExecute();
 		try {
 			if (result.getBoolean("success"))
-				handler.onSuccess(result.get("message"));
+				handler.onSuccess((T)result.get("message"));
 			else
 				handler.onFailure(result.getString("message"));
 		} catch (JSONException e) {
@@ -216,21 +217,21 @@ public class JSONParser {
 		}
 	}
 	
-	public static interface ResultHandler {
+	public static interface ResultHandler<T> {
 	    public void onPostExecute();
-        public void onSuccess(Object result) throws JSONException;
+        public void onSuccess(T result) throws JSONException;
         public void onFailure(String errorMessage);
         public void onError(Exception e);
         public void onCancelled();
 	}
 	
-	public static class SimpleResultHandler implements ResultHandler {
+	public static class SimpleResultHandler<T> implements ResultHandler<T> {
 		private Context ctx;
 		public SimpleResultHandler(Context ctx) {
 			this.ctx = ctx;
 		}
 	    public void onPostExecute() { }
-        public void onSuccess(Object result) throws JSONException { }
+        public void onSuccess(T result) throws JSONException { }
         public void onFailure(String errorMessage) {
         	Log.w("GrantMobile", errorMessage);
         	if (errorMessage.equals("Invalid Session ID")) {
@@ -264,11 +265,12 @@ public class JSONParser {
         public void onCancelled() { }
 	}
 	
-	public static class ResultHandlerWrapper implements ResultHandler {
-		ResultHandler h;
-		public ResultHandlerWrapper(ResultHandler h) { this.h = h; }
+	public static abstract class ResultHandlerWrapper<In, Out> implements ResultHandler<In> {
+		ResultHandler<Out> h;
+		public ResultHandlerWrapper(ResultHandler<Out> h) { this.h = h; }
 	    public void onPostExecute() { h.onPostExecute(); }
-        public void onSuccess(Object result) throws JSONException { h.onSuccess(result); }
+	    public void onWrappedSuccess(Out result) throws JSONException { h.onSuccess(result); }
+//        public void onSuccess(In result) throws JSONException { h.onSuccess(result); }
         public void onFailure(String errorMessage) { h.onFailure(errorMessage); }
         public void onError(Exception e) { h.onError(e); }
         public void onCancelled() { h.onCancelled(); }

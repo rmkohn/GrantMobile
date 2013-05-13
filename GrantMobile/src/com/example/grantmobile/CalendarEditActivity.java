@@ -21,6 +21,7 @@ import android.widget.Spinner;
 
 import com.example.grantmobile.CalendarSquare.DaySquare;
 import com.example.grantmobile.CalendarSquare.ICalendarSquare;
+import com.example.grantmobile.DBAdapter.Hours;
 import com.example.grantmobile.EmployeeDialog.Employee;
 import com.example.grantmobile.GrantService.GrantData;
 
@@ -75,10 +76,9 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 		Log.i("calendareditactivity", "loadcalendar");
 		final GrantService.GrantData data = new GrantService.GrantData(getYear(), getMonth()-1, user.id);
 //		GrantService.getHours(this, new CalendarEditHandler().setParent(this), data, getGrantStrings());
-		getService().getHours(data, getGrantStrings(), new JSONParser.SimpleResultHandler(this) {
-			@SuppressWarnings("unchecked")
-			public void onSuccess(Object oResult) {
-				assignNewData((Map<String, double[]>)oResult);
+		getService().getHours(data, getGrantStrings(), new JSONParser.SimpleResultHandler<Map<String, Hours>>(this) {
+			public void onSuccess(Map<String, Hours> result) {
+				assignNewData(result);
 			}
 		});
 	}
@@ -122,9 +122,8 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	}
 	
 	private void openEmailDialog() {
-		getService().getSupervisors(new JSONParser.SimpleResultHandler(this) {
-			public void onSuccess(Object oResult) {
-				JSONObject[] result = (JSONObject[]) oResult;
+		getService().getSupervisors(new JSONParser.SimpleResultHandler<JSONObject[]>(this) {
+			public void onSuccess(JSONObject[] result) {
 				EmployeeDialog dialog = new EmployeeDialog();
 				List<EmployeeDialog.Employee> supervisors = new ArrayList<EmployeeDialog.Employee>(result.length);
 				for (JSONObject obj: result) {
@@ -138,14 +137,14 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 		});
 	}
 	
-	public void assignNewData(Map<String, double[]> data) {
+	public void assignNewData(Map<String, Hours> data) {
 		SparseArray<double[]> granthours = new SparseArray<double[]>();
 		for (int i: grantids) {
-			granthours.append(i, data.get(String.valueOf(i)));
+			granthours.append(i, data.get(String.valueOf(i)).hours);
 		}
 		this.granthours    = granthours;
-		this.nongranthours = data.get("non-grant");
-		this.leavehours    = data.get("leave");
+		this.nongranthours = data.get("non-grant").hours;
+		this.leavehours    = data.get("leave").hours;
 		this.updateCalendar();
 	}
 	

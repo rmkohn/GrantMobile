@@ -160,14 +160,13 @@ public class LoginActivity extends Activity {
 		    .addParam("q", "login")
 		    .addParam("id", mEmployeeId)
 		    .addParam("pass", mPassword)
-		    .makeRequest(new JSONParser.SimpleResultHandler(this) {
+		    .makeRequest(new JSONParser.SimpleResultHandler<JSONObject>(this) {
 		        public void onPostExecute() {
         			mAuthTask = null;
         			showProgress(false);
 		        }
 
-		        public void onSuccess(Object oResult) throws JSONException {
-		        	JSONObject result = (JSONObject) oResult;
+		        public void onSuccess(JSONObject result) throws JSONException {
 		        	Employee user = Employee.fromJson(result);
 		        	String name = user.firstname + " " + user.lastname;
 		            Toast.makeText(LoginActivity.this, "Logged in as " + name, Toast.LENGTH_LONG).show();

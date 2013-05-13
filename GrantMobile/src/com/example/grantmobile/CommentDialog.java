@@ -56,9 +56,9 @@ public class CommentDialog extends DialogFragment {
 				    	  .addParam("q", "approve")
 		    			  .addParam("approval", Boolean.toString(approval))
 				    	  .addParam("comment", input.getText().toString())
-				    	  .makeRequest(new JSONParser.SimpleResultHandler(currentActivity) {
-				    		  public void onSuccess(Object result) {
-				    			  Toast.makeText(currentActivity, (String)result, Toast.LENGTH_LONG).show();
+				    	  .makeRequest(new JSONParser.SimpleResultHandler<String>(currentActivity) {
+				    		  public void onSuccess(String result) {
+				    			  Toast.makeText(currentActivity, result, Toast.LENGTH_LONG).show();
 				    			  
 				    			  Intent quitIntent = new Intent(currentActivity, MainActivity.class);
 				    			  quitIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
