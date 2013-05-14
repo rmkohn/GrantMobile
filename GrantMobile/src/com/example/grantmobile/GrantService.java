@@ -64,20 +64,6 @@ public class GrantService extends Service {
 
 	@Override
 	public void onDestroy() {
-		// TODO save only the changed values to permanent storage (server or database)
-		for (final GrantData entry: db.cache.keySet()) {
-			this.uploadHoursFromDB(entry, db.getAllTimes(entry), new JSONParser.SimpleResultHandler<JSONObject>(null) {
-				public void onSuccess(JSONObject result) {
-					Log.i(TAG, "saved hours for " + entry + " to server");
-				}
-				public void onFailure(String errorMessage) {
-					Log.i(TAG, "failed to save hours for " + entry);
-				}
-				public void onError(Exception e) {
-					e.printStackTrace();
-				}
-			});
-		}
 		super.onDestroy();
 		Log.w(TAG, "grant service shut down");
 	}
