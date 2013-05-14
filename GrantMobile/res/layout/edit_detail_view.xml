@@ -151,8 +151,10 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:inputType="numberDecimal"
+                android:selectAllOnFocus="true"
                 android:text="grant hours"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
+
         </TableRow>
 
         <TableRow>
@@ -169,6 +171,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal"
+                android:selectAllOnFocus="true"
                 android:text="non-grant hours"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
         </TableRow>
@@ -187,6 +190,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal"
+                android:selectAllOnFocus="true"
                 android:text="leave hours"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
         </TableRow>

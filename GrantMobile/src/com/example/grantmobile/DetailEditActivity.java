@@ -103,8 +103,6 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 		dayTotalHoursView = (TextView)findViewById(R.id.dayTotalHoursTv);
 		monthTotalHoursView = (TextView)findViewById(R.id.monthTotalHoursTv);
 		
-		loadGrantInfo();
-		
         final Button backwardButton = (Button) findViewById(R.id.backBtn);
         backwardButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -149,20 +147,15 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 		nonGrantHoursView.setOnFocusChangeListener(editListener);
 		leaveHoursView   .setOnFocusChangeListener(editListener);
         
-		if (getService() != null)
-			loadHours();
 	}
 	
-		
 	private void loadGrantInfo() {
-		if (isServiceBound()) {
-			Log.i("detailedit", "loading grant info");
-			getService().getGrantByParameter("ID", Integer.valueOf(grantId), new JSONParser.SimpleResultHandler<JSONObject>(this) {
-				public void onSuccess(JSONObject result) {
-					updateGrantViews(result);
-				}
-			});
-		}
+		Log.i("detailedit", "loading grant info");
+		getService().getGrantByParameter("ID", Integer.valueOf(grantId), new JSONParser.SimpleResultHandler<JSONObject>(this) {
+			public void onSuccess(JSONObject result) {
+				updateGrantViews(result);
+			}
+		});
 	}
 	
 	private void updateGrantViews(JSONObject result) {
@@ -218,6 +211,9 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
     	for (double gh: grantHours)
     		tgh = tgh + gh;
     	monthTotalHoursView.setText(getFormattedHours(tgh));
+    	
+    	grantHoursView.requestFocus();
+    	grantHoursView.selectAll();
 	}
     
     private void saveHours() {
@@ -257,7 +253,6 @@ public class DetailEditActivity extends GrantServiceBindingActivity {
 				Toast.makeText(DetailEditActivity.this, "Download failed.",
 						Toast.LENGTH_LONG).show();
 			}
-			
 		}
     }
     
