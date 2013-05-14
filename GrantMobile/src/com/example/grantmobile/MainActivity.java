@@ -8,7 +8,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.widget.TextView;
 
-public class MainActivity extends Activity 
+public class MainActivity extends QuittableActivity 
 {
 	TextView tvTest; 
 		

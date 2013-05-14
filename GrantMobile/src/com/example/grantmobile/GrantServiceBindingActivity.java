@@ -11,7 +11,7 @@ import android.os.IBinder;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 
-public abstract class GrantServiceBindingActivity extends FragmentActivity {
+public abstract class GrantServiceBindingActivity extends QuittableActivity {
 	private GrantService service;
 	public GrantService getService() {
 		return service;

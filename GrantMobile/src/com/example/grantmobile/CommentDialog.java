@@ -59,10 +59,7 @@ public class CommentDialog extends DialogFragment {
 				    		  public void onSuccess(String result) {
 				    			  Toast.makeText(currentActivity, result, Toast.LENGTH_LONG).show();
 				    			  
-				    			  Intent quitIntent = new Intent(currentActivity, MainActivity.class);
-				    			  quitIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-				    			  quitIntent.putExtra("quit", true);
-				    			  currentActivity.startActivity(quitIntent);
+				    			  GrantApp.quit(currentActivity);
 				    		  }
 				    	  });
 				      }

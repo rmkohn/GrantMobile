@@ -84,4 +84,16 @@ public final class GrantApp {
 		}
 		return ret;
 	}
+	
+	public static void quit(Context ctx) {
+//		Intent quitIntent = new Intent(ctx, MainActivity.class);
+//		quitIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+//		quitIntent.putExtra("quit", true);
+//		ctx.startActivity(quitIntent);
+		if (ctx instanceof QuittableActivity) {
+			((QuittableActivity)ctx).quitApp();
+		} else {
+			android.os.Process.killProcess(android.os.Process.myPid());
+		}
+	}
 }

@@ -27,7 +27,7 @@ import android.widget.Toast;
  * Activity which displays a login screen to the user
  * 
  */
-public class LoginActivity extends Activity {
+public class LoginActivity extends QuittableActivity {
     
 	public static final String TAG_INTENT_USERID = "userid";
 
