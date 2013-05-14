@@ -88,11 +88,6 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 		getService().getHours(data, getGrantStrings(), new JSONParser.SimpleResultHandler<Map<String, Hours>>(this) {
 			public void onSuccess(Map<String, Hours> result) {
 				assignNewData(result);
-				getService().loadNewRequests(user.id, new JSONParser.SimpleResultHandler<Map<GrantData, Map<String, Hours>>>(CalendarEditActivity.this) {
-					public void onSuccess(Map<GrantData, Map<String, Hours>> result) throws JSONException {
-						((BaseAdapter)grantSpinner.getAdapter()).notifyDataSetChanged();
-					}
-				});
 			}
 		});
 	}
