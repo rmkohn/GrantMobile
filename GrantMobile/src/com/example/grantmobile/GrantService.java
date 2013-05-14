@@ -49,7 +49,6 @@ public class GrantService extends Service {
 	Set<Runnable> updateListeners;
 	// keep track of what statuses have been loaded -- we don't have user input like getHours()
 	// and our data is likely to be fresher than queryCache
-	public boolean offlineGrantsLoaded = false;
 	public Set<Integer> onlineGrantsLoaded;
 
 	@Override
@@ -79,7 +78,6 @@ public class GrantService extends Service {
 				}
 			});
 		}
-		saveNewRequests();
 		super.onDestroy();
 		Log.w(TAG, "grant service shut down");
 	}
@@ -313,71 +311,12 @@ public class GrantService extends Service {
 		});
 	}
 	
-	public void saveNewRequests() {
-		JSONArray users = new JSONArray();
-		for (Entry<GrantData, Map<String, Hours>> entry: db.cache.entrySet()) {
-			Log.i("grantservice", "saving to disk: "+entry.getKey().toString());
-			try {
-				for (Entry<String, Hours> grant: entry.getValue().entrySet()) {
-					if (grant.getValue().status == Hours.GrantStatus.New) {
-						Log.i("grantservice", "saving grant " + grant.getKey() + " to disk");
-						JSONObject data = new JSONObject();
-						data.put("year", entry.getKey().year);
-						data.put("month", entry.getKey().month);
-						data.put("employee", new JSONObject().put("id",entry.getKey().employeeid));
-						data.put("grant", grant.getKey());
-						Log.i("grantservice", "it looks like: " + data.toString());
-						users.put(data);
-					}
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-		}
-		try {
-			Log.i("grantservice", "full string is: " + users.toString(2));
-		} catch (JSONException e1) {
-			e1.printStackTrace();
-		}
-		OutputStreamWriter out = null;
-		try {
-			out = new OutputStreamWriter(new BufferedOutputStream(
-					openFileOutput("new_grants", Context.MODE_PRIVATE)));
-			out.write(users.toString());
-			out.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-			if (out != null) {
-				try {
-					out.close();
-				} catch (IOException f) {
-					f.printStackTrace();
-				}
-			}
-		}
-	}
-	
 	public void loadNewRequests(final int empid, final ResultHandler<Map<GrantData, Map<String, Hours>>> handler) {
-		// caching the results using makeGenericRequest, besides wasting a tiny amount of space,
-		// would also overwrite our data with old cached data
-		try {
-			if (!offlineGrantsLoaded) {
-				// the offline statuses may also be out of date, so load them first
-				Log.i("grantservice", "loading statuses from disk");
-				String newRequests = GrantApp.readFile(GrantService.this, "new_grants");
-				if (newRequests != null)
-					addStatusesToDb(new JSONArray(newRequests));
-				offlineGrantsLoaded = true;
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
-			// it's not going to get any more readable if we leave it
-			new File(getFilesDir().getPath() + "/new_grants").delete();
-		}
 		if (!onlineGrantsLoaded.contains(empid)) {
 			new JSONParser.RequestBuilder(GrantApp.requestURL)
 			.addParam("q", "listrequests")
 			.addParam("employee", String.valueOf(empid))
+			.addParam("maxage", "36") // 3 years seems conservative enough
 			.makeRequest(new JSONParser.ResultHandlerWrapper<JSONArray, Map<GrantData, Map<String, Hours>>>(handler) {
 				public void onSuccess(JSONArray result) throws JSONException {
 					addStatusesToDb(result);
