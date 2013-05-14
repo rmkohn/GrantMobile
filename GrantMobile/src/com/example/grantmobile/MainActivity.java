@@ -2,10 +2,8 @@ package com.example.grantmobile;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.app.Activity;
 import android.content.Intent;
 import android.util.Log;
-import android.view.Menu;
 import android.widget.TextView;
 
 public class MainActivity extends QuittableActivity 

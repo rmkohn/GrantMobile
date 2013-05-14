@@ -46,13 +46,7 @@ public class LoginActivity extends QuittableActivity {
 	private View mLoginFormView;
 	private View mLoginStatusView; 
 	private TextView mLoginStatusMessageView;
-	//Spinner spSpoof; //Pointer to the spinner
 	
-	/*************************************************************************************
-	 * Was used for the spinner, loading the list of users                               *
-	 *                                                                                   *
-	 *************************************************************************************/
-	//ArrayList <String> theList = new ArrayList <String>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -83,10 +77,7 @@ public class LoginActivity extends QuittableActivity {
 		mLoginFormView 			= findViewById(R.id.login_form);
 		mLoginStatusView 		= findViewById(R.id.login_status);
 		mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
-		//spSpoof 				= (Spinner)findViewById(R.id.spSpoof);
-		
-		//setSpoof();
-		
+	
 
 		findViewById(R.id.sign_in_button).setOnClickListener(
 				new View.OnClickListener() {
@@ -118,20 +109,7 @@ public class LoginActivity extends QuittableActivity {
 
 		boolean cancel = false;
 		View focusView = null;
-		/**************************************************************************************
-		 * This section needs to be modified according to the grant app password controls.    *
-		 *                                                                                    *
-		 **************************************************************************************/
-		// Check for a valid password.
-//		if (TextUtils.isEmpty(mPassword)) {
-//			mPasswordView.setError(getString(R.string.error_field_required));
-//			focusView = mPasswordView;
-//			cancel = true;
-//		} else if (mPassword.length() < 4) {
-//			mPasswordView.setError(getString(R.string.error_invalid_password));
-//			focusView = mPasswordView;
-//			cancel = true;
-//		}
+	
 		/**************************************************************************************
 		 * This section needs to be modified according to the grant app user id.              *
 		 *                                                                                    *
