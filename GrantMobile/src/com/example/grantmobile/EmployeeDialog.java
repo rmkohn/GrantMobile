@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.example.grantmobile.DBAdapter.Hours.GrantStatus;
 import com.example.grantmobile.GrantService.GrantData;
 
 import android.app.AlertDialog;

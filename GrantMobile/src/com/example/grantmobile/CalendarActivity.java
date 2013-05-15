@@ -229,14 +229,6 @@ public class CalendarActivity extends BaseCalendarActivity {
 	protected void onEmailButtonClicked() {
 		openDialog();
 	}
-		/**
-	 * This procedure initializes the header message with sample data
-	 */
-	private void initHeaderMessage()
-	{	
-		// load sample data
-		initHeaderMessage(1, 2000, "Loading", "Loading", "Palmer Eldritch");
-	}
 	
 	/**
 	 * This procedure initializes the header message.

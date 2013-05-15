@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Intent;
@@ -28,7 +27,6 @@ public class CalendarEditActivity extends BaseCalendarActivity {
 	Spinner grantSpinner;
 	int[] grantids;
 	SparseArray<String> grantnames;
-//	int user.id;
 	Employee user;
 	SparseArray<Hours> granthours;
 	double[] nongranthours;

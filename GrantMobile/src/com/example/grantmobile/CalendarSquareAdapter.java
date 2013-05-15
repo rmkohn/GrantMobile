@@ -2,9 +2,7 @@ package com.example.grantmobile;
 
 import com.example.grantmobile.CalendarSquare.DaySquare;
 import com.example.grantmobile.CalendarSquare.ICalendarSquare;
-import com.example.grantmobile.CalendarSquare.PlaceholderSquare;
 import com.example.grantmobile.CalendarSquare.TitleSquare;
-import com.example.grantmobile.CalendarSquare.TotalSquare;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -15,11 +13,9 @@ import android.widget.TextView;
 
 public class CalendarSquareAdapter extends BaseAdapter {
 	private CalendarArray calendar;
-	private Context mContext;
 	private LayoutInflater inflater;
 
 	public CalendarSquareAdapter(Context c, CalendarArray calendar) {
-		mContext = c;
 		this.calendar = calendar;
 		inflater = LayoutInflater.from(c);
 	}
