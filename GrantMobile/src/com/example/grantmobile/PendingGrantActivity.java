@@ -40,14 +40,16 @@ public class PendingGrantActivity extends GrantServiceBindingActivity {
 			this.adapter = adapter;
 		}
 		public int compareTo(ExpandableGrantData another) {
-			int priority = adapter.getPriority() - another.adapter.getPriority();
-			if (priority != 0)
-				return priority;
 			int year = data.year - another.data.year;
 			if (year != 0)
 				return year;
 			int month = data.month - another.data.month;
-			return month;
+			if (month != 0)
+				return month;
+			int priority = adapter.getPriority() - another.adapter.getPriority();
+			if (priority != 0)
+				return priority;
+			return 0;
 		}
 	}
 
